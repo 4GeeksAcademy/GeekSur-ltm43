@@ -1,6 +1,8 @@
 
 import click
-from api.models import db, User
+from api.models import db, User, Patient
+from datetime import datetime  # Importa el módulo datetime
+
 
 """
 In this file, you can add as many commands as you want using the @app.cli.command decorator
@@ -31,4 +33,58 @@ def setup_commands(app):
 
     @app.cli.command("insert-test-data")
     def insert_test_data():
-        pass
+        print("Inserting test data for Patients")
+        patients_data = [
+            {
+                "id": 5,
+                "email": "glopez@gmail.com",
+                "first_name": "Guillermo",
+                "last_name": "Lopez",
+                "gender": "male",
+                "birth_date": datetime.strptime("2001-04-12", "%Y-%m-%d"),
+                "phone_number": "4120968200",
+                "password": "guille22"
+            },
+            {
+                "id": 6,
+                "email": "vero.martin@gmail.com",
+                "first_name": "Veronica",
+                "last_name": "Martinez",
+                "gender": "female",
+                "birth_date": datetime.strptime("1989-05-05", "%Y-%m-%d"),
+                "phone_number": "4249868415",
+                "password": "veroismy"
+            },
+            {
+                "id": 7,
+                "email": "mcrisafi02@gmail.com",
+                "first_name": "Monica",
+                "last_name": "Crisafi",
+                "gender": "female",
+                "birth_date": datetime.strptime("1992-07-03", "%Y-%m-%d"),
+                "phone_number": "4120864548",
+                "password": "crisafmy"
+            }
+
+        ]
+
+        try:
+            for patient_data in patients_data:
+                patient = Patient(
+                    id=patient_data["id"],
+                    email=patient_data["email"],
+                    first_name=patient_data["first_name"],
+                    last_name=patient_data["last_name"],
+                    gender=patient_data["gender"],
+                    birth_date=patient_data["birth_date"],
+                    phone_number=str(patient_data["phone_number"]),  # Forzar string
+                    password=patient_data["password"]
+                )
+                db.session.add(patient)
+            db.session.commit()
+            print("All test patients inserted successfully!")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error inserting patients: {str(e)}")
+            raise
+        
