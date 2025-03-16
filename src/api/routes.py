@@ -10,7 +10,12 @@ from datetime import datetime
 api = Blueprint('api', __name__)
 
 # Allow CORS requests to this API
-CORS(api)
+# Permitir solicitudes desde el frontend específico y otros orígenes
+CORS(api, resources={r"/api/*": {"origins": [
+    "http://localhost:3000",
+    "https://obscure-engine-694p5x4qqx5vfxxqv-3000.app.github.dev",
+    "https://*.app.github.dev"
+]}})
 
 
 @api.route('/hello', methods=['POST', 'GET'])
@@ -73,7 +78,7 @@ def update_patient(id):
     # Obtiene los datos del cuerpo de la solicitud
     data = request.get_json()
     
-    # Campos requeridos (todos deben enviarse para reemplazar el recurso)
+    # Campos requeridos (todos deben enviarse)
     required_fields = ['email', 'first_name', 'last_name', 'gender', 'birth_date', 'phone_number', 'password']
     for field in required_fields:
         if field not in data:

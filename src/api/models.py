@@ -39,7 +39,7 @@ class Patient(db.Model):
             "first_name": self.first_name,
             "last_name": self.last_name,
             "gender": self.gender,
-            "birth_date": str(self.birth_date),  # Convertir a string para JSON
+            "birth_date": str(self.birth_date),  # Se convierte a string para JSON
             "phone_number": self.phone_number
             # do not serialize the password, its a security breach
         }
