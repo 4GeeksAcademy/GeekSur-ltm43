@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { Link } from "react-router-dom";
 import { Context } from "../store/appContext";
 
 export const Patients = () => {
@@ -17,7 +18,7 @@ export const Patients = () => {
   // Cargar pacientes al montar el componente
   useEffect(() => {
     actions.getPatients();
-  }, []);
+  }, [actions]);
 
   // Manejar cambios en el formulario
   const handleChange = (e) => {
@@ -46,6 +47,8 @@ export const Patients = () => {
         phone_number: "",
         password: "",
       });
+      // Actualizar lista de pacientes
+      actions.getPatients();
     } catch (error) {
       alert("Error: " + error.message);
     }
@@ -70,6 +73,8 @@ export const Patients = () => {
     if (window.confirm("¿Estás seguro de que quieres eliminar este paciente?")) {
       try {
         await actions.deletePatient(id);
+        // Actualizar lista de pacientes
+        actions.getPatients();
       } catch (error) {
         alert("Error: " + error.message);
       }
@@ -169,6 +174,10 @@ export const Patients = () => {
           </li>
         ))}
       </ul>
+      <br />
+      <Link to="/">
+        <button className="btn btn-primary">Back home</button>
+      </Link>
     </div>
   );
 };
