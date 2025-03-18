@@ -14,7 +14,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					initial: "white"
 				}
 			],
-			patients: [], //Nuevo estado para agregar pacientes.
+			patients: [], 
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
@@ -98,7 +98,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					method: "DELETE",
 				  });
 				  if (!resp.ok) throw new Error("Error deleting patient");
-				  getActions().getPatients(); // Refrescar la lista
+				  getActions().getPatients(); 
 				} catch (error) {
 				  console.log("Error deleting patient:", error);
 				  throw error;
@@ -110,8 +110,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				//get the store
 				const store = getStore();
 
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
+				
 				const demo = store.demo.map((elm, i) => {
 					if (i === index) elm.background = color;
 					return elm;
