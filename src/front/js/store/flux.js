@@ -2,20 +2,83 @@ const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
 			message: null,
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
+			demo: [],
+			doctors: [] // se esto para que la partida sea un array vacio..
 		},
+		
 		actions: {
+
+			// SE CREA ACTION PARA VER LISTA DE PACIENTES EN COMPONENTE DOCTORS
+			getDoctors: async () => {
+				try {
+					
+					const response = await fetch("https://silver-invention-x5v49jq67774hvq95-3001.app.github.dev/api/doctors");
+					const data = await response.json();
+			
+					if (response.ok) {
+						setStore({ doctors: data.Doctors }); 
+					} else {
+						console.error("Error al obtener doctores:", data.msg);
+					}
+				} catch (error) {
+					console.error("Error en la solicitud:", error);
+				}
+			},
+
+			// ACTION PARA ELIMINAR DOCTOR
+			  deleteDoctor: async (id) => {
+				try {
+				  	const resp = await fetch(`https://silver-invention-x5v49jq67774hvq95-3001.app.github.dev/api/doctors/${id}`,{
+					method: "DELETE",
+				  });
+				  if (!resp.ok) throw new Error("Error al tratar de borrar al doctor. revise...");
+				  getActions().getDoctors(); // esto para que al borrar actualice lista con los que quedan
+				} catch (error) {
+				  console.log("Error al borrar al doctor. revisar..:", error);
+				  throw error;
+				}
+			  },
+
+			  // ACTION PARA CREAR DOCTOR
+			 createDoctor: async (doctorData) => {
+				try {
+				  const resp = await fetch("https://silver-invention-x5v49jq67774hvq95-3001.app.github.dev/api/doctors", {
+					method: "POST",
+					headers: {
+					  "Content-Type": "application/json",
+					},
+					body: JSON.stringify(doctorData),
+				  });
+				  if (!resp.ok) throw new Error("Error creating...");
+				  const data = await resp.json();
+				  getActions().getDoctors(); 
+				  return data;
+				} catch (error) {
+				  console.log("Error....:", error);
+				  throw error;
+				}
+			  },
+
+			  // UPDATE A DOCTOR
+			 updateDoctor: async (id, doctorData) => {
+				try {
+				  const resp = await fetch(`https://silver-invention-x5v49jq67774hvq95-3001.app.github.dev/api/doctors/${id}`, {
+					method: "PUT",
+					headers: {
+					  "Content-Type": "application/json",
+					},
+					body: JSON.stringify(doctorData),
+				  });
+				  if (!resp.ok) throw new Error("Error updating Doctor");
+				  const data = await resp.json();
+				  getActions().getDoctors(); 
+				  return data;
+				} catch (error) {
+				  console.log("Error updating doctor:", error);
+				  throw error;
+				}
+			  },
+
 			// Use getActions to call a function within a fuction
 			exampleFunction: () => {
 				getActions().changeColor(0, "green");
@@ -32,20 +95,6 @@ const getState = ({ getStore, getActions, setStore }) => {
 				}catch(error){
 					console.log("Error loading message from backend", error)
 				}
-			},
-			changeColor: (index, color) => {
-				//get the store
-				const store = getStore();
-
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
-				const demo = store.demo.map((elm, i) => {
-					if (i === index) elm.background = color;
-					return elm;
-				});
-
-				//reset the global store
-				setStore({ demo: demo });
 			}
 		}
 	};
