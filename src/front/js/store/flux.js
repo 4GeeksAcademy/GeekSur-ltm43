@@ -8,7 +8,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 		
 		actions: {
 
-			// SE CREA ACTION PARA VER LISTA DE PACIENTES EN COMPONENTE DOCTORS
+			// SE CREA ACTION PARA VER LISTA DE DOCTOR EN COMPONENTE DOCTORS
 			getDoctors: async () => {
 				try {
 					
