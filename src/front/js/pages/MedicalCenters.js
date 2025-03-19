@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const API_URL = "https://fictional-spoon-q7p6wrx5vx6xc956v-3001.app.github.dev/api/medical_centers";
+const API_URL = "https://sturdy-space-xylophone-7vpx5jp66q7vcp5w6-3001.app.github.dev/api/medical_centers";
 
 function MedicalCenters() {
   const [centers, setCenters] = useState([]);
