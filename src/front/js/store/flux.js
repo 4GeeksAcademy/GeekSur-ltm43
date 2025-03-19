@@ -3,35 +3,24 @@ const getState = ({ getStore, getActions, setStore }) => {
         store: {
             message: null,
             demo: [
-                {
-                    title: "FIRST",
-                    background: "white",
-                    initial: "white"
-                },
-                {
-                    title: "SECOND",
-                    background: "white",
-                    initial: "white"
-                }
-            ],
-            patients: [],
-            medicalCenters: [],
-            medicalCenterFormData: {
-                name: "",
-                address: "",
-                country: "",
-                city: "",
-                phone: "",
-                email: "",
-            },
-            editingMedicalCenter: null,
-            medicalCenterError: null,
-            medicalCenterSuccessMessage: null,
-        },
-        actions: {
-            exampleFunction: () => {
-                getActions().changeColor(0, "green");
-            },
+				{
+					title: "FIRST",
+					background: "white",
+					initial: "white"
+				},
+				{
+					title: "SECOND",
+					background: "white",
+					initial: "white"
+				}
+			],
+			patients: [], 
+		},
+		actions: {
+			// Use getActions to call a function within a fuction
+			exampleFunction: () => {
+				getActions().changeColor(0, "green");
+			},
 
             getMessage: async () => {
                 try {
@@ -44,7 +33,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-            getPatients: async () => {
+			getPatients: async () => {
                 try {
                     const resp = await fetch(process.env.BACKEND_URL + "/api/patients", {
                         method: "GET",
@@ -57,7 +46,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         throw new Error(`Error fetching patients: ${resp.status} - ${errorText}`);
                     }
                     const data = await resp.json();
-                    console.log("Patients obtained:", data);
+                    console.log("Pacientes obtenidos:", data);
                     setStore({ patients: data });
                     return data;
                 } catch (error) {
@@ -79,7 +68,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         throw new Error(`Error creating patient: ${resp.status} - ${errorText}`);
                     }
                     const data = await resp.json();
-                    getActions().getPatients(); 
+                    getActions().getPatients(); // Refrescar la lista
                     return data;
                 } catch (error) {
                     console.log("Error creating patient:", error.message);
