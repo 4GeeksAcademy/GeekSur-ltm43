@@ -8,11 +8,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 		
 		actions: {
 
+///////////////////START/////////////////////////////////DOCTORS/////////////////////////////////////
+				
 			// SE CREA ACTION PARA VER LISTA DE DOCTOR EN COMPONENTE DOCTORS
 			getDoctors: async () => {
 				try {
 					
-					const response = await fetch("https://silver-invention-x5v49jq67774hvq95-3001.app.github.dev/api/doctors");
+					const response = await fetch(process.env.BACKEND_URL+"/api/doctors");
 					const data = await response.json();
 			
 					if (response.ok) {
@@ -28,7 +30,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			// ACTION PARA ELIMINAR DOCTOR
 			  deleteDoctor: async (id) => {
 				try {
-				  	const resp = await fetch(`https://silver-invention-x5v49jq67774hvq95-3001.app.github.dev/api/doctors/${id}`,{
+				  	const resp = await fetch(`${process.env.BACKEND_URL}/api/doctors/${id}`, {
 					method: "DELETE",
 				  });
 				  if (!resp.ok) throw new Error("Error al tratar de borrar al doctor. revise...");
@@ -42,7 +44,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			  // ACTION PARA CREAR DOCTOR
 			 createDoctor: async (doctorData) => {
 				try {
-				  const resp = await fetch("https://silver-invention-x5v49jq67774hvq95-3001.app.github.dev/api/doctors", {
+				  const resp = await fetch(process.env.BACKEND_URL+"/api/doctors", {
 					method: "POST",
 					headers: {
 					  "Content-Type": "application/json",
@@ -62,7 +64,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			  // UPDATE A DOCTOR
 			 updateDoctor: async (id, doctorData) => {
 				try {
-				  const resp = await fetch(`https://silver-invention-x5v49jq67774hvq95-3001.app.github.dev/api/doctors/${id}`, {
+				  const resp = await fetch(`${process.env.BACKEND_URL}/api/doctors/${id}`, {
 					method: "PUT",
 					headers: {
 					  "Content-Type": "application/json",
@@ -78,12 +80,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				  throw error;
 				}
 			  },
-
-			// Use getActions to call a function within a fuction
-			exampleFunction: () => {
-				getActions().changeColor(0, "green");
-			},
-
+///////////////////END/////////////////////////////////DOCTORS/////////////////////////////////////
 			getMessage: async () => {
 				try{
 					// fetching data from the backend

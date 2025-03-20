@@ -2,8 +2,6 @@ import React, { useContext ,useEffect, useState} from "react";
 import { Context } from "../store/appContext";
 import "../../styles/home.css";
 
-//# https://silver-invention-x5v49jq67774hvq95-3000.app.github.dev/doctors
-
 export const Doctors = () => {
     const { store, actions } = useContext(Context);
     const [editId, setEditId] = useState(null);

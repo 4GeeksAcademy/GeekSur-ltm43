@@ -11,15 +11,6 @@ api = Blueprint('api', __name__)
 # Allow CORS requests to this API
 CORS(api)
 
-# https://silver-invention-x5v49jq67774hvq95-3001.app.github.dev/api/doctors
-# pipenv install
-# pipenv run migrate 
-# pipenv run upgrade
-# pipenv run start
-# front
-# npm install
-# npm run start
-
 #-------------------------------------GET-----ALL DOCTORS------------------------------------------------#
 
 @api.route('/doctors', methods=['GET'])
