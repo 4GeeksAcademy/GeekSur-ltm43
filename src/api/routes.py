@@ -111,4 +111,3 @@ def update_doctor(doctor_id):
         "msg": f"Doctor con ID {doctor_id} actualizado correctamente",
         "updated_doctor": doctor_one.serialize()
     }), 200
-

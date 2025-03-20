@@ -12,22 +12,17 @@ export const Navbar = () => {
 					<Link to="/demo">
 						<button className="btn btn-primary">Check the Context in action</button>
 					</Link>
-				</div>
-				<div className="ml-auto">
-					<Link to="/">
-					<button className="btn btn-primary">Back home</button>
+
+					<Link to="/patients">
+            		<button className="btn btn-primary">Manage Patients</button>
+					<Link to="/medical-centers">Medical Centers</Link>
+          			
 					</Link>
-				</div>
-				<div className="ml-auto">
 					<Link to="/doctors">
 					<button className="btn btn-primary">Doctors</button>
 					</Link>
-				</div>
-			</div>
-		</nav>
-	);
+        </div>
+      </div>
+    </nav>
+  );
 };
-
-			<Link to="/">
-				<button className="btn btn-primary">Back home</button>
-			</Link>
