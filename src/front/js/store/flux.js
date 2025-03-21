@@ -14,7 +14,19 @@ const getState = ({ getStore, getActions, setStore }) => {
 					initial: "white"
 				}
 			],
-			patients: [], 
+			patients: [],
+            medicalCenters: [],
+            medicalCenterFormData: {
+                name: "",
+                address: "",
+                country: "",
+                city: "",
+                phone: "",
+                email: "",
+            },
+            editingMedicalCenter: null,
+            medicalCenterError: null,
+            medicalCenterSuccessMessage: null, 
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
@@ -22,18 +34,16 @@ const getState = ({ getStore, getActions, setStore }) => {
 				getActions().changeColor(0, "green");
 			},
 
-			getMessage: async () => {
-				try{
-					// fetching data from the backend
-					const resp = await fetch(process.env.BACKEND_URL + "/api/hello")
-					const data = await resp.json()
-					setStore({ message: data.message })
-					// don't forget to return something, that is how the async resolves
-					return data;
-				}catch(error){
-					console.log("Error loading message from backend", error)
-				}
-			},
+            getMessage: async () => {
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/hello")
+                    const data = await resp.json()
+                    setStore({ message: data.message })
+                    return data;
+                } catch (error) {
+                    console.log("Error loading message from backend", error)
+                }
+            },
 
 			getPatients: async () => {
                 try {
@@ -55,7 +65,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     console.log("Error fetching patients:", error.message);
                 }
             },
-
+			
             createPatient: async (patientData) => {
                 try {
                     const resp = await fetch(process.env.BACKEND_URL + "/api/patients", {
@@ -78,56 +88,175 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-			  // Actualizar un paciente
-			 updatePatient: async (id, patientData) => {
-				try {
-				  const resp = await fetch(process.env.BACKEND_URL + `/api/patients/${id}`, {
-					method: "PUT",
-					headers: {
-					  "Content-Type": "application/json",
-					},
-					body: JSON.stringify(patientData),
-				  });
-				  if (!resp.ok) throw new Error("Error updating patient");
-				  const data = await resp.json();
-				  getActions().getPatients(); // Refrescar la lista
-				  return data;
-				} catch (error) {
-				  console.log("Error updating patient:", error);
-				  throw error;
-				}
-			  },
+            updatePatient: async (id, patientData) => {
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + `/api/patients/${id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(patientData),
+                    });
+                    if (!resp.ok) throw new Error("Error updating patient");
+                    const data = await resp.json();
+                    getActions().getPatients(); // Refresh the list
+                    return data;
+                } catch (error) {
+                    console.log("Error updating patient:", error);
+                    throw error;
+                }
+            },
 
-			  // Eliminar un paciente
-			  deletePatient: async (id) => {
-				try {
-				  const resp = await fetch(process.env.BACKEND_URL + `/api/patients/${id}`, {
-					method: "DELETE",
-				  });
-				  if (!resp.ok) throw new Error("Error deleting patient");
-				  getActions().getPatients(); 
-				} catch (error) {
-				  console.log("Error deleting patient:", error);
-				  throw error;
-				}
-			  },
+            deletePatient: async (id) => {
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + `/api/patients/${id}`, {
+                        method: "DELETE",
+                    });
+                    if (!resp.ok) throw new Error("Error deleting patient");
+                    getActions().getPatients();
+                } catch (error) {
+                    console.log("Error deleting patient:", error);
+                    throw error;
+                }
+            },
+
+            ///////////// BEGIN MEDICAL CENTER /////////////
+            getMedicalCenters: async () => {
+                try {
+                    const resp1 = await fetch(process.env.BACKEND_URL + "/api/hello")
+                    
+                    const data1 = await resp1.json()
+                
+                    console.log(data1)
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/medical_centers", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    });
+                    console.log(resp)
+                    // if (!resp.ok) {
+                    //     const errorText = await resp.text();
+                    //     // throw new Error(`Error fetching medical centers: ${resp.status} - ${errorText}`);
+                    // }
+                    const data = await resp.json();
+                    console.log(data)
+                    console.log("Medical centers obtained:", data);
+                    setStore({ medicalCenters: data, medicalCenterError: null });
+                    return data;
+                } catch (error) {
+                    console.log("Error fetching medical centers:", error.message);
+                    setStore({ medicalCenterError: "Error loading medical centers." });
+                }
+            },
+
+            setMedicalCenterFormData: (data) => {
+                setStore({ medicalCenterFormData: { ...getStore().medicalCenterFormData, ...data } });
+            },
+
+            setEditingMedicalCenter: (center) => {
+                setStore({ editingMedicalCenter: center, medicalCenterFormData: center || {
+                    name: "", address: "", country: "", city: "", phone: "", email: ""
+                } });
+            },
+
+            clearMedicalCenterFormData: () => {
+                setStore({
+                    medicalCenterFormData: {
+                        name: "", address: "", country: "", city: "", phone: "", email: ""
+                    },
+                    editingMedicalCenter: null,
+                    medicalCenterSuccessMessage: null,
+                    medicalCenterError: null,
+                });
+            },
+
+            addMedicalCenter: async () => {
+                const store = getStore();
+                const formData = store.medicalCenterFormData;
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/medical_centers", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(formData),
+                    });
+                    if (!resp.ok) {
+                        const errorText = await resp.text();
+                        throw new Error(`Error adding medical center: ${resp.status} - ${errorText}`);
+                    }
+                    const data = await resp.json();
+                    getActions().getMedicalCenters();
+                    setStore({ medicalCenterSuccessMessage: "Medical center added successfully!", medicalCenterError: null });
+                    getActions().clearMedicalCenterFormData();
+                    return data;
+                } catch (error) {
+                    console.log("Error adding medical center:", error.message);
+                    setStore({ medicalCenterError: "Error adding medical center.", medicalCenterSuccessMessage: null });
+                    throw error;
+                }
+            },
+
+            updateMedicalCenter: async () => {
+                const store = getStore();
+                const formData = store.medicalCenterFormData;
+                const editingCenter = store.editingMedicalCenter;
+                if (!editingCenter) return; 
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + `/api/medical_centers/${editingCenter.id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(formData),
+                    });
+                    if (!resp.ok) throw new Error("Error updating medical center");
+                    const data = await resp.json();
+                    getActions().getMedicalCenters();
+                    setStore({ medicalCenterSuccessMessage: "Medical center updated successfully!", medicalCenterError: null });
+                    getActions().clearMedicalCenterFormData();
+                    return data;
+                } catch (error) {
+                    console.log("Error updating medical center:", error);
+                    setStore({ medicalCenterError: "Error updating medical center.", medicalCenterSuccessMessage: null });
+                    throw error;
+                }
+            },
+
+            deleteMedicalCenter: async (id) => {
+                if (!window.confirm("Are you sure you want to delete this medical center?")) {
+                    return;
+                }
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + `/api/medical_centers/${id}`, {
+                        method: "DELETE",
+                    });
+                    if (!resp.ok) throw new Error("Error deleting medical center");
+                    getActions().getMedicalCenters();
+                    setStore({ medicalCenterSuccessMessage: "Medical center deleted successfully!", medicalCenterError: null });
+                } catch (error) {
+                    console.log("Error deleting medical center:", error);
+                    setStore({ medicalCenterError: "Error deleting medical center.", medicalCenterSuccessMessage: null });
+                    throw error;
+                }
+            },
+            ///////////// END MEDICAL CENTER /////////////
+            changeColor: (index, color) => {
+                const store = getStore();
+                const demo = store.demo.map((elm, i) => {
+                    if (i === index) elm.background = color;
+                    return elm;
+                });
+                setStore({ demo: demo });
+            },
+
+            
 
 
-			changeColor: (index, color) => {
-				//get the store
-				const store = getStore();
-
-				
-				const demo = store.demo.map((elm, i) => {
-					if (i === index) elm.background = color;
-					return elm;
-				});
-
-				//reset the global store
-				setStore({ demo: demo });
-			}
-		}
-	};
+            
+        }
+    };
 };
 
 export default getState;
