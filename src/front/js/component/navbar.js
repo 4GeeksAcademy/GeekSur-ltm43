@@ -16,8 +16,9 @@ export const Navbar = () => {
 					<Link to="/patients">
             		<button className="btn btn-primary">Manage Patients</button>
 					<Link to="/medical-centers">Medical Centers</Link>
-          			
-					</Link>
+          			</Link>
+					
+					
 					<Link to="/doctors">
 					<button className="btn btn-primary">Doctors</button>
 					</Link>
