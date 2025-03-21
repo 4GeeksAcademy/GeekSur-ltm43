@@ -9,7 +9,6 @@ from datetime import datetime
 
 api = Blueprint('api', __name__)
 
-# Allow CORS requests to this API
 CORS(api)
 
 
