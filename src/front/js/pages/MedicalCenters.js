@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Context } from "../store/appContext"; // Make sure the path is correct
-import axios from "axios"; // Although not directly used here, it could be kept if there's any specific logic
 import "bootstrap/dist/css/bootstrap.min.css";
 
 

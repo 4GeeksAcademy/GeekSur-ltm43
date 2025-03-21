@@ -14,7 +14,19 @@ const getState = ({ getStore, getActions, setStore }) => {
 					initial: "white"
 				}
 			],
-			patients: [], 
+			patients: [],
+            medicalCenters: [],
+            medicalCenterFormData: {
+                name: "",
+                address: "",
+                country: "",
+                city: "",
+                phone: "",
+                email: "",
+            },
+            editingMedicalCenter: null,
+            medicalCenterError: null,
+            medicalCenterSuccessMessage: null, 
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
@@ -108,20 +120,27 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-            // Actions for Medical Centers
+            ///////////// BEGIN MEDICAL CENTER /////////////
             getMedicalCenters: async () => {
                 try {
+                    const resp1 = await fetch(process.env.BACKEND_URL + "/api/hello")
+                    
+                    const data1 = await resp1.json()
+                
+                    console.log(data1)
                     const resp = await fetch(process.env.BACKEND_URL + "/api/medical_centers", {
                         method: "GET",
                         headers: {
                             "Content-Type": "application/json"
                         }
                     });
-                    if (!resp.ok) {
-                        const errorText = await resp.text();
-                        throw new Error(`Error fetching medical centers: ${resp.status} - ${errorText}`);
-                    }
+                    console.log(resp)
+                    // if (!resp.ok) {
+                    //     const errorText = await resp.text();
+                    //     // throw new Error(`Error fetching medical centers: ${resp.status} - ${errorText}`);
+                    // }
                     const data = await resp.json();
+                    console.log(data)
                     console.log("Medical centers obtained:", data);
                     setStore({ medicalCenters: data, medicalCenterError: null });
                     return data;
@@ -222,7 +241,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     throw error;
                 }
             },
-
+            ///////////// END MEDICAL CENTER /////////////
             changeColor: (index, color) => {
                 const store = getStore();
                 const demo = store.demo.map((elm, i) => {
@@ -231,6 +250,11 @@ const getState = ({ getStore, getActions, setStore }) => {
                 });
                 setStore({ demo: demo });
             },
+
+            
+
+
+            
         }
     };
 };
