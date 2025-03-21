@@ -1,23 +1,11 @@
-
 import click
-from api.models import db, User, Patient
-from datetime import datetime  # Importa el módulo datetime
+from api.models import db, User, Patient, MedicalCenter
+from datetime import datetime
 
-
-"""
-In this file, you can add as many commands as you want using the @app.cli.command decorator
-Flask commands are usefull to run cronjobs or tasks outside of the API but sill in integration 
-with youy database, for example: Import the price of bitcoin every night as 12am
-"""
 def setup_commands(app):
     
-    """ 
-    This is an example command "insert-test-users" that you can run from the command line
-    by typing: $ flask insert-test-users 5
-    Note: 5 is the number of users to add
-    """
-    @app.cli.command("insert-test-users") # name of our command
-    @click.argument("count") # argument of out command
+    @app.cli.command("insert-test-users")
+    @click.argument("count")
     def insert_test_users(count):
         print("Creating test users")
         for x in range(1, int(count) + 1):
@@ -65,7 +53,6 @@ def setup_commands(app):
                 "phone_number": "4120864548",
                 "password": "crisafmy"
             }
-
         ]
 
         try:
@@ -77,7 +64,7 @@ def setup_commands(app):
                     last_name=patient_data["last_name"],
                     gender=patient_data["gender"],
                     birth_date=patient_data["birth_date"],
-                    phone_number=str(patient_data["phone_number"]),  # Forzar string
+                    phone_number=str(patient_data["phone_number"]),
                     password=patient_data["password"]
                 )
                 db.session.add(patient)
@@ -87,4 +74,55 @@ def setup_commands(app):
             db.session.rollback()
             print(f"Error inserting patients: {str(e)}")
             raise
-        
+
+    @app.cli.command("insert-test-medical-centers")
+    def insert_test_medical_centers():
+        print("Inserting test data for Medical Centers")
+        medical_centers_data = [
+            {
+                "id": 30,
+                "name": "Clinica Caracas",
+                "address": "Centro de Caracas",
+                "country": "Venezuela",
+                "city": "Caracas",
+                "phone": "582198592475",
+                "email": "clinccrcs@gmail.com"
+            },
+            {
+                "id": 31,
+                "name": "Clinica Santiago",
+                "address": "Centro de Santiago",
+                "country": "Chile",
+                "city": "Santiago",
+                "phone": "56235885585",
+                "email": "clinccsgo@gmail.com"
+            },
+            {
+                "id": 32,
+                "name": "Clinica Auckland",
+                "address": "Centro de Auckland",
+                "country": "New Zealand",
+                "city": "Auckland",
+                "phone": "64205879736",
+                "email": "clinccakl@gmail.com"
+            }
+        ]
+
+        try:
+            for center_data in medical_centers_data:
+                center = MedicalCenter(
+                    id=center_data["id"],
+                    name=center_data["name"],
+                    address=center_data["address"],
+                    country=center_data["country"],
+                    city=center_data["city"],
+                    phone=center_data["phone"],
+                    email=center_data["email"]
+                )
+                db.session.add(center)
+            db.session.commit()
+            print("All test medical centers inserted successfully!")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error inserting medical centers: {str(e)}")
+            raise

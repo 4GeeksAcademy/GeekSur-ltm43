@@ -47,6 +47,8 @@ export const Patients = () => {
         phone_number: "",
         password: "",
       });
+      // Actualizar lista de pacientes
+      actions.getPatients();
     } catch (error) {
       alert("Error: " + error.message);
     }
@@ -71,13 +73,14 @@ export const Patients = () => {
     if (window.confirm("¿Estás seguro de que quieres eliminar este paciente?")) {
       try {
         await actions.deletePatient(id);
+        // Actualizar lista de pacientes
+        actions.getPatients();
       } catch (error) {
         alert("Error: " + error.message);
       }
     }
   };
 
-  console.log("Pacientes en el store:", store.patients);
   return (
     <div className="container">
       <h1>{editId ? "Editar Paciente" : "Crear Paciente"}</h1>
@@ -171,9 +174,9 @@ export const Patients = () => {
         ))}
       </ul>
       <br />
-                <Link to="/">
-                  <button className="btn btn-primary">Back home</button>
-                </Link>
+      <Link to="/">
+        <button className="btn btn-primary">Back home</button>
+      </Link>
     </div>
   );
 };

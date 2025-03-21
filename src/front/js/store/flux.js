@@ -1,8 +1,8 @@
 const getState = ({ getStore, getActions, setStore }) => {
-	return {
-		store: {
-			message: null,
-			demo: [
+    return {
+        store: {
+            message: null,
+            demo: [
 				{
 					title: "FIRST",
 					background: "white",
@@ -14,7 +14,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					initial: "white"
 				}
 			],
-			patients: [], //Nuevo estado para agregar pacientes.
+			patients: [], 
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
@@ -36,40 +36,47 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 
 			getPatients: async () => {
-				try {
-				  const resp = await fetch(process.env.BACKEND_URL + "/api/patients");
-				  if (!resp.ok) {
-					const errorText = await resp.text();
-					throw new Error(`Error fetching patients: ${resp.status} - ${errorText}`);
-				  }
-				  const data = await resp.json();
-				  console.log("Pacientes obtenidos:", data); // Verifica los datos recibidos
-				  setStore({ patients: data });
-				  return data;
-				} catch (error) {
-				  console.log("Error fetching patients:", error.message);
-				}
-			  },
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/patients", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    });
+                    if (!resp.ok) {
+                        const errorText = await resp.text();
+                        throw new Error(`Error fetching patients: ${resp.status} - ${errorText}`);
+                    }
+                    const data = await resp.json();
+                    console.log("Pacientes obtenidos:", data);
+                    setStore({ patients: data });
+                    return data;
+                } catch (error) {
+                    console.log("Error fetching patients:", error.message);
+                }
+            },
 
-			 // Crear un paciente
-			 createPatient: async (patientData) => {
-				try {
-				  const resp = await fetch(process.env.BACKEND_URL + "/api/patients", {
-					method: "POST",
-					headers: {
-					  "Content-Type": "application/json",
-					},
-					body: JSON.stringify(patientData),
-				  });
-				  if (!resp.ok) throw new Error("Error creating patient");
-				  const data = await resp.json();
-				  getActions().getPatients(); // Refrescar la lista
-				  return data;
-				} catch (error) {
-				  console.log("Error creating patient:", error);
-				  throw error;
-				}
-			  },
+            createPatient: async (patientData) => {
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/patients", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(patientData),
+                    });
+                    if (!resp.ok) {
+                        const errorText = await resp.text();
+                        throw new Error(`Error creating patient: ${resp.status} - ${errorText}`);
+                    }
+                    const data = await resp.json();
+                    getActions().getPatients(); // Refrescar la lista
+                    return data;
+                } catch (error) {
+                    console.log("Error creating patient:", error.message);
+                    throw error;
+                }
+            },
 
 			  // Actualizar un paciente
 			 updatePatient: async (id, patientData) => {
@@ -98,7 +105,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					method: "DELETE",
 				  });
 				  if (!resp.ok) throw new Error("Error deleting patient");
-				  getActions().getPatients(); // Refrescar la lista
+				  getActions().getPatients(); 
 				} catch (error) {
 				  console.log("Error deleting patient:", error);
 				  throw error;
@@ -110,8 +117,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				//get the store
 				const store = getStore();
 
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
+				
 				const demo = store.demo.map((elm, i) => {
 					if (i === index) elm.background = color;
 					return elm;
