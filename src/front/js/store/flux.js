@@ -65,7 +65,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     console.log("Error fetching patients:", error.message);
                 }
             },
-
+			
             createPatient: async (patientData) => {
                 try {
                     const resp = await fetch(process.env.BACKEND_URL + "/api/patients", {

@@ -18,7 +18,7 @@ export const Patients = () => {
   // Cargar pacientes al montar el componente
   useEffect(() => {
     actions.getPatients();
-  }, [actions]);
+  }, []);
 
   // Manejar cambios en el formulario
   const handleChange = (e) => {
@@ -81,7 +81,6 @@ export const Patients = () => {
     }
   };
 
-  console.log("Pacientes en el store:", store.patients);
   return (
     <div className="container">
       <h1>{editId ? "Editar Paciente" : "Crear Paciente"}</h1>
