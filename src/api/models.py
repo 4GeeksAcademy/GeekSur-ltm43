@@ -29,7 +29,7 @@ class Patient(db.Model):
             "birth_date": self.birth_date.strftime('%Y-%m-%d'),
             "phone_number": self.phone_number
             # Password excluido por seguridad
-        },
+        }
 
 class MedicalCenter(db.Model):
     id = db.Column(db.Integer, primary_key=True)

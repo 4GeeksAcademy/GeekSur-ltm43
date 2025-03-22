@@ -14,16 +14,17 @@ export const Navbar = () => {
 					</Link>
 
 					<Link to="/patients">
-            		<button className="btn btn-primary">Manage Patients</button>
-					<Link to="/medical-centers">Medical Centers</Link>
-          			</Link>
-					
-					
-					<Link to="/doctors">
-					<button className="btn btn-primary">Doctors</button>
+            			<button className="btn btn-primary">Manage Patients</button>
 					</Link>
-        </div>
-      </div>
-    </nav>
+					
+					<Link to="/medical-centers">Medical Centers</Link>
+
+					<Link to="/doctors">
+						<button className="btn btn-primary">Doctors</button>
+					</Link>
+
+				</div>
+			</div>
+		</nav>
   );
 };
