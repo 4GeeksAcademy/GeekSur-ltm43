@@ -16,6 +16,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 			],
 			patients: [],
 			doctors: [] ,
+            specialties:[],
+            specialties_doctor:[],
             medicalCenters: [],
             medicalCenterFormData: {
                 name: "",
@@ -326,6 +328,157 @@ const getState = ({ getStore, getActions, setStore }) => {
             
 
 ///////////////////END/////////////////////////////////PATIENTS/////////////////////////////////////	
+
+///////////////////START/////////////////////////////////SPECIALTIES///////////////////////////
+				
+			// SE CREA ACTION PARA VER LISTA DE ESPECIALIDADES 
+            getSpecialties: async () => {
+				try {
+					
+					const response = await fetch(process.env.BACKEND_URL+"/api/specialties");
+					const data = await response.json();
+			
+					if (response.ok) {
+						setStore({ specialties: data.Specialties }); 
+					} else {
+						console.error("Error al obtener Espacialidades:", data.msg);
+					}
+				} catch (error) {
+					console.error("Error en la solicitud:", error);
+				}
+			},
+
+             // ACTION PARA CREAR ESPECIALIDAD
+             createSpecialties: async (specialtyData) => {
+				try {
+				  const resp = await fetch(process.env.BACKEND_URL+"/api/specialties", {
+					method: "POST",
+					headers: {
+					  "Content-Type": "application/json",
+					},
+					body: JSON.stringify(specialtyData),
+				  });
+				  if (!resp.ok) throw new Error("Error creating...");
+				  const data = await resp.json();
+				  getActions().getSpecialties(); 
+				  return data;
+				} catch (error) {
+				  console.log("Error....:", error);
+				  throw error;
+				}
+            },
+
+            // ACTION PARA ELIMINAR Especialidad
+			  deleteSpecialties: async (id) => {
+				try {
+				  	const resp = await fetch(process.env.BACKEND_URL+`/api/specialties/${id}`, {
+					method: "DELETE",
+				  });
+				  if (!resp.ok) throw new Error("Error al tratar de borrar la especialidad. revise...");
+				  getActions().getSpecialties(); // esto para que al borrar actualice lista con los que quedan
+				} catch (error) {
+				  console.log("Error al tratar de borrar la especialidad. revise", error);
+				  throw error;
+				}
+			  },
+        // UPDATE ESPECIALIDAD
+        updateSpecialties: async (id, specialtyData) => {
+            try {
+            const resp = await fetch(`${process.env.BACKEND_URL}/api/specialties/${id}`, {
+                method: "PUT",
+                headers: {
+                "Content-Type": "application/json",
+                },
+                body: JSON.stringify(specialtyData),
+            });
+            if (!resp.ok) throw new Error("Error updating Especialidad");
+            const data = await resp.json();
+            getActions().getSpecialties(); 
+            return data;
+            } catch (error) {
+            console.log("Error updating especialidad:", error);
+            throw error;
+            }
+        },
+///////////////////END/////////////////////////////////SPECIALTIES///////////////////////////
+
+///////////////////START/////////////////////////////////SPECIALTIES_DOCTOR///////////////////////////
+
+        // SE CREA ACTION PARA VER LISTA DE ESPECIALIDADES_DOCTOR 
+        getSpecialties_doctor: async () => {
+            try {
+                const response = await fetch(process.env.BACKEND_URL+"/api/specialties_doctor");
+                const data = await response.json();
+
+                if (response.ok) {
+                    setStore({ specialties_doctor: data.Specialties_doctor });
+                } else {
+                    console.error("Error al obtener Especialidades_doctor:", data.msg);
+                }
+            } catch (error) {
+                console.error("Error en la solicitud:", error);
+            }
+        },
+
+        // ACTION PARA CREAR ESPECIALIDAD_DOCTOR
+        createSpecialties_doctor: async (specialtyData) => {
+            try {
+                console.log("Datos a enviar:", specialtyData);
+                const resp = await fetch(process.env.BACKEND_URL+"/api/specialties_doctor", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(specialtyData),
+                });
+                if (!resp.ok) throw new Error("Error creating...");
+                const data = await resp.json();
+                getActions().getSpecialties_doctor();
+                return data;
+            } catch (error) {
+                console.log("Error....:", error);
+                throw error;
+            }
+        },
+
+        // ACTION PARA ELIMINAR Especialidad_doctor
+        deleteSpecialties_doctor: async (id) => {
+            try {
+                const resp = await fetch(process.env.BACKEND_URL+`/api/specialties_doctor/${id}`, {
+                    method: "DELETE",
+                });
+                if (!resp.ok) throw new Error("Error al tratar de borrar la especialidad_doctor. revise...");
+                getActions().getSpecialties_doctor(); // esto para que al borrar actualice lista con los que quedan
+            } catch (error) {
+                console.log("Error al tratar de borrar la especialidad_doctor. revise", error);
+                throw error;
+            }
+        },
+
+        // UPDATE ESPECIALIDAD_DOCTOR
+        updateSpecialties_doctor: async (id, specialtyData) => {
+            try {
+                const resp = await fetch(`${process.env.BACKEND_URL}/api/specialties_doctor/${id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(specialtyData),
+                });
+                if (!resp.ok) throw new Error("Error updating Especialidad_doctor");
+                const data = await resp.json();
+                getActions().getSpecialties_doctor();
+                return data;
+            } catch (error) {
+                console.log("Error updating especialidad_doctor:", error);
+                throw error;
+            }
+        },
+///////////////////END/////////////////////////////////SPECIALTIES_DOCTOR///////////////////////////
+
+
+
+
 
             
         }

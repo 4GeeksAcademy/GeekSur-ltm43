@@ -23,6 +23,14 @@ export const Navbar = () => {
 						<button className="btn btn-primary">Doctors</button>
 					</Link>
 
+					<Link to="/specialties">
+						<button className="btn btn-primary">Specialties</button>
+					</Link>
+
+					<Link to="/specialties_doctor">
+						<button className="btn btn-primary">Specialties_doctor</button>
+					</Link>
+
 				</div>
 			</div>
 		</nav>

@@ -9,6 +9,8 @@ import { Single } from "./pages/single";
 import { Patients } from "./pages/patients";
 import MedicalCenters from "./pages/MedicalCenters"; 
 import { Doctors } from "./pages/doctors";
+import { Specialties } from "./pages/specialties"; 
+import { Specialties_doctor } from "./pages/specialties_doctor";
 import injectContext from "./store/appContext";
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
@@ -32,6 +34,8 @@ const Layout = () => {
                         <Route element={<Patients />} path="/patients" />
                         <Route element={<MedicalCenters />} path="/medical-centers" /> 
                         <Route element={<Doctors />} path="/doctors" />
+                        <Route element={<Specialties />} path="/specialties" />
+                        <Route element={<Specialties_doctor />} path="/specialties_doctor" />
                         <Route element={<h1>Not found!</h1>} path="*" />
                         
                     </Routes>
