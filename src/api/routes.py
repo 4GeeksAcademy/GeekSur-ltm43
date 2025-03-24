@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, MedicalCenter, Patient, Doctors, Specialties, Specialties_doctor
+from api.models import db, User, MedicalCenter, Patient, Doctors, Specialties, Specialties_doctor, Appointment
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from datetime import datetime
@@ -468,3 +468,157 @@ def update_specialty_doctor(specialty_id):
         "msg": f"Especialidad_doctor con ID {specialty_id} actualizado correctamente",
         "update_specialty_doctor":  specialty_doctor_one.serialize()
     }), 200
+
+#//////////////////////////////START //////APPOINTMENT
+
+#-------------------------------------GET-----ALL APPOINTMENTS------------------------------------------------#
+
+@api.route('/appointments', methods=['GET'])
+def get_appointments():
+    list_appointments = Appointment.query.all()
+    obj_all_appointments = [appointment.serialize() for appointment in list_appointments]
+
+    response_body = {
+        "msg": "GET / Appointments for this project",
+        "Appointments": obj_all_appointments
+    }
+    return jsonify(response_body), 200
+
+#----------------------------------GET------1 ID-APPOINTMENT---------------------------------------------------------#
+@api.route('/appointments/<int:appointment_id>', methods=['GET'])
+def get_appointment_id(appointment_id):
+    appointment_one = Appointment.query.get(appointment_id)
+    if not appointment_one:
+        return jsonify({"msg": "Appointment not found"}), 404
+
+    response_body = {
+        "msg": "GET / Data for one Appointment",
+        "Appointment": appointment_one.serialize()
+    }
+    return jsonify(response_body), 200
+
+#-------------------------------------------------POST------------------------------------------------#
+#-------------------------------------POST-----NEW APPOINTMENT-------------------------------------------------#
+@api.route('/appointments', methods=['POST'])
+def post_appointment():
+    data = request.get_json()
+
+    # Validate required fields
+    required_fields = ['id_patient', 'id_doctor', 'id_center', 'date', 'hour', 'id_specialty', 'confirmation']
+    for field in required_fields:
+        if field not in data:
+            raise APIException(f'The field "{field}" is required', status_code=400)
+
+    # Validate date and hour format
+    try:
+        appointment_date = datetime.strptime(data["date"], "%Y-%m-%d").date()
+        appointment_hour = datetime.strptime(data["hour"], "%H:%M").time()
+    except ValueError:
+        raise APIException("Invalid date or hour format. Use YYYY-MM-DD for date and HH:MM for hour", status_code=400)
+
+    # Validate foreign keys
+    if not Patient.query.get(data["id_patient"]):
+        raise APIException("Patient not found", status_code=404)
+    if not Doctors.query.get(data["id_doctor"]):
+        raise APIException("Doctor not found", status_code=404)
+    if not MedicalCenter.query.get(data["id_center"]):
+        raise APIException("Medical Center not found", status_code=404)
+    if not Specialties.query.get(data["id_specialty"]):
+        raise APIException("Specialty not found", status_code=404)
+
+    # Validate confirmation value
+    if data["confirmation"] not in ["confirmed", "to_be_confirmed"]:
+        raise APIException("Confirmation must be 'confirmed' or 'to_be_confirmed'", status_code=400)
+
+    new_appointment = Appointment(
+        id_patient=data["id_patient"],
+        id_doctor=data["id_doctor"],
+        id_center=data["id_center"],
+        date=appointment_date,
+        hour=appointment_hour,
+        id_specialty=data["id_specialty"],
+        confirmation=data["confirmation"]
+    )
+
+    db.session.add(new_appointment)
+    db.session.commit()
+
+    response_body = {
+        "msg": "New Appointment created successfully",
+        "new_appointment": new_appointment.serialize()
+    }
+    return jsonify(response_body), 201
+
+#-------------------------------------DELETE-----APPOINTMENT------------------------------------------------#
+
+@api.route('/appointments/<int:appointment_id>', methods=['DELETE'])
+def delete_appointment(appointment_id):
+    appointment_one = Appointment.query.get(appointment_id)
+
+    if not appointment_one:
+        return jsonify({"msg": "Appointment not found"}), 404
+
+    db.session.delete(appointment_one)
+    db.session.commit()
+
+    return jsonify({"msg": f"Appointment with ID {appointment_id} deleted successfully"}), 200
+
+#-------------------------------------PUT----APPOINTMENT----------------------------------------------------#
+
+@api.route('/appointments/<int:appointment_id>', methods=['PUT'])
+def update_appointment(appointment_id):
+    appointment_one = Appointment.query.get(appointment_id)
+
+    if not appointment_one:
+        return jsonify({"msg": "Appointment not found"}), 404
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"msg": "No data provided"}), 400
+
+    # Update fields if provided
+    if "id_patient" in data:
+        if not Patient.query.get(data["id_patient"]):
+            raise APIException("Patient not found", status_code=404)
+        appointment_one.id_patient = data["id_patient"]
+
+    if "id_doctor" in data:
+        if not Doctors.query.get(data["id_doctor"]):
+            raise APIException("Doctor not found", status_code=404)
+        appointment_one.id_doctor = data["id_doctor"]
+
+    if "id_center" in data:
+        if not MedicalCenter.query.get(data["id_center"]):
+            raise APIException("Medical Center not found", status_code=404)
+        appointment_one.id_center = data["id_center"]
+
+    if "date" in data:
+        try:
+            appointment_one.date = datetime.strptime(data["date"], "%Y-%m-%d").date()
+        except ValueError:
+            raise APIException("Invalid date format. Use YYYY-MM-DD", status_code=400)
+
+    if "hour" in data:
+        try:
+            appointment_one.hour = datetime.strptime(data["hour"], "%H:%M").time()
+        except ValueError:
+            raise APIException("Invalid hour format. Use HH:MM", status_code=400)
+
+    if "id_specialty" in data:
+        if not Specialties.query.get(data["id_specialty"]):
+            raise APIException("Specialty not found", status_code=404)
+        appointment_one.id_specialty = data["id_specialty"]
+
+    if "confirmation" in data:
+        if data["confirmation"] not in ["confirmed", "to_be_confirmed"]:
+            raise APIException("Confirmation must be 'confirmed' or 'to_be_confirmed'", status_code=400)
+        appointment_one.confirmation = data["confirmation"]
+
+    db.session.commit()
+
+    return jsonify({
+        "msg": f"Appointment with ID {appointment_id} updated successfully",
+        "updated_appointment": appointment_one.serialize()
+    }), 200
+
+#//////////////////////////////END //////APPOINTMENT

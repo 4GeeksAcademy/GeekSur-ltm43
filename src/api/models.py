@@ -99,4 +99,26 @@ class Specialties_doctor(db.Model):
             "id": self.id,
             "id_specialty": self.id_specialty,    
             "id_doctor": self.id_doctor             
-        } 
+        }
+    
+class Appointment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    id_patient = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
+    id_doctor = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
+    id_center = db.Column(db.Integer, db.ForeignKey('medical_center.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    hour = db.Column(db.Time, nullable=False)
+    id_specialty = db.Column(db.Integer, db.ForeignKey('specialties.id'), nullable=False)
+    confirmation = db.Column(db.String(20), nullable=False, default='to_be_confirmed')
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "id_patient": self.id_patient,
+            "id_doctor": self.id_doctor,
+            "id_center": self.id_center,
+            "date": self.date.strftime('%Y-%m-%d'),
+            "hour": self.hour.strftime('%H:%M'),
+            "id_specialty": self.id_specialty,
+            "confirmation": self.confirmation
+        }
