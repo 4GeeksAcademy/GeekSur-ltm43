@@ -49,7 +49,7 @@ class MedicalCenter(db.Model):
             "city": self.city,
             "phone": self.phone,
             "email": self.email
-        },
+        }
 
 class Doctors(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -59,6 +59,8 @@ class Doctors(db.Model):
     phone_number = db.Column(db.String(80), unique=False, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+    specialties = db.relationship('Specialties_doctor', backref='doctor')
+
 
     def __repr__(self):
         return f'<User {self.email}>'
@@ -71,4 +73,30 @@ class Doctors(db.Model):
             "last_name": self.last_name,
             "phone_number":self.phone_number
                  
-        }
+        } 
+    
+class Specialties(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), unique=True, nullable=False)
+    relation_specialties = db.relationship('Specialties_doctor', backref='Specialties')
+
+    def __repr__(self):
+        return f'<User {self.name}>'
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name                 
+        } 
+
+class Specialties_doctor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    id_specialty = db.Column(db.Integer, db.ForeignKey('specialties.id'), nullable=False)
+    id_doctor = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "id_specialty": self.id_specialty,    
+            "id_doctor": self.id_doctor             
+        } 

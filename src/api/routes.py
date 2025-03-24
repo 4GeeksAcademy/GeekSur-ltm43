@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, MedicalCenter, Patient, Doctors
+from api.models import db, User, MedicalCenter, Patient, Doctors, Specialties, Specialties_doctor
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from datetime import datetime
@@ -279,3 +279,192 @@ def delete_patient(id):
     # Retorna una respuesta vacía con código 200
     return jsonify({"message": f"Patient with id {id} has been deleted"}), 200
 ################## End patients services#########
+
+#////////////////////////////////////////////////////START //////////////////SPECIALITIES////////////////////////////
+#-------------------------------------GET-----ALL SPECIALITIES------------------------------------------------#
+
+@api.route('/specialties', methods=['GET'])
+def get_specialties():
+    list_specialties = Specialties.query.all()
+    obj_all_specialties = [specialties.serialize() for specialties in list_specialties]
+
+    response_body = {
+       "msg": "GET / Specialties from Tabla",
+       "Specialties": obj_all_specialties
+    }
+    return jsonify(response_body), 200
+#----------------------------------GET------1 ID-SPECIALITIES----------------------------------------------#
+@api.route('/specialties/<int:specialty_id>', methods=['GET'])
+def get_specialty_id(specialty_id):
+    specialty_one = Specialties.query.get(specialty_id)
+
+    response_body = {
+    "msg": "GET / Data solo 1 Especialidad",
+ 	"Specialties":  specialty_one.serialize() 
+    }
+    return jsonify(response_body), 200
+#-------------------------------------------------POST------------------------------------------------#
+#-------------------------------------POST-----NEW DOCTOR-------------------------------------------------#
+@api.route('/specialties', methods=['POST'])
+def post_specialties():
+    # Obtener los datos del cuerpo de la solicitud
+    data = request.get_json()
+
+    # Validar que los datos necesarios estén presentes
+    if not data:
+         raise APIException('No se proporcionaron datos', status_code=400)
+    if 'name' not in data:
+         raise APIException('El campo "name" es requerido', status_code=400)
+    if data["name"]=="":
+        raise APIException('El campo "name" es requerido', status_code=400)
+
+    # siempre tiene que haber data dentro de los corchetes.
+    new_specialty = Specialties(
+       name=data["name"]
+    )
+    # Guardar el nueva especialidad en la base de datos
+    db.session.add(new_specialty)
+    db.session.commit()
+
+    # Devolver una respuesta con el planeta creado
+    response_body = {
+        "msg": f"la nueva Especialidad creada es: {new_specialty.name}",
+        "new_Specialty": new_specialty.serialize() 
+        }
+    return jsonify(response_body), 201
+
+#-------------------------------------DELETE-----Doctor------------------------------------------------#
+
+@api.route('/specialties/<int:specialty_id>', methods=['DELETE'])
+def delete_specialty(specialty_id):
+    specialty_one = Specialties.query.get(specialty_id)
+
+    if not specialty_one:
+        return jsonify({"msg": "Especialidad no encontrado"}), 404
+
+    db.session.delete(specialty_one)
+    db.session.commit()
+
+    return jsonify({"msg": f"Especialidad con ID {specialty_id} eliminado correctamente"}), 200
+
+#-------------------------------------PUT----SPECIALITIES----------------------------------------------------#
+
+@api.route('/specialties/<int:specialty_id>', methods=['PUT'])
+def update_specialty(specialty_id):
+    # Buscar el Especialidad en la base de datos
+    specialty_one = Specialties.query.get(specialty_id)
+
+    if not specialty_one:
+        return jsonify({"msg": "Especialidad no encontrado"}), 404
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"msg": "No se enviaron datos"}), 400
+
+    # Actualizar los campos si existen en el JSON recibido
+    specialty_one.name = data.get("name", specialty_one.name)
+      
+    db.session.commit()
+
+    return jsonify({
+        "msg": f"Especialidad con ID {specialty_id} actualizado correctamente",
+        "update_specialty":  specialty_one.serialize()
+    }), 200
+
+#//////////////////////////////////////////////////END //////////////////SPECIALITIES////////////////////////////######
+
+
+#//////////////////////////////START //////SPECIALTIES_DOCTOR////////////////////////////////////////////////////////
+
+
+#-------------------------------------GET-----ALL SPECIALTIES_DOCTOR-----------------------------------------------#
+
+@api.route('/specialties_doctor', methods=['GET'])
+def get_specialties_doctor():
+    list_specialties_doctor = Specialties_doctor.query.all()
+    obj_all_specialties_doctor = [specialties_doctor.serialize() for specialties_doctor in list_specialties_doctor]
+
+    response_body = {
+       "msg": "GET / Specialties_doctor from Tabla",
+       "Specialties_doctor": obj_all_specialties_doctor
+    }
+    return jsonify(response_body), 200
+
+#----------------------------------GET------1 ID-SPECIALTIES_DOCTOR-----------------------------------------------#
+@api.route('/specialties_doctor/<int:specialty_id>', methods=['GET'])
+def get_specialty_doctor_id(specialty_id):
+    specialty_doctor_one = Specialties_doctor.query.get(specialty_id)
+
+    response_body = {
+    "msg": "GET / Data solo 1 Especialidad_doctor",
+    "Specialties_doctor":  specialty_doctor_one.serialize() 
+    }
+    return jsonify(response_body), 200
+
+#-------------------------------------------------POST------------------------------------------------#
+#-------------------------------------POST-----NEW SPECIALTIES_DOCTOR-------------------------------------------------#
+@api.route('/specialties_doctor', methods=['POST'])
+def post_specialties_doctor():
+    # Obtener los datos del cuerpo de la solicitud
+    data = request.get_json()
+
+    # Validar que los datos necesarios estén presentes
+    if not data:
+         raise APIException('No se proporcionaron datos', status_code=400)
+    if 'id_specialty' not in data or 'id_doctor' not in data:
+         raise APIException('El campo  "id_specialty" y "id_doctor" es requerido', status_code=400)
+    
+    # siempre tiene que haber data dentro de los corchetes.
+    new_specialty_doctor = Specialties_doctor(
+    id_specialty=data["id_specialty"],
+    id_doctor=data["id_doctor"]
+    )
+    # Guardar el nueva especialidad_doctor en la base de datos
+    db.session.add(new_specialty_doctor)
+    db.session.commit()
+
+    # Devolver una respuesta con el especialidad_doctor creado
+    response_body = {
+        "msg": "Se creo nueva especialidad",
+        "new_Specialty_doctor": new_specialty_doctor.serialize() 
+        }
+    return jsonify(response_body), 201
+
+#-------------------------------------DELETE----SPECIALTIES_DOCTOR-----------------------------------------------#
+
+@api.route('/specialties_doctor/<int:specialty_id>', methods=['DELETE'])
+def delete_specialty_doctor(specialty_id):
+    specialty_doctor_one = Specialties_doctor.query.get(specialty_id)
+
+    if not specialty_doctor_one:
+        return jsonify({"msg": "Especialidad_doctor no encontrado"}), 404
+
+    db.session.delete(specialty_doctor_one)
+    db.session.commit()
+
+    return jsonify({"msg": f"Especialidad_doctor con ID {specialty_id} eliminado correctamente"}), 200
+
+#-------------------------------------PUT---SPECIALTIES_DOCTOR-------------------------------------------------#
+
+@api.route('/specialties_doctor/<int:specialty_id>', methods=['PUT'])
+def update_specialty_doctor(specialty_id):
+    # Buscar el Especialidad_doctor en la base de datos
+    specialty_doctor_one = Specialties_doctor.query.get(specialty_id)
+
+    if not specialty_doctor_one:
+        return jsonify({"msg": "Especialidad_doctor no encontrado"}), 404
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"msg": "No se enviaron datos"}), 400
+
+    # Actualizar los campos si existen en el JSON recibido
+    specialty_doctor_one.id_specialty = data.get("id_specialty", specialty_doctor_one.id_specialty)
+    specialty_doctor_one.id_doctor = data.get("id_doctor", specialty_doctor_one.id_doctor)
+      
+    db.session.commit()
+
+    return jsonify({
+        "msg": f"Especialidad_doctor con ID {specialty_id} actualizado correctamente",
+        "update_specialty_doctor":  specialty_doctor_one.serialize()
+    }), 200
