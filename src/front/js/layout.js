@@ -7,6 +7,7 @@ import { Home } from "./pages/home";
 import { Demo } from "./pages/demo";
 import { Single } from "./pages/single";
 import { Patients } from "./pages/patients";
+import Appointments from './pages/appointments';
 import MedicalCenters from "./pages/MedicalCenters"; 
 import { Doctors } from "./pages/doctors";
 import { Specialties } from "./pages/specialties"; 
@@ -32,6 +33,7 @@ const Layout = () => {
                         <Route element={<Demo />} path="/demo" />
                         <Route element={<Single />} path="/single/:theid" />
                         <Route element={<Patients />} path="/patients" />
+                        <Route element={<Appointments />} path="/appointments" />
                         <Route element={<MedicalCenters />} path="/medical-centers" /> 
                         <Route element={<Doctors />} path="/doctors" />
                         <Route element={<Specialties />} path="/specialties" />

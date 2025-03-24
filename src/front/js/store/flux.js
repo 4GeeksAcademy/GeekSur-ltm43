@@ -29,7 +29,10 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
             editingMedicalCenter: null,
             medicalCenterError: null,
-            medicalCenterSuccessMessage: null, 
+            medicalCenterSuccessMessage: null,
+            appointments: [],
+            appointmentError: null,
+            appointmentSuccessMessage: null, 
 		},
 		
 		actions: {
@@ -107,6 +110,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 				}
 			  },
 ///////////////////END/////////////////////////////////DOCTORS/////////////////////////////////////
+
+///////////////////Beguin Patients/////////////////////////////////Beguin Patients/////////////////////////////////////
 
             getMessage: async () => {
                 try {
@@ -193,6 +198,85 @@ const getState = ({ getStore, getActions, setStore }) => {
                     throw error;
                 }
             },
+        ///////////////////End Patients/////////////////////////////////End Patients/////////////////////////////////////
+
+        ///////////////////START/////////////////////////////////APPOINTMENTS/////////////////////////////////////
+        getAppointments: async () => {
+            try {
+                const response = await fetch(process.env.BACKEND_URL + "/api/appointments");
+                const data = await response.json();
+                if (response.ok) {
+                    setStore({ appointments: data.Appointments, appointmentError: null });
+                } else {
+                    console.error("Error al obtener appointments:", data.msg);
+                    setStore({ appointmentError: "Error loading appointments" });
+                }
+            } catch (error) {
+                console.error("Error en la solicitud:", error);
+                setStore({ appointmentError: "Error loading appointments" });
+            }
+        },
+
+        createAppointment: async (appointmentData) => {
+            try {
+                const resp = await fetch(process.env.BACKEND_URL + "/api/appointments", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(appointmentData),
+                });
+                if (!resp.ok) {
+                    const errorText = await resp.text();
+                    throw new Error(`Error creating appointment: ${errorText}`);
+                }
+                const data = await resp.json();
+                getActions().getAppointments();
+                setStore({ appointmentSuccessMessage: "Appointment created successfully!", appointmentError: null });
+                return data;
+            } catch (error) {
+                console.log("Error creating appointment:", error);
+                setStore({ appointmentError: "Error creating appointment", appointmentSuccessMessage: null });
+                throw error;
+            }
+        },
+
+        updateAppointment: async (id, appointmentData) => {
+            try {
+                const resp = await fetch(`${process.env.BACKEND_URL}/api/appointments/${id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(appointmentData),
+                });
+                if (!resp.ok) throw new Error("Error updating appointment");
+                const data = await resp.json();
+                getActions().getAppointments();
+                setStore({ appointmentSuccessMessage: "Appointment updated successfully!", appointmentError: null });
+                return data;
+            } catch (error) {
+                console.log("Error updating appointment:", error);
+                setStore({ appointmentError: "Error updating appointment", appointmentSuccessMessage: null });
+                throw error;
+            }
+        },
+
+        deleteAppointment: async (id) => {
+            try {
+                const resp = await fetch(`${process.env.BACKEND_URL}/api/appointments/${id}`, {
+                    method: "DELETE",
+                });
+                if (!resp.ok) throw new Error("Error deleting appointment");
+                getActions().getAppointments();
+                setStore({ appointmentSuccessMessage: "Appointment deleted successfully!", appointmentError: null });
+            } catch (error) {
+                console.log("Error deleting appointment:", error);
+                setStore({ appointmentError: "Error deleting appointment", appointmentSuccessMessage: null });
+                throw error;
+            }
+        },
+        ///////////////////END/////////////////////////////////APPOINTMENTS/////////////////////////////////////
 
             ///////////// BEGIN MEDICAL CENTER /////////////
             getMedicalCenters: async () => {

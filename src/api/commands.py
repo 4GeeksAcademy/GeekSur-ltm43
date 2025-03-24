@@ -1,5 +1,5 @@
 import click
-from api.models import db, User, Patient, MedicalCenter
+from api.models import db, User, Patient, MedicalCenter, Appointment, Doctors, Specialties
 from datetime import datetime
 
 def setup_commands(app):
