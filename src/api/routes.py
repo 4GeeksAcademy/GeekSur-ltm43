@@ -128,6 +128,8 @@ def update_doctor(doctor_id):
 
 #//////////////////////////////END //////DOCTOR
 
+#//////////////////////////////Beguin //////Medical Center
+
 @api.route('/medical_centers', methods=['GET'])
 def get_centers():
     centers = MedicalCenter.query.all()
@@ -177,6 +179,7 @@ def delete_center(id):
     db.session.delete(center)
     db.session.commit()
     return jsonify({'message': 'Medical Center deleted!'})
+#//////////////////////////////END //////Medical Center
 
 ########## Beguin patients services###############
 
@@ -497,7 +500,6 @@ def get_appointment_id(appointment_id):
     }
     return jsonify(response_body), 200
 
-#-------------------------------------------------POST------------------------------------------------#
 #-------------------------------------POST-----NEW APPOINTMENT-------------------------------------------------#
 @api.route('/appointments', methods=['POST'])
 def post_appointment():

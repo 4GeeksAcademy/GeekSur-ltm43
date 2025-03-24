@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
-import { Context } from "../store/appContext"; // Importa Context desde appContext.js
+import { Context } from "../store/appContext"; 
 
 const Appointments = () => {
-    const { store, actions } = useContext(Context); // Usa useContext con Context
+    const { store, actions } = useContext(Context);
     
     const [newAppointment, setNewAppointment] = useState({
         id_patient: "",
