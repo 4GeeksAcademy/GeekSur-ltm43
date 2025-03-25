@@ -122,3 +122,23 @@ class Appointment(db.Model):
             "id_specialty": self.id_specialty,
             "confirmation": self.confirmation
         }
+    
+class Review(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    id_doctor = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
+    id_patient = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    id_center = db.Column(db.Integer, db.ForeignKey('medical_center.id'), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    comments = db.Column(db.String(255))
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "id_doctor": self.id_doctor,
+            "id_patient": self.id_patient,
+            "date": self.date.strftime('%Y-%m-%d'),
+            "id_center": self.id_center,
+            "rating": self.rating,
+            "comments": self.comments
+        }

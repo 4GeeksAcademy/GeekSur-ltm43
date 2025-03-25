@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, MedicalCenter, Patient, Doctors, Specialties, Specialties_doctor, Appointment
+from api.models import db, User, MedicalCenter, Patient, Doctors, Specialties, Specialties_doctor, Appointment, Review
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from datetime import datetime
@@ -624,3 +624,140 @@ def update_appointment(appointment_id):
     }), 200
 
 #//////////////////////////////END //////APPOINTMENT
+
+
+#///////////////////// BEGIN REVIEWS /////////////////////////////
+@api.route('/reviews', methods=['GET'])
+def get_reviews():
+    list_reviews = Review.query.all()
+    obj_all_reviews = [review.serialize() for review in list_reviews]
+
+    response_body = {
+        "msg": "GET / Reviews for this project",
+        "Reviews": obj_all_reviews
+    }
+    return jsonify(response_body), 200
+
+@api.route('/reviews/<int:review_id>', methods=['GET'])
+def get_review_id(review_id):
+    review_one = Review.query.get(review_id)
+    if not review_one:
+        return jsonify({"msg": "Review not found"}), 404
+
+    response_body = {
+        "msg": "GET / Data for one Review",
+        "Review": review_one.serialize()
+    }
+    return jsonify(response_body), 200
+
+@api.route('/reviews', methods=['POST'])
+def post_review():
+    data = request.get_json()
+
+    # Validate required fields
+    required_fields = ['id_doctor', 'id_patient', 'date', 'id_center', 'rating', 'comments']
+    for field in required_fields:
+        if field not in data:
+            raise APIException(f'The field "{field}" is required', status_code=400)
+
+    # Validate date format
+    try:
+        review_date = datetime.strptime(data["date"], "%Y-%m-%d").date()
+    except ValueError:
+        raise APIException("Invalid date format. Use YYYY-MM-DD", status_code=400)
+
+    # Validate rating range 
+    if not (1 <= data.get('rating', 0) <= 5):
+        raise APIException("Rating must be between 1 and 5", status_code=400)
+
+    # Validate foreign keys (si es necesario)
+    if not Doctors.query.get(data.get('id_doctor')):
+        raise APIException("Doctor not found", status_code=404)
+    if not Patient.query.get(data.get('id_patient')):
+        raise APIException("Patient not found", status_code=404)
+    if not MedicalCenter.query.get(data.get('id_center')):
+        raise APIException("Medical Center not found", status_code=404)
+
+    new_review = Review(
+        id_doctor=data["id_doctor"],
+        id_patient=data["id_patient"],
+        date=review_date,
+        id_center=data["id_center"],
+        rating=data["rating"],
+        comments=data["comments"]
+    )
+
+    db.session.add(new_review)
+    db.session.commit()
+
+    response_body = {
+        "msg": "New Review created successfully",
+        "new_review": new_review.serialize()
+    }
+    return jsonify(response_body), 201
+
+#-------------------------------------DELETE-----REVIEW------------------------------------------------#
+
+@api.route('/reviews/<int:review_id>', methods=['DELETE'])
+def delete_review(review_id):
+    review_one = Review.query.get(review_id)
+
+    if not review_one:
+        return jsonify({"msg": "Review not found"}), 404
+
+    db.session.delete(review_one)
+    db.session.commit()
+
+    return jsonify({"msg": f"Review with ID {review_id} deleted successfully"}), 200
+
+#-------------------------------------PUT----REVIEW----------------------------------------------------#
+
+@api.route('/reviews/<int:review_id>', methods=['PUT'])
+def update_review(review_id):
+    review_one = Review.query.get(review_id)
+
+    if not review_one:
+        return jsonify({"msg": "Review not found"}), 404
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"msg": "No data provided"}), 400
+
+    # Update fields if provided
+    if "id_doctor" in data:
+        if not Doctors.query.get(data["id_doctor"]):
+            raise APIException("Doctor not found", status_code=404)
+        review_one.id_doctor = data["id_doctor"]
+
+    if "id_patient" in data:
+        if not Patient.query.get(data["id_patient"]):
+            raise APIException("Patient not found", status_code=404)
+        review_one.id_patient = data["id_patient"]
+
+    if "date" in data:
+        try:
+            review_one.date = datetime.strptime(data["date"], "%Y-%m-%d").date()
+        except ValueError:
+            raise APIException("Invalid date format. Use YYYY-MM-DD", status_code=400)
+
+    if "id_center" in data:
+        if not MedicalCenter.query.get(data["id_center"]):
+            raise APIException("Medical Center not found", status_code=404)
+        review_one.id_center = data["id_center"]
+
+    if "rating" in data:
+        if not (1 <= data.get('rating', 0) <= 5):
+            raise APIException("Rating must be between 1 and 5", status_code=400)
+        review_one.rating = data["rating"]
+
+    if "comments" in data:
+        review_one.comments = data["comments"]
+
+    db.session.commit()
+
+    return jsonify({
+        "msg": f"Review with ID {review_id} updated successfully",
+        "updated_review": review_one.serialize()
+    }), 200
+
+#////////////////////// END REVIEWS ///////////////////

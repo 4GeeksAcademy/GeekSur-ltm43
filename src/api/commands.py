@@ -1,5 +1,5 @@
 import click
-from api.models import db, User, Patient, MedicalCenter, Appointment, Doctors, Specialties
+from api.models import db, User, Patient, MedicalCenter, Appointment, Doctors, Specialties, Review 
 from datetime import datetime
 
 def setup_commands(app):
@@ -24,7 +24,7 @@ def setup_commands(app):
         print("Inserting test data for Patients")
         patients_data = [
             {
-                "id": 5,
+                
                 "email": "glopez@gmail.com",
                 "first_name": "Guillermo",
                 "last_name": "Lopez",
@@ -34,7 +34,7 @@ def setup_commands(app):
                 "password": "guille22"
             },
             {
-                "id": 6,
+                
                 "email": "vero.martin@gmail.com",
                 "first_name": "Veronica",
                 "last_name": "Martinez",
@@ -44,7 +44,7 @@ def setup_commands(app):
                 "password": "veroismy"
             },
             {
-                "id": 7,
+                
                 "email": "mcrisafi02@gmail.com",
                 "first_name": "Monica",
                 "last_name": "Crisafi",
@@ -58,7 +58,7 @@ def setup_commands(app):
         try:
             for patient_data in patients_data:
                 patient = Patient(
-                    id=patient_data["id"],
+                    
                     email=patient_data["email"],
                     first_name=patient_data["first_name"],
                     last_name=patient_data["last_name"],
@@ -80,7 +80,7 @@ def setup_commands(app):
         print("Inserting test data for Medical Centers")
         medical_centers_data = [
             {
-                "id": 30,
+                
                 "name": "Clinica Caracas",
                 "address": "Centro de Caracas",
                 "country": "Venezuela",
@@ -89,7 +89,7 @@ def setup_commands(app):
                 "email": "clinccrcs@gmail.com"
             },
             {
-                "id": 31,
+                
                 "name": "Clinica Santiago",
                 "address": "Centro de Santiago",
                 "country": "Chile",
@@ -98,7 +98,7 @@ def setup_commands(app):
                 "email": "clinccsgo@gmail.com"
             },
             {
-                "id": 32,
+                
                 "name": "Clinica Auckland",
                 "address": "Centro de Auckland",
                 "country": "New Zealand",
@@ -111,7 +111,7 @@ def setup_commands(app):
         try:
             for center_data in medical_centers_data:
                 center = MedicalCenter(
-                    id=center_data["id"],
+                    
                     name=center_data["name"],
                     address=center_data["address"],
                     country=center_data["country"],
@@ -132,7 +132,7 @@ def setup_commands(app):
         print("Inserting test data for Doctors")
         doctors_data = [
             {
-                "id": 10,
+                
                 "email": "dr.smith@gmail.com",
                 "first_name": "John",
                 "last_name": "Smith",
@@ -141,7 +141,7 @@ def setup_commands(app):
                 "is_active": True
             },
             {
-                "id": 11,
+                
                 "email": "dr.jones@gmail.com",
                 "first_name": "Emily",
                 "last_name": "Jones",
@@ -150,7 +150,7 @@ def setup_commands(app):
                 "is_active": True
             },
             {
-                "id": 12,
+                
                 "email": "dr.brown@gmail.com",
                 "first_name": "Michael",
                 "last_name": "Brown",
@@ -163,7 +163,6 @@ def setup_commands(app):
         try:
             for doctor_data in doctors_data:
                 doctor = Doctors(
-                    id=doctor_data["id"],
                     email=doctor_data["email"],
                     first_name=doctor_data["first_name"],
                     last_name=doctor_data["last_name"],
@@ -185,15 +184,14 @@ def setup_commands(app):
 
         # Insert specialties first
         specialties_data = [
-            {"id": 1, "name": "urology"},
-            {"id": 2, "name": "cardiology"},
-            {"id": 3, "name": "gynecology"}
+            { "name": "urology"},
+            { "name": "cardiology"},
+            { "name": "gynecology"}
         ]
 
         try:
             for specialty_data in specialties_data:
                 specialty = Specialties(
-                    id=specialty_data["id"],
                     name=specialty_data["name"]
                 )
                 db.session.add(specialty)
@@ -220,7 +218,7 @@ def setup_commands(app):
         # Insert appointments using dynamic IDs
         appointments_data = [
             {
-                "id": 20,
+                
                 "id_patient": patients[0].id,  # First patient
                 "id_doctor": doctors[0].id,    # First doctor
                 "id_center": medical_centers[0].id,  # First medical center
@@ -230,7 +228,7 @@ def setup_commands(app):
                 "confirmation": "confirmed"
             },
             {
-                "id": 21,
+                
                 "id_patient": patients[1].id,  # Second patient
                 "id_doctor": doctors[1].id,    # Second doctor
                 "id_center": medical_centers[1].id,  # Second medical center
@@ -240,7 +238,7 @@ def setup_commands(app):
                 "confirmation": "confirmed"
             },
             {
-                "id": 22,
+                
                 "id_patient": patients[2].id,  # Third patient
                 "id_doctor": doctors[2].id,    # Third doctor
                 "id_center": medical_centers[2].id,  # Third medical center
@@ -254,7 +252,6 @@ def setup_commands(app):
         try:
             for appointment_data in appointments_data:
                 appointment = Appointment(
-                    id=appointment_data["id"],
                     id_patient=appointment_data["id_patient"],
                     id_doctor=appointment_data["id_doctor"],
                     id_center=appointment_data["id_center"],
@@ -269,4 +266,56 @@ def setup_commands(app):
         except Exception as e:
             db.session.rollback()
             print(f"Error inserting appointments: {str(e)}")
+            raise
+
+    @app.cli.command("insert-test-reviews")
+    def insert_test_reviews():
+        print("Inserting test data for Reviews")
+        reviews_data = [
+            {
+            
+                "id_doctor": 1,
+                "id_patient": 1,
+                "date": datetime(2023, 3, 5).date(),
+                "id_center": 1,
+                "rating": 5,
+                "comments": "The doctor was very attentive"
+            },
+            {
+                
+                "id_doctor": 2,
+                "id_patient": 2,
+                "date": datetime(2023, 2, 10).date(),
+                "id_center": 2,
+                "rating": 2,
+                "comments": "The doctor was late for the appointment"
+            },
+            {
+                
+                "id_doctor": 3,
+                "id_patient": 3,
+                "date": datetime(2023, 2, 11).date(),
+                "id_center": 3,
+                "rating": 5,
+                "comments": "I felt very comfortable and well attended to"
+            }
+        ]
+
+        try:
+            for review_data in reviews_data:
+                review = Review(
+                    
+                    id_doctor=review_data["id_doctor"],
+                    id_patient=review_data["id_patient"],
+                    date=review_data["date"],
+                    id_center=review_data["id_center"],
+                    rating=review_data["rating"],
+                    comments=review_data["comments"]
+                )
+                db.session.add(review)
+            db.session.commit()
+            print("All test reviews inserted successfully!")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error inserting reviews: {str(e)}")
             raise

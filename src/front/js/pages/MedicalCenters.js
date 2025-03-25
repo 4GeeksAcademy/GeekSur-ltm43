@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Context } from "../store/appContext"; // Make sure the path is correct
+import { Link } from 'react-router-dom';
 import "bootstrap/dist/css/bootstrap.min.css";
 
 
@@ -209,6 +210,9 @@ function MedicalCenters() {
           </tbody>
         </table>
       </div>
+      <Link to="/"> 
+        <button className="btn btn-primary mt-3">Back Home</button>
+      </Link>
     </div>
   );
 }

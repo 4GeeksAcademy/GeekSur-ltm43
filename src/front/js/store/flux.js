@@ -32,7 +32,10 @@ const getState = ({ getStore, getActions, setStore }) => {
             medicalCenterSuccessMessage: null,
             appointments: [],
             appointmentError: null,
-            appointmentSuccessMessage: null, 
+            appointmentSuccessMessage: null,
+            reviews: [],
+            reviewError: null,
+            reviewSuccessMessage: null,
 		},
 		
 		actions: {
@@ -559,6 +562,90 @@ const getState = ({ getStore, getActions, setStore }) => {
             }
         },
 ///////////////////END/////////////////////////////////SPECIALTIES_DOCTOR///////////////////////////
+
+////////////////////// BEGIN REVIEWS //////////////////////////
+
+getReviews: async () => {
+    try {
+        const response = await fetch(process.env.BACKEND_URL + "/api/reviews");
+        const data = await response.json();
+        if (response.ok) {
+            setStore({ reviews: data.Reviews, reviewError: null });
+        } else {
+            console.error("Error al obtener las reseñas:", data.msg);
+            setStore({ reviewError: "Error loading reviews" });
+        }
+    } catch (error) {
+        console.error("Error en la solicitud:", error);
+        setStore({ reviewError: "Error loading reviews" });
+    }
+},
+
+// ... dentro de tu bloque actions ...
+
+createReview: async (reviewData) => {
+    try {
+        const resp = await fetch(process.env.BACKEND_URL + "/api/reviews", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(reviewData),
+        });
+        if (!resp.ok) {
+            const errorText = await resp.text();
+            throw new Error(`Error creating review: ${errorText}`);
+        }
+        const data = await resp.json();
+        getActions().getReviews(); 
+        setStore({ reviewSuccessMessage: "Review created successfully!", reviewError: null });
+        return data; 
+    } catch (error) {
+        console.log("Error creating review:", error);
+        setStore({ reviewError: "Error creating review", reviewSuccessMessage: null });
+        throw error;
+    }
+},
+
+
+updateReview: async (id, reviewData) => {
+    try {
+        const resp = await fetch(`${process.env.BACKEND_URL}/api/reviews/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(reviewData),
+        });
+        if (!resp.ok) throw new Error("Error updating review");
+        const data = await resp.json();
+        getActions().getReviews();
+        setStore({ reviewSuccessMessage: "Review updated successfully!", reviewError: null });
+        return data;
+    } catch (error) {
+        console.log("Error updating review:", error);
+        setStore({ reviewError: "Error updating review", reviewSuccessMessage: null });
+        throw error;
+    }
+},
+
+deleteReview: async (id) => {
+    try {
+        const resp = await fetch(`${process.env.BACKEND_URL}/api/reviews/${id}`, {
+            method: "DELETE",
+        });
+        if (!resp.ok) throw new Error("Error deleting review");
+        getActions().getReviews();
+        setStore({ reviewSuccessMessage: "Review deleted successfully!", reviewError: null });
+    } catch (error) {
+        console.log("Error deleting review:", error);
+        setStore({ reviewError: "Error deleting review", reviewSuccessMessage: null });
+        throw error;
+    }
+},
+
+////////////////////////// END REVIEW  /////////////////////////////////
+
 
 
 
