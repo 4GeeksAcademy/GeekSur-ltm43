@@ -6,6 +6,7 @@ from api.models import db, User, MedicalCenter, Patient, Doctors, Specialties, S
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from datetime import datetime
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 
 api = Blueprint('api', __name__)
 
@@ -282,6 +283,56 @@ def delete_patient(id):
     # Retorna una respuesta vacía con código 200
     return jsonify({"message": f"Patient with id {id} has been deleted"}), 200
 ################## End patients services#########
+
+            ################## Beguin login patients services##############
+
+# Ruta para login de pacientes
+@api.route('/loginpatient', methods=['POST'])
+def login_patient():
+    data = request.get_json()
+
+    # Validar que se envíen email y password
+    if not data or 'email' not in data or 'password' not in data:
+        return jsonify({"msg": "Faltan email o password"}), 400
+
+    # Buscar al paciente en la base de datos
+    patient = Patient.query.filter_by(email=data['email']).first()
+
+    # Verificar si el paciente existe y la contraseña es correcta
+    if not patient or patient.password != data['password']:
+        return jsonify({"msg": "Email o contraseña incorrectos"}), 401
+    
+    # Imprimir el valor de patient.id para depurar
+    print(f"patient.id: {patient.id}, tipo: {type(patient.id)}")
+
+    # Generar el tokenpatient (access token)
+    tokenpatient = create_access_token(identity=str(patient.id))
+    
+    return jsonify({
+        "msg": "Login exitoso",
+        "tokenpatient": tokenpatient,
+        "patient": patient.serialize()
+    }), 200
+
+# Ruta protegida para el dashboard de pacientes
+@api.route('/dashboardpatient', methods=['GET'])
+@jwt_required()
+def dashboard_patient():
+    # Obtener el ID del paciente desde el token
+    patient_id = get_jwt_identity()
+
+    # Buscar al paciente en la base de datos
+    patient = Patient.query.get(patient_id)
+    if not patient:
+        return jsonify({"msg": "Paciente no encontrado"}), 404
+
+    # Retornar información del paciente (puedes personalizar lo que quieras mostrar)
+    return jsonify({
+        "msg": "Bienvenido al dashboard del paciente",
+        "patient": patient.serialize()
+    }), 200
+
+            ################## End login patients services##############
 
 #////////////////////////////////////////////////////START //////////////////SPECIALITIES////////////////////////////
 #-------------------------------------GET-----ALL SPECIALITIES------------------------------------------------#

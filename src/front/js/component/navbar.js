@@ -35,6 +35,14 @@ export const Navbar = () => {
 						<button className="btn btn-primary">schedule appointment</button>
 					</Link>
 
+					<Link to="/loginpatient">
+                        <button className="btn btn-primary">Login Patient</button>
+                    </Link>
+                    
+					<Link to="/dashboardpatient">
+                        <button className="btn btn-primary">Dashboard Patient</button>
+                    </Link>
+
 				</div>
 			</div>
 		</nav>

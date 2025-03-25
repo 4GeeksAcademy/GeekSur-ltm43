@@ -32,7 +32,11 @@ const getState = ({ getStore, getActions, setStore }) => {
             medicalCenterSuccessMessage: null,
             appointments: [],
             appointmentError: null,
-            appointmentSuccessMessage: null, 
+            appointmentSuccessMessage: null,
+            tokenpatient: null,
+            currentPatient: null,
+            dashboardPatientData: null,
+            loginPatientError: null, 
 		},
 		
 		actions: {
@@ -560,12 +564,83 @@ const getState = ({ getStore, getActions, setStore }) => {
         },
 ///////////////////END/////////////////////////////////SPECIALTIES_DOCTOR///////////////////////////
 
+// Acción para login de pacientes
+loginPatient: async (email, password) => {
+    try {
+        const resp = await fetch(process.env.BACKEND_URL + "/api/loginpatient", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.msg || "Error en el login");
 
+        // Guardar el tokenpatient y los datos del paciente en el store y localStorage
+        setStore({
+            tokenpatient: data.tokenpatient,
+            currentPatient: data.patient,
+            loginPatientError: null,
+        });
+        localStorage.setItem("tokenpatient", data.tokenpatient);
+        return data;
+    } catch (error) {
+        console.log("Error en el login:", error.message);
+        setStore({ loginPatientError: error.message });
+        throw error;
+    }
+},
 
+// Acción para cargar el dashboard del paciente
+getDashboardPatient: async () => {
+    const store = getStore();
+    const token = store.tokenpatient || localStorage.getItem("tokenpatient");
+    if (!token) {
+        setStore({ loginPatientError: "No hay token, por favor inicia sesión" });
+        return;
+    }
 
+    try {
+        const resp = await fetch(process.env.BACKEND_URL + "/api/dashboardpatient", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.msg || "Error al cargar el dashboard");
 
-            
-        }
+        setStore({ dashboardPatientData: data.patient });
+        return data;
+    } catch (error) {
+        console.log("Error al cargar el dashboard:", error.message);
+        setStore({ loginPatientError: error.message });
+        throw error;
+    }
+},
+
+// Acción para logout
+logoutPatient: () => {
+    setStore({
+        tokenpatient: null,
+        currentPatient: null,
+        dashboardPatientData: null,
+        loginPatientError: null,
+    });
+    localStorage.removeItem("tokenpatient");
+},
+
+// Acción para cargar el token desde localStorage al iniciar la app
+loadTokenPatient: () => {
+    const token = localStorage.getItem("tokenpatient");
+    if (token) {
+        setStore({ tokenpatient: token });
+        getActions().getDashboardPatient(); // Cargar el dashboard si hay token
+                }
+            },
+        },
     };
 };
 
