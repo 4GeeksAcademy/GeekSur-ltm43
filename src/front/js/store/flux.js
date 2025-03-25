@@ -3,21 +3,21 @@ const getState = ({ getStore, getActions, setStore }) => {
         store: {
             message: null,
             demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			],
-			patients: [],
-			doctors: [] ,
-            specialties:[],
-            specialties_doctor:[],
+                {
+                    title: "FIRST",
+                    background: "white",
+                    initial: "white"
+                },
+                {
+                    title: "SECOND",
+                    background: "white",
+                    initial: "white"
+                }
+            ],
+            patients: [],
+            doctors: [],
+            specialties: [],
+            specialties_doctor: [],
             medicalCenters: [],
             medicalCenterFormData: {
                 name: "",
@@ -36,86 +36,86 @@ const getState = ({ getStore, getActions, setStore }) => {
             tokenpatient: null,
             currentPatient: null,
             dashboardPatientData: null,
-            loginPatientError: null, 
-		},
-		
-		actions: {
+            loginPatientError: null,
+            reviews: [],
+            reviewError: null,
+            reviewSuccessMessage: null,
+        },
+        actions: {
+            ///////////////////START/////////////////////////////////DOCTORS////////////////////////////////////
 
-///////////////////START/////////////////////////////////DOCTORS////////////////////////////////////
-				
-			// SE CREA ACTION PARA VER LISTA DE DOCTOR EN COMPONENTE DOCTORS
-			getDoctors: async () => {
-				try {
-					
-					const response = await fetch(process.env.BACKEND_URL+"/api/doctors");
-					const data = await response.json();
-			
-					if (response.ok) {
-						setStore({ doctors: data.Doctors }); 
-					} else {
-						console.error("Error al obtener doctores:", data.msg);
-					}
-				} catch (error) {
-					console.error("Error en la solicitud:", error);
-				}
-			},
+            // SE CREA ACTION PARA VER LISTA DE DOCTOR EN COMPONENTE DOCTORS
+            getDoctors: async () => {
+                try {
+                    const response = await fetch(process.env.BACKEND_URL + "/api/doctors");
+                    const data = await response.json();
 
-			// ACTION PARA ELIMINAR DOCTOR
-			  deleteDoctor: async (id) => {
-				try {
-				  	const resp = await fetch(`${process.env.BACKEND_URL}/api/doctors/${id}`, {
-					method: "DELETE",
-				  });
-				  if (!resp.ok) throw new Error("Error al tratar de borrar al doctor. revise...");
-				  getActions().getDoctors(); // esto para que al borrar actualice lista con los que quedan
-				} catch (error) {
-				  console.log("Error al borrar al doctor. revisar..:", error);
-				  throw error;
-				}
-			  },
+                    if (response.ok) {
+                        setStore({ doctors: data.Doctors });
+                    } else {
+                        console.error("Error al obtener doctores:", data.msg);
+                    }
+                } catch (error) {
+                    console.error("Error en la solicitud:", error);
+                }
+            },
 
-			  // ACTION PARA CREAR DOCTOR
-			 createDoctor: async (doctorData) => {
-				try {
-				  const resp = await fetch(process.env.BACKEND_URL+"/api/doctors", {
-					method: "POST",
-					headers: {
-					  "Content-Type": "application/json",
-					},
-					body: JSON.stringify(doctorData),
-				  });
-				  if (!resp.ok) throw new Error("Error creating...");
-				  const data = await resp.json();
-				  getActions().getDoctors(); 
-				  return data;
-				} catch (error) {
-				  console.log("Error....:", error);
-				  throw error;
-				}
-			  },
+            // ACTION PARA ELIMINAR DOCTOR
+            deleteDoctor: async (id) => {
+                try {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/doctors/${id}`, {
+                        method: "DELETE",
+                    });
+                    if (!resp.ok) throw new Error("Error al tratar de borrar al doctor. revise...");
+                    getActions().getDoctors(); // esto para que al borrar actualice lista con los que quedan
+                } catch (error) {
+                    console.log("Error al borrar al doctor. revisar..:", error);
+                    throw error;
+                }
+            },
 
-			  // UPDATE A DOCTOR
-			 updateDoctor: async (id, doctorData) => {
-				try {
-				  const resp = await fetch(`${process.env.BACKEND_URL}/api/doctors/${id}`, {
-					method: "PUT",
-					headers: {
-					  "Content-Type": "application/json",
-					},
-					body: JSON.stringify(doctorData),
-				  });
-				  if (!resp.ok) throw new Error("Error updating Doctor");
-				  const data = await resp.json();
-				  getActions().getDoctors(); 
-				  return data;
-				} catch (error) {
-				  console.log("Error updating doctor:", error);
-				  throw error;
-				}
-			  },
-///////////////////END/////////////////////////////////DOCTORS/////////////////////////////////////
+            // ACTION PARA CREAR DOCTOR
+            createDoctor: async (doctorData) => {
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/doctors", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(doctorData),
+                    });
+                    if (!resp.ok) throw new Error("Error creating...");
+                    const data = await resp.json();
+                    getActions().getDoctors();
+                    return data;
+                } catch (error) {
+                    console.log("Error....:", error);
+                    throw error;
+                }
+            },
 
-///////////////////Beguin Patients/////////////////////////////////Beguin Patients/////////////////////////////////////
+            // UPDATE A DOCTOR
+            updateDoctor: async (id, doctorData) => {
+                try {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/doctors/${id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(doctorData),
+                    });
+                    if (!resp.ok) throw new Error("Error updating Doctor");
+                    const data = await resp.json();
+                    getActions().getDoctors();
+                    return data;
+                } catch (error) {
+                    console.log("Error updating doctor:", error);
+                    throw error;
+                }
+            },
+            ///////////////////END/////////////////////////////////DOCTORS/////////////////////////////////////
+
+            ///////////////////Beguin Patients/////////////////////////////////Beguin Patients/////////////////////////////////////
 
             getMessage: async () => {
                 try {
@@ -128,7 +128,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-			getPatients: async () => {
+            getPatients: async () => {
                 try {
                     const resp = await fetch(process.env.BACKEND_URL + "/api/patients", {
                         method: "GET",
@@ -148,7 +148,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     console.log("Error fetching patients:", error.message);
                 }
             },
-			
+
             createPatient: async (patientData) => {
                 try {
                     const resp = await fetch(process.env.BACKEND_URL + "/api/patients", {
@@ -202,85 +202,85 @@ const getState = ({ getStore, getActions, setStore }) => {
                     throw error;
                 }
             },
-        ///////////////////End Patients/////////////////////////////////End Patients/////////////////////////////////////
+            ///////////////////End Patients/////////////////////////////////End Patients/////////////////////////////////////
 
-        ///////////////////START/////////////////////////////////APPOINTMENTS/////////////////////////////////////
-        getAppointments: async () => {
-            try {
-                const response = await fetch(process.env.BACKEND_URL + "/api/appointments");
-                const data = await response.json();
-                if (response.ok) {
-                    setStore({ appointments: data.Appointments, appointmentError: null });
-                } else {
-                    console.error("Error al obtener appointments:", data.msg);
+            ///////////////////START/////////////////////////////////APPOINTMENTS/////////////////////////////////////
+            getAppointments: async () => {
+                try {
+                    const response = await fetch(process.env.BACKEND_URL + "/api/appointments");
+                    const data = await response.json();
+                    if (response.ok) {
+                        setStore({ appointments: data.Appointments, appointmentError: null });
+                    } else {
+                        console.error("Error al obtener appointments:", data.msg);
+                        setStore({ appointmentError: "Error loading appointments" });
+                    }
+                } catch (error) {
+                    console.error("Error en la solicitud:", error);
                     setStore({ appointmentError: "Error loading appointments" });
                 }
-            } catch (error) {
-                console.error("Error en la solicitud:", error);
-                setStore({ appointmentError: "Error loading appointments" });
-            }
-        },
+            },
 
-        createAppointment: async (appointmentData) => {
-            try {
-                const resp = await fetch(process.env.BACKEND_URL + "/api/appointments", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(appointmentData),
-                });
-                if (!resp.ok) {
-                    const errorText = await resp.text();
-                    throw new Error(`Error creating appointment: ${errorText}`);
+            createAppointment: async (appointmentData) => {
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/appointments", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(appointmentData),
+                    });
+                    if (!resp.ok) {
+                        const errorText = await resp.text();
+                        throw new Error(`Error creating appointment: ${errorText}`);
+                    }
+                    const data = await resp.json();
+                    getActions().getAppointments();
+                    setStore({ appointmentSuccessMessage: "Appointment created successfully!", appointmentError: null });
+                    return data;
+                } catch (error) {
+                    console.log("Error creating appointment:", error);
+                    setStore({ appointmentError: "Error creating appointment", appointmentSuccessMessage: null });
+                    throw error;
                 }
-                const data = await resp.json();
-                getActions().getAppointments();
-                setStore({ appointmentSuccessMessage: "Appointment created successfully!", appointmentError: null });
-                return data;
-            } catch (error) {
-                console.log("Error creating appointment:", error);
-                setStore({ appointmentError: "Error creating appointment", appointmentSuccessMessage: null });
-                throw error;
-            }
-        },
+            },
 
-        updateAppointment: async (id, appointmentData) => {
-            try {
-                const resp = await fetch(`${process.env.BACKEND_URL}/api/appointments/${id}`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(appointmentData),
-                });
-                if (!resp.ok) throw new Error("Error updating appointment");
-                const data = await resp.json();
-                getActions().getAppointments();
-                setStore({ appointmentSuccessMessage: "Appointment updated successfully!", appointmentError: null });
-                return data;
-            } catch (error) {
-                console.log("Error updating appointment:", error);
-                setStore({ appointmentError: "Error updating appointment", appointmentSuccessMessage: null });
-                throw error;
-            }
-        },
+            updateAppointment: async (id, appointmentData) => {
+                try {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/appointments/${id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(appointmentData),
+                    });
+                    if (!resp.ok) throw new Error("Error updating appointment");
+                    const data = await resp.json();
+                    getActions().getAppointments();
+                    setStore({ appointmentSuccessMessage: "Appointment updated successfully!", appointmentError: null });
+                    return data;
+                } catch (error) {
+                    console.log("Error updating appointment:", error);
+                    setStore({ appointmentError: "Error updating appointment", appointmentSuccessMessage: null });
+                    throw error;
+                }
+            },
 
-        deleteAppointment: async (id) => {
-            try {
-                const resp = await fetch(`${process.env.BACKEND_URL}/api/appointments/${id}`, {
-                    method: "DELETE",
-                });
-                if (!resp.ok) throw new Error("Error deleting appointment");
-                getActions().getAppointments();
-                setStore({ appointmentSuccessMessage: "Appointment deleted successfully!", appointmentError: null });
-            } catch (error) {
-                console.log("Error deleting appointment:", error);
-                setStore({ appointmentError: "Error deleting appointment", appointmentSuccessMessage: null });
-                throw error;
-            }
-        },
-        ///////////////////END/////////////////////////////////APPOINTMENTS/////////////////////////////////////
+            deleteAppointment: async (id) => {
+                try {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/appointments/${id}`, {
+                        method: "DELETE",
+                    });
+                    if (!resp.ok) throw new Error("Error deleting appointment");
+                    getActions().getAppointments();
+                    setStore({ appointmentSuccessMessage: "Appointment deleted successfully!", appointmentError: null });
+                } catch (error) {
+                    console.log("Error deleting appointment:", error);
+                    setStore({ appointmentError: "Error deleting appointment", appointmentSuccessMessage: null });
+                    throw error;
+                }
+            },
+            ///////////////////END/////////////////////////////////APPOINTMENTS/////////////////////////////////////
 
             ///////////// BEGIN MEDICAL CENTER /////////////
             getMedicalCenters: async () => {
@@ -404,6 +404,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
             ///////////// END MEDICAL CENTER /////////////
+
             changeColor: (index, color) => {
                 const store = getStore();
                 const demo = store.demo.map((elm, i) => {
@@ -413,234 +414,310 @@ const getState = ({ getStore, getActions, setStore }) => {
                 setStore({ demo: demo });
             },
 
-            
+            ///////////////////START/////////////////////////////////SPECIALTIES///////////////////////////
 
-///////////////////END/////////////////////////////////PATIENTS/////////////////////////////////////	
-
-///////////////////START/////////////////////////////////SPECIALTIES///////////////////////////
-				
-			// SE CREA ACTION PARA VER LISTA DE ESPECIALIDADES 
+            // SE CREA ACTION PARA VER LISTA DE ESPECIALIDADES 
             getSpecialties: async () => {
-				try {
-					
-					const response = await fetch(process.env.BACKEND_URL+"/api/specialties");
-					const data = await response.json();
-			
-					if (response.ok) {
-						setStore({ specialties: data.Specialties }); 
-					} else {
-						console.error("Error al obtener Espacialidades:", data.msg);
-					}
-				} catch (error) {
-					console.error("Error en la solicitud:", error);
-				}
-			},
+                try {
+                    const response = await fetch(process.env.BACKEND_URL + "/api/specialties");
+                    const data = await response.json();
 
-             // ACTION PARA CREAR ESPECIALIDAD
-             createSpecialties: async (specialtyData) => {
-				try {
-				  const resp = await fetch(process.env.BACKEND_URL+"/api/specialties", {
-					method: "POST",
-					headers: {
-					  "Content-Type": "application/json",
-					},
-					body: JSON.stringify(specialtyData),
-				  });
-				  if (!resp.ok) throw new Error("Error creating...");
-				  const data = await resp.json();
-				  getActions().getSpecialties(); 
-				  return data;
-				} catch (error) {
-				  console.log("Error....:", error);
-				  throw error;
-				}
+                    if (response.ok) {
+                        setStore({ specialties: data.Specialties });
+                    } else {
+                        console.error("Error al obtener Espacialidades:", data.msg);
+                    }
+                } catch (error) {
+                    console.error("Error en la solicitud:", error);
+                }
+            },
+
+            // ACTION PARA CREAR ESPECIALIDAD
+            createSpecialties: async (specialtyData) => {
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/specialties", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(specialtyData),
+                    });
+                    if (!resp.ok) throw new Error("Error creating...");
+                    const data = await resp.json();
+                    getActions().getSpecialties();
+                    return data;
+                } catch (error) {
+                    console.log("Error....:", error);
+                    throw error;
+                }
             },
 
             // ACTION PARA ELIMINAR Especialidad
-			  deleteSpecialties: async (id) => {
-				try {
-				  	const resp = await fetch(process.env.BACKEND_URL+`/api/specialties/${id}`, {
-					method: "DELETE",
-				  });
-				  if (!resp.ok) throw new Error("Error al tratar de borrar la especialidad. revise...");
-				  getActions().getSpecialties(); // esto para que al borrar actualice lista con los que quedan
-				} catch (error) {
-				  console.log("Error al tratar de borrar la especialidad. revise", error);
-				  throw error;
-				}
-			  },
-        // UPDATE ESPECIALIDAD
-        updateSpecialties: async (id, specialtyData) => {
-            try {
-            const resp = await fetch(`${process.env.BACKEND_URL}/api/specialties/${id}`, {
-                method: "PUT",
-                headers: {
-                "Content-Type": "application/json",
-                },
-                body: JSON.stringify(specialtyData),
-            });
-            if (!resp.ok) throw new Error("Error updating Especialidad");
-            const data = await resp.json();
-            getActions().getSpecialties(); 
-            return data;
-            } catch (error) {
-            console.log("Error updating especialidad:", error);
-            throw error;
-            }
-        },
-///////////////////END/////////////////////////////////SPECIALTIES///////////////////////////
-
-///////////////////START/////////////////////////////////SPECIALTIES_DOCTOR///////////////////////////
-
-        // SE CREA ACTION PARA VER LISTA DE ESPECIALIDADES_DOCTOR 
-        getSpecialties_doctor: async () => {
-            try {
-                const response = await fetch(process.env.BACKEND_URL+"/api/specialties_doctor");
-                const data = await response.json();
-
-                if (response.ok) {
-                    setStore({ specialties_doctor: data.Specialties_doctor });
-                } else {
-                    console.error("Error al obtener Especialidades_doctor:", data.msg);
-                }
-            } catch (error) {
-                console.error("Error en la solicitud:", error);
-            }
-        },
-
-        // ACTION PARA CREAR ESPECIALIDAD_DOCTOR
-        createSpecialties_doctor: async (specialtyData) => {
-            try {
-                console.log("Datos a enviar:", specialtyData);
-                const resp = await fetch(process.env.BACKEND_URL+"/api/specialties_doctor", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(specialtyData),
-                });
-                if (!resp.ok) throw new Error("Error creating...");
-                const data = await resp.json();
-                getActions().getSpecialties_doctor();
-                return data;
-            } catch (error) {
-                console.log("Error....:", error);
-                throw error;
-            }
-        },
-
-        // ACTION PARA ELIMINAR Especialidad_doctor
-        deleteSpecialties_doctor: async (id) => {
-            try {
-                const resp = await fetch(process.env.BACKEND_URL+`/api/specialties_doctor/${id}`, {
-                    method: "DELETE",
-                });
-                if (!resp.ok) throw new Error("Error al tratar de borrar la especialidad_doctor. revise...");
-                getActions().getSpecialties_doctor(); // esto para que al borrar actualice lista con los que quedan
-            } catch (error) {
-                console.log("Error al tratar de borrar la especialidad_doctor. revise", error);
-                throw error;
-            }
-        },
-
-        // UPDATE ESPECIALIDAD_DOCTOR
-        updateSpecialties_doctor: async (id, specialtyData) => {
-            try {
-                const resp = await fetch(`${process.env.BACKEND_URL}/api/specialties_doctor/${id}`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(specialtyData),
-                });
-                if (!resp.ok) throw new Error("Error updating Especialidad_doctor");
-                const data = await resp.json();
-                getActions().getSpecialties_doctor();
-                return data;
-            } catch (error) {
-                console.log("Error updating especialidad_doctor:", error);
-                throw error;
-            }
-        },
-///////////////////END/////////////////////////////////SPECIALTIES_DOCTOR///////////////////////////
-
-// Acción para login de pacientes
-loginPatient: async (email, password) => {
-    try {
-        const resp = await fetch(process.env.BACKEND_URL + "/api/loginpatient", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, password }),
-        });
-        const data = await resp.json();
-        if (!resp.ok) throw new Error(data.msg || "Error en el login");
-
-        // Guardar el tokenpatient y los datos del paciente en el store y localStorage
-        setStore({
-            tokenpatient: data.tokenpatient,
-            currentPatient: data.patient,
-            loginPatientError: null,
-        });
-        localStorage.setItem("tokenpatient", data.tokenpatient);
-        return data;
-    } catch (error) {
-        console.log("Error en el login:", error.message);
-        setStore({ loginPatientError: error.message });
-        throw error;
-    }
-},
-
-// Acción para cargar el dashboard del paciente
-getDashboardPatient: async () => {
-    const store = getStore();
-    const token = store.tokenpatient || localStorage.getItem("tokenpatient");
-    if (!token) {
-        setStore({ loginPatientError: "No hay token, por favor inicia sesión" });
-        return;
-    }
-
-    try {
-        const resp = await fetch(process.env.BACKEND_URL + "/api/dashboardpatient", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
-            },
-        });
-        const data = await resp.json();
-        if (!resp.ok) throw new Error(data.msg || "Error al cargar el dashboard");
-
-        setStore({ dashboardPatientData: data.patient });
-        return data;
-    } catch (error) {
-        console.log("Error al cargar el dashboard:", error.message);
-        setStore({ loginPatientError: error.message });
-        throw error;
-    }
-},
-
-// Acción para logout
-logoutPatient: () => {
-    setStore({
-        tokenpatient: null,
-        currentPatient: null,
-        dashboardPatientData: null,
-        loginPatientError: null,
-    });
-    localStorage.removeItem("tokenpatient");
-},
-
-// Acción para cargar el token desde localStorage al iniciar la app
-loadTokenPatient: () => {
-    const token = localStorage.getItem("tokenpatient");
-    if (token) {
-        setStore({ tokenpatient: token });
-        getActions().getDashboardPatient(); // Cargar el dashboard si hay token
+            deleteSpecialties: async (id) => {
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + `/api/specialties/${id}`, {
+                        method: "DELETE",
+                    });
+                    if (!resp.ok) throw new Error("Error al tratar de borrar la especialidad. revise...");
+                    getActions().getSpecialties(); // esto para que al borrar actualice lista con los que quedan
+                } catch (error) {
+                    console.log("Error al tratar de borrar la especialidad. revise", error);
+                    throw error;
                 }
             },
-        },
+
+            // UPDATE ESPECIALIDAD
+            updateSpecialties: async (id, specialtyData) => {
+                try {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/specialties/${id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(specialtyData),
+                    });
+                    if (!resp.ok) throw new Error("Error updating Especialidad");
+                    const data = await resp.json();
+                    getActions().getSpecialties();
+                    return data;
+                } catch (error) {
+                    console.log("Error updating especialidad:", error);
+                    throw error;
+                }
+            },
+            ///////////////////END/////////////////////////////////SPECIALTIES///////////////////////////
+
+            ///////////////////START/////////////////////////////////SPECIALTIES_DOCTOR///////////////////////////
+
+            // SE CREA ACTION PARA VER LISTA DE ESPECIALIDADES_DOCTOR 
+            getSpecialties_doctor: async () => {
+                try {
+                    const response = await fetch(process.env.BACKEND_URL + "/api/specialties_doctor");
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        setStore({ specialties_doctor: data.Specialties_doctor });
+                    } else {
+                        console.error("Error al obtener Especialidades_doctor:", data.msg);
+                    }
+                } catch (error) {
+                    console.error("Error en la solicitud:", error);
+                }
+            },
+
+            // ACTION PARA CREAR ESPECIALIDAD_DOCTOR
+            createSpecialties_doctor: async (specialtyData) => {
+                try {
+                    console.log("Datos a enviar:", specialtyData);
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/specialties_doctor", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(specialtyData),
+                    });
+                    if (!resp.ok) throw new Error("Error creating...");
+                    const data = await resp.json();
+                    getActions().getSpecialties_doctor();
+                    return data;
+                } catch (error) {
+                    console.log("Error....:", error);
+                    throw error;
+                }
+            },
+
+            // ACTION PARA ELIMINAR Especialidad_doctor
+            deleteSpecialties_doctor: async (id) => {
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + `/api/specialties_doctor/${id}`, {
+                        method: "DELETE",
+                    });
+                    if (!resp.ok) throw new Error("Error al tratar de borrar la especialidad_doctor. revise...");
+                    getActions().getSpecialties_doctor(); // esto para que al borrar actualice lista con los que quedan
+                } catch (error) {
+                    console.log("Error al tratar de borrar la especialidad_doctor. revise", error);
+                    throw error;
+                }
+            },
+
+            // UPDATE ESPECIALIDAD_DOCTOR
+            updateSpecialties_doctor: async (id, specialtyData) => {
+                try {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/specialties_doctor/${id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(specialtyData),
+                    });
+                    if (!resp.ok) throw new Error("Error updating Especialidad_doctor");
+                    const data = await resp.json();
+                    getActions().getSpecialties_doctor();
+                    return data;
+                } catch (error) {
+                    console.log("Error updating especialidad_doctor:", error);
+                    throw error;
+                }
+            },
+            ///////////////////END/////////////////////////////////SPECIALTIES_DOCTOR///////////////////////////
+
+            ///////////////////// BEGIN REVIEWS //////////////////////////
+
+            getReviews: async () => {
+                try {
+                    const response = await fetch(process.env.BACKEND_URL + "/api/reviews");
+                    const data = await response.json();
+                    if (response.ok) {
+                        setStore({ reviews: data.Reviews, reviewError: null });
+                    } else {
+                        console.error("Error al obtener las reseñas:", data.msg);
+                        setStore({ reviewError: "Error loading reviews" });
+                    }
+                } catch (error) {
+                    console.error("Error en la solicitud:", error);
+                    setStore({ reviewError: "Error loading reviews" });
+                }
+            },
+
+            createReview: async (reviewData) => {
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/reviews", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(reviewData),
+                    });
+                    if (!resp.ok) {
+                        const errorText = await resp.text();
+                        throw new Error(`Error creating review: ${errorText}`);
+                    }
+                    const data = await resp.json();
+                    getActions().getReviews();
+                    setStore({ reviewSuccessMessage: "Review created successfully!", reviewError: null });
+                    return data;
+                } catch (error) {
+                    console.log("Error creating review:", error);
+                    setStore({ reviewError: "Error creating review", reviewSuccessMessage: null });
+                    throw error;
+                }
+            },
+
+            updateReview: async (id, reviewData) => {
+                try {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/reviews/${id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(reviewData),
+                    });
+                    if (!resp.ok) throw new Error("Error updating review");
+                    const data = await resp.json();
+                    getActions().getReviews();
+                    setStore({ reviewSuccessMessage: "Review updated successfully!", reviewError: null });
+                    return data;
+                } catch (error) {
+                    console.log("Error updating review:", error);
+                    setStore({ reviewError: "Error updating review", reviewSuccessMessage: null });
+                    throw error;
+                }
+            },
+
+            deleteReview: async (id) => {
+                try {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/reviews/${id}`, {
+                        method: "DELETE",
+                    });
+                    if (!resp.ok) throw new Error("Error deleting review");
+                    getActions().getReviews();
+                    setStore({ reviewSuccessMessage: "Review deleted successfully!", reviewError: null });
+                } catch (error) {
+                    console.log("Error deleting review:", error);
+                    setStore({ reviewError: "Error deleting review", reviewSuccessMessage: null });
+                    throw error;
+                }
+            },
+
+            ////////////////////////// END REVIEW  /////////////////////////////////
+
+            // Acción para login de pacientes
+            loginPatient: async (email, password) => {
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/loginpatient", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ email, password }),
+                    });
+                    const data = await resp.json();
+                    if (!resp.ok) throw new Error(data.msg || "Error en el login");
+
+                    // Guardar el tokenpatient y los datos del paciente en el store y localStorage
+                    setStore({
+                        tokenpatient: data.tokenpatient,
+                        currentPatient: data.patient,
+                        loginPatientError: null,
+                    });
+                    localStorage.setItem("tokenpatient", data.tokenpatient);
+                    return data;
+                } catch (error) {
+                    console.log("Error en el login:", error.message);
+                    setStore({ loginPatientError: error.message });
+                    throw error;
+                }
+            },
+
+            // Acción para cargar el dashboard del paciente
+            getDashboardPatient: async () => {
+                const store = getStore();
+                const token = store.tokenpatient || localStorage.getItem("tokenpatient");
+                if (!token) {
+                    setStore({ loginPatientError: "No hay token, por favor inicia sesión" });
+                    return;
+                }
+
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/dashboardpatient", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
+                        },
+                    });
+                    const data = await resp.json();
+                    if (!resp.ok) throw new Error(data.msg || "Error al cargar el dashboard");
+
+                    setStore({ dashboardPatientData: data.patient });
+                    return data;
+                } catch (error) {
+                    console.log("Error al cargar el dashboard:", error.message);
+                    setStore({ loginPatientError: error.message });
+                    throw error;
+                }
+            },
+
+            // Acción para logout
+            logoutPatient: () => {
+                setStore({
+                    tokenpatient: null,
+                    currentPatient: null,
+                    dashboardPatientData: null,
+                    loginPatientError: null,
+                });
+                localStorage.removeItem("tokenpatient");
+            },
+
+            // Acción para cargar el token desde localStorage al iniciar la app
+            loadTokenPatient: () => {
+                const token = localStorage.getItem("tokenpatient");
+                if (token) {
+                    setStore({ tokenpatient: token });
+                    getActions().getDashboardPatient(); // Cargar el dashboard si hay token
+                }
+            },
+        }
     };
 };
 

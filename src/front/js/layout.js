@@ -12,8 +12,12 @@ import MedicalCenters from "./pages/MedicalCenters";
 import { Doctors } from "./pages/doctors";
 import { Specialties } from "./pages/specialties"; 
 import { Specialties_doctor } from "./pages/specialties_doctor";
+<<<<<<< HEAD
 import { LoginPatient } from "./pages/loginpatient"; // Importar la nueva vista
 import { DashboardPatient } from "./pages/dashboardpatient"; // Importar la nueva vista
+=======
+import Reviews from "./pages/Reviews";
+>>>>>>> develop
 import injectContext from "./store/appContext";
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
@@ -40,8 +44,12 @@ const Layout = () => {
                         <Route element={<Doctors />} path="/doctors" />
                         <Route element={<Specialties />} path="/specialties" />
                         <Route element={<Specialties_doctor />} path="/specialties_doctor" />
+<<<<<<< HEAD
                         <Route element={<LoginPatient />} path="/loginpatient" /> {/* Nueva ruta */}
                         <Route element={<DashboardPatient />} path="/dashboardpatient" /> {/* Nueva ruta */}
+=======
+                        <Route element={<Reviews />} path="/reviews" />
+>>>>>>> develop
                         <Route element={<h1>Not found!</h1>} path="*" />
                         
                     </Routes>

@@ -17,7 +17,9 @@ export const Navbar = () => {
             			<button className="btn btn-primary">Manage Patients</button>
 					</Link>
 					
-					<Link to="/medical-centers">Medical Centers</Link>
+					<Link to="/medical-centers">
+						<button className="btn btn-primary">Medical Centers</button>
+					</Link>
 
 					<Link to="/doctors">
 						<button className="btn btn-primary">Doctors</button>
@@ -42,6 +44,9 @@ export const Navbar = () => {
 					<Link to="/dashboardpatient">
                         <button className="btn btn-primary">Dashboard Patient</button>
                     </Link>
+					<Link to="/reviews">
+						<button className="btn btn-primary">Reviews</button>
+					</Link>
 
 				</div>
 			</div>
