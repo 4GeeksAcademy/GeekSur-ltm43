@@ -1,6 +1,7 @@
 import React, { useEffect, useContext } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export const DashboardPatient = () => {
     const { store, actions } = useContext(Context);
@@ -33,6 +34,14 @@ export const DashboardPatient = () => {
                 <p>Cargando datos...</p>
             )}
             {store.loginPatientError && <p style={{ color: "red" }}>{store.loginPatientError}</p>}
+
+            
+        <br />
+        <Link to="/">
+        <button className="btn btn-primary">Back home</button>
+        </Link>
+
+
         </div>
     );
 };

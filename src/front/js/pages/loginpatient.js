@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export const LoginPatient = () => {
     const { actions, store } = useContext(Context);
@@ -43,6 +44,13 @@ export const LoginPatient = () => {
                 <button type="submit">Iniciar Sesión</button>
             </form>
             {store.loginPatientError && <p style={{ color: "red" }}>{store.loginPatientError}</p>}
+
+        <br />
+        <Link to="/">
+        <button className="btn btn-primary">Back home</button>
+        </Link>
+
+
         </div>
     );
 };

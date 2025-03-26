@@ -7,6 +7,7 @@ from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from datetime import datetime
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+import json
 
 api = Blueprint('api', __name__)
 
@@ -812,3 +813,53 @@ def update_review(review_id):
     }), 200
 
 #////////////////////// END REVIEWS ///////////////////
+
+#//////
+# DOCTORLOGIN
+@api.route('/logindoctor', methods=['POST'])
+def login_doctor():
+    data = request.get_json()
+
+    # Validar que se envíen email y password
+    if not data or 'email' not in data or 'password' not in data:
+        return jsonify({"msg": "Faltan email o password"}), 400
+
+    # Buscar al doctor en la base de datos
+    doctor = Doctors.query.filter_by(email=data['email']).first()
+
+    # Verificar si el doctor existe y la contraseña es correcta
+    if not doctor or doctor.password != data['password']:
+        return jsonify({"msg": "Email o contraseña incorrectos"}), 401
+    
+    # Imprimir el valor de doctor.id para depurar
+    print(f"doctor.id: {doctor.id}, tipo: {type(doctor.id)}")
+
+    # Generar el tokendoctor (access token)
+    tokendoctor = create_access_token(identity= json.dumps({"id": doctor.id, "role": "doctor"}))
+    
+    return jsonify({
+        "msg": "Login exitoso",
+        "tokendoctor": tokendoctor,
+        "doctor": doctor.serialize()
+    }), 200
+
+
+# Ruta protegida para el dashboard de Doctor  doctor
+@api.route('/dashboarddoctor', methods=['GET'])
+@jwt_required()
+def dashboard_doctor():
+    # Obtener el ID del doctor desde el token
+    data = get_jwt_identity()
+  
+    doctor_data = json.loads(data)
+
+    # Buscar al doctor en la base de datos
+    doctor = Doctors.query.get(doctor_data["id"])
+    if not doctor:
+        return jsonify({"msg": "doctor no encontrado"}), 404
+
+    # Retornar información del doctor (puedes personalizar lo que quieras mostrar)
+    return jsonify({
+        "msg": "Bienvenido al dashboard del doctor",
+        "doctor": doctor.serialize()
+    }), 200
