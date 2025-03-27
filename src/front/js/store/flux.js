@@ -26,14 +26,16 @@ const getState = ({ getStore, getActions, setStore }) => {
                 city: "",
                 phone: "",
                 email: "",
-            },
+                latitude: "",  // Nuevo campo
+                longitude: ""  // Nuevo campo
+              },
             editingMedicalCenter: null,
             medicalCenterError: null,
             medicalCenterSuccessMessage: null,
             appointments: [],
             appointmentError: null,
             appointmentSuccessMessage: null,
-            tokenpatient: null,
+            authPatient: false,
             currentPatient: null,
             dashboardPatientData: null,
             loginPatientError: null,
@@ -205,6 +207,10 @@ const getState = ({ getStore, getActions, setStore }) => {
                     console.log("Error deleting patient:", error);
                     throw error;
                 }
+            },
+
+            validatePatientAuth: () => {
+                console.log("validatePatientAuth")
             },
             ///////////////////End Patients/////////////////////////////////End Patients/////////////////////////////////////
 
@@ -660,7 +666,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 
                     // Guardar el tokenpatient y los datos del paciente en el store y localStorage
                     setStore({
-                        tokenpatient: data.tokenpatient,
+                        authPatient: true,
                         currentPatient: data.patient,
                         loginPatientError: null,
                     });
@@ -705,7 +711,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             // Acción para logout
             logoutPatient: () => {
                 setStore({
-                    tokenpatient: null,
+                    authPatient: false,
                     currentPatient: null,
                     dashboardPatientData: null,
                     loginPatientError: null,
@@ -714,11 +720,12 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
 
             // Acción para cargar el token desde localStorage al iniciar la app
-            loadTokenPatient: () => {
-                const token = localStorage.getItem("tokenpatient");
-                if (token) {
-                    setStore({ tokenpatient: token });
-                    getActions().getDashboardPatient(); // Cargar el dashboard si hay token
+            validateAuthPatient: async () => {
+                console.log("validateAuthPatient")
+                if (localStorage.getItem("tokenpatient")) {
+                    setStore({ authPatient: true})
+                        console.log("usuario logueado")
+                    //getActions().getDashboardPatient(); // Cargar el dashboard si hay token
                 }
                
             },
