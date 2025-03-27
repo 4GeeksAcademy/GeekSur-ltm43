@@ -26,8 +26,8 @@ const getState = ({ getStore, getActions, setStore }) => {
                 city: "",
                 phone: "",
                 email: "",
-                latitude: "",  // Nuevo campo
-                longitude: ""  // Nuevo campo
+                latitude: "", 
+                longitude: ""
               },
             editingMedicalCenter: null,
             medicalCenterError: null,
