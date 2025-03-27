@@ -32,8 +32,10 @@ function MedicalCenters() {
     const place = inputRef.current.getPlace();
     if (place.geometry) {
       const location = place.geometry.location;
-      setCenter({ lat: location.lat(), lng: location.lng() });
-      setMarkerPosition({ lat: location.lat(), lng: location.lng() });
+      const lat = location.lat();
+      const lng = location.lng();
+      setCenter({ lat, lng });
+      setMarkerPosition({ lat, lng });
 
       // Extraer ciudad y país desde address_components
       let city = "";
@@ -57,6 +59,8 @@ function MedicalCenters() {
         address: place.formatted_address || medicalCenterFormData.address || "",
         city: city || medicalCenterFormData.city || "",
         country: country || medicalCenterFormData.country || "",
+        latitude: lat,  // Agregar latitud
+        longitude: lng  // Agregar longitud
       });
     }
   };
@@ -84,7 +88,15 @@ function MedicalCenters() {
 
   const handleEdit = (center) => {
     setEditingMedicalCenter(center);
-    if (center.address) {
+    setMedicalCenterFormData({
+      ...center,
+      latitude: center.latitude || "",  // Asegúrate de incluir latitud
+      longitude: center.longitude || ""  // Asegúrate de incluir longitud
+    });
+    if (center.latitude && center.longitude) {
+      setCenter({ lat: center.latitude, lng: center.longitude });
+      setMarkerPosition({ lat: center.latitude, lng: center.longitude });
+    } else if (center.address) {
       const geocoder = new window.google.maps.Geocoder();
       geocoder.geocode({ address: center.address }, (results, status) => {
         if (status === "OK" && results[0]) {
@@ -209,6 +221,40 @@ function MedicalCenters() {
                     </div>
                   </div>
                 </div>
+                <div className="row">
+                  <div className="col-md-6">
+                    <div className="form-group mb-3">
+                      <label htmlFor="latitude">Latitude</label>
+                      <input
+                        type="number"
+                        step="any"
+                        className="form-control"
+                        id="latitude"
+                        name="latitude"
+                        placeholder="Latitude"
+                        value={medicalCenterFormData.latitude || ""}
+                        onChange={handleChange}
+                        readOnly // Hacerlo de solo lectura ya que se llena automáticamente
+                      />
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="form-group mb-3">
+                      <label htmlFor="longitude">Longitude</label>
+                      <input
+                        type="number"
+                        step="any"
+                        className="form-control"
+                        id="longitude"
+                        name="longitude"
+                        placeholder="Longitude"
+                        value={medicalCenterFormData.longitude || ""}
+                        onChange={handleChange}
+                        readOnly // Hacerlo de solo lectura ya que se llena automáticamente
+                      />
+                    </div>
+                  </div>
+                </div>
                 <button type="submit" className="btn btn-primary w-100 mt-3">
                   {editingMedicalCenter ? "Update Medical Center" : "Add Medical Center"}
                 </button>
@@ -238,56 +284,52 @@ function MedicalCenters() {
       </LoadScript>
 
       <div className="table-responsive mt-4">
-        <table className="table table-striped table-bordered">
-          <thead className="thead-dark">
-            <tr>
-              <th>Name</th>
-              <th>Address</th>
-              <th>Country</th>
-              <th>City</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {medicalCenters && medicalCenters.length > 0 ? (
-              medicalCenters.map((center) => (
-                <tr key={center.id}>
-                  <td>{center.name}</td>
-                  <td>{center.address}</td>
-                  <td>{center.country}</td>
-                  <td>{center.city}</td>
-                  <td>{center.phone}</td>
-                  <td>{center.email}</td>
-                  <td>
-                    <button
-                      className="btn btn-primary btn-sm me-2"
-                      onClick={() => handleEdit(center)}
-                      title="Edit"
-                    >
-                      <i className="fas fa-edit"></i>
-                    </button>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleDelete(center.id)}
-                      title="Delete"
-                    >
-                      <i className="fas fa-trash-alt"></i>
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7" className="text-center">
-                  {medicalCenterError ? "Error loading data." : "No medical centers found."}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+  <table className="table table-striped table-bordered">
+    <thead className="thead-dark">
+      <tr>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Country</th>
+        <th>City</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {medicalCenters && medicalCenters.length > 0 ? medicalCenters.map((center) => (
+        <tr key={center.id}>
+          <td>{center.name}</td>
+          <td>{center.address}</td>
+          <td>{center.country}</td>
+          <td>{center.city}</td>
+          <td>{center.phone}</td>
+          <td>{center.email}</td>
+          <td>{center.latitude}</td>
+          <td>{center.longitude}</td>
+          <td>
+            <button
+              className="btn btn-primary btn-sm me-2"
+              onClick={() => handleEdit(center)}
+              title="Edit"
+            >
+              <i className="fas fa-edit"></i>
+            </button>
+            <button
+              className="btn btn-danger btn-sm"
+              onClick={() => handleDelete(center.id)}
+              title="Delete"
+            >
+              <i className="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+      )) : <tr><td colSpan="9" className="text-center">{medicalCenterError ? "Error loading data." : "No medical centers found."}</td></tr>}
+    </tbody>
+  </table>
+</div>
       <Link to="/">
         <button className="btn btn-primary mt-3">Back Home</button>
       </Link>

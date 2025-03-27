@@ -153,7 +153,9 @@ def add_center():
         'country': new_center.country,
         'city': new_center.city,
         'phone': new_center.phone,
-        'email': new_center.email
+        'email': new_center.email,
+        'latitude': new_center.latitude, 
+        'longitude': new_center.longitude
     }), 201
 
 # Actualizar un centro médico
