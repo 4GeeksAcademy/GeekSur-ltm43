@@ -295,32 +295,25 @@ const getState = ({ getStore, getActions, setStore }) => {
             ///////////// BEGIN MEDICAL CENTER /////////////
             getMedicalCenters: async () => {
                 try {
-                    const resp1 = await fetch(process.env.BACKEND_URL + "/api/hello")
-                    
-                    const data1 = await resp1.json()
-                
-                    console.log(data1)
-                    const resp = await fetch(process.env.BACKEND_URL + "/api/medical_centers", {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json"
-                        }
-                    });
-                    console.log(resp)
-                    // if (!resp.ok) {
-                    //     const errorText = await resp.text();
-                    //     // throw new Error(`Error fetching medical centers: ${resp.status} - ${errorText}`);
-                    // }
-                    const data = await resp.json();
-                    console.log(data)
-                    console.log("Medical centers obtained:", data);
-                    setStore({ medicalCenters: data, medicalCenterError: null });
-                    return data;
+                  const resp = await fetch(process.env.BACKEND_URL + "/api/medical_centers", {
+                    method: "GET",
+                    headers: {
+                      "Content-Type": "application/json"
+                    }
+                  });
+                  if (!resp.ok) {
+                    const errorText = await resp.text();
+                    throw new Error(`Error fetching medical centers: ${resp.status} - ${errorText}`);
+                  }
+                  const data = await resp.json();
+                  console.log("Medical centers obtained:", data);
+                  setStore({ medicalCenters: data, medicalCenterError: null });
+                  return data;
                 } catch (error) {
-                    console.log("Error fetching medical centers:", error.message);
-                    setStore({ medicalCenterError: "Error loading medical centers." });
+                  console.log("Error fetching medical centers:", error.message);
+                  setStore({ medicalCenterError: "Error loading medical centers: " + error.message });
                 }
-            },
+              },
 
             setMedicalCenterFormData: (data) => {
                 setStore({ medicalCenterFormData: { ...getStore().medicalCenterFormData, ...data } });

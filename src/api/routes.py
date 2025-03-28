@@ -134,8 +134,11 @@ def update_doctor(doctor_id):
 
 @api.route('/medical_centers', methods=['GET'])
 def get_centers():
-    centers = MedicalCenter.query.all()
-    return jsonify([center.serialize() for center in centers])  # Usar serialize para incluir todos los campos
+    try:
+        centers = MedicalCenter.query.all()
+        return jsonify([center.serialize() for center in centers])
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # Agregar un nuevo centro médico
 @api.route('/medical_centers', methods=['POST'])
