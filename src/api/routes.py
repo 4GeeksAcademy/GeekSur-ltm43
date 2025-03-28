@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, MedicalCenter, Patient, Doctors, Specialties, Specialties_doctor, Appointment, Review
+from api.models import db, User, MedicalCenter, Patient, Doctors, Specialties, Specialties_doctor, Appointment, Review, MedicalCenterDoctor
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from datetime import datetime
@@ -862,4 +862,92 @@ def dashboard_doctor():
     return jsonify({
         "msg": "Bienvenido al dashboard del doctor",
         "doctor": doctor.serialize()
+    }), 200
+
+
+#//////////////////////////////START //////MEDICAL CENTER DOCTOR////////////////////////////////////////////////////////
+
+
+#-------------------------------------GET-----ALL MEDICAL CENTER DOCTOR-----------------------------------------------#
+
+@api.route('/medicalcenterdoctor', methods=['GET'])
+def get_medical_center_doctor():
+    list_medical_center_doctor= MedicalCenterDoctor.query.all()
+    obj_all_medical_center_doctor = [medical_center_doctor.serialize() for medical_center_doctor in list_medical_center_doctor]
+
+    response_body = {
+       "msg": "GET / medical_center_doctor from Tabla",
+       "MedicalCenterDoctor": obj_all_medical_center_doctor
+    }
+    return jsonify(response_body), 200
+
+
+#-------------------------------------------------POST------------------------------------------------#
+#-------------------------------------POST----------------------------------------------------#
+@api.route('/medicalcenterdoctor', methods=['POST'])
+def post_medical_center_doctor():
+    # Obtener los datos del cuerpo de la solicitud
+    data = request.get_json()
+
+    # Validar que los datos necesarios estén presentes
+    if not data:
+         raise APIException('No se proporcionaron datos', status_code=400)
+    if 'id_medical_center' not in data or 'id_doctor' not in data:
+         raise APIException('El campo  "id_medical_center" y "id_doctor" es requerido', status_code=400)
+    
+    # siempre tiene que haber data dentro de los corchetes.
+    new_medical_center_doctor = MedicalCenterDoctor(
+    id_medical_center=data["id_medical_center"],
+    id_doctor=data["id_doctor"],
+    office=data["office"],
+    )
+    # Guardar el nueva especialidad_doctor en la base de datos
+    db.session.add(new_medical_center_doctor)
+    db.session.commit()
+
+    # Devolver una respuesta con el especialidad_doctor creado
+    response_body = {
+        "msg": "Se creo nuevo medical_center_doctor",
+        "new_medical_center_doctor": new_medical_center_doctor.serialize() 
+        }
+    return jsonify(response_body), 201
+
+#-------------------------------------DELETE----SPECIALTIES_DOCTOR-----------------------------------------------#
+
+@api.route('/medicalcenterdoctor/<int:cmd_id>', methods=['DELETE'])
+def delete_medical_center_doctor(cmd_id):
+    medical_center_doctor_one = MedicalCenterDoctor.query.get(cmd_id)
+
+    if not medical_center_doctor_one:
+        return jsonify({"msg": "medical_center_doctor no encontrado"}), 404
+
+    db.session.delete(medical_center_doctor_one)
+    db.session.commit()
+
+    return jsonify({"msg": "ok"}), 200
+
+#-------------------------------------PUT---SPECIALTIES_DOCTOR-------------------------------------------------#
+
+@api.route('/medicalcenterdoctor/<int:cmd_id>', methods=['PUT'])
+def update_medical_center_doctor(cmd_id):
+    # Buscar el medical_center_doctor en la base de datos
+    medical_center_doctor_one = MedicalCenterDoctor.query.get(cmd_id)
+
+    if not medical_center_doctor_one:
+        return jsonify({"msg": "Especialidad_doctor no encontrado"}), 404
+
+    data = request.get_json()
+    if not data:
+        return jsonify({"msg": "No se enviaron datos"}), 400
+
+    # Actualizar los campos si existen en el JSON recibido
+    medical_center_doctor_one.id_medical_center = data.get("id_medical_center", medical_center_doctor_one.id_medical_center)
+    medical_center_doctor_one.id_doctor = data.get("id_doctor", medical_center_doctor_one.id_doctor)
+    medical_center_doctor_one.office = data.get("office", medical_center_doctor_one.office)
+      
+    db.session.commit()
+
+    return jsonify({
+        "msg": "actualizado correctamente",
+        "update_specialty_doctor": medical_center_doctor_one.serialize()
     }), 200

@@ -26,8 +26,8 @@ export const DashboardDoctor = () => {
             {store.dashboardDoctorData ? (
                 <div>
                     <p>Hola: , {store.dashboardDoctorData.first_name} {store.dashboardDoctorData.last_name}</p>
-                    <p>Email: {store.dashboardDoctorData.email}</p>
-                    <p>Teléfono: {store.dashboardDoctorData.phone_number}</p>
+                    <p>Su Email es : {store.dashboardDoctorData.email}</p>
+                    <p>Su telefono es: {store.dashboardDoctorData.phone_number}</p>
                     <button onClick={handleLogout}> Log Out</button>
                 </div>
             ) : (

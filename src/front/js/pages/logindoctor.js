@@ -18,8 +18,6 @@ export const LoginDoctor = () => {
             console.log("Intentando iniciar sesión con:", email, password);
             await actions.loginDoctor(email, password);
     
-            // Espera un poco para que el store se actualice
-
             setTimeout(() => {
                 console.log("Token después del login:", store.tokendoctor); 
     

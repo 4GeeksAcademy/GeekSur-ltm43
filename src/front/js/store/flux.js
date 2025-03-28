@@ -44,6 +44,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             currentDoctor: null,
             dashboardDoctorData: null,
             loginDoctorError: null,
+            medicalCenterDoctor: [],
         },
         actions: {
             ///////////////////START/////////////////////////////////DOCTORS////////////////////////////////////
@@ -727,9 +728,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 
                          loginDoctor: async (email, password) => {
                             try {
-                                //https://glorious-halibut-x5v49jq67xw7h99q5-3001.app.github.dev/api/logindoctor
-                                //const resp = await fetch(process.env.BACKEND_URL + "/api/logindoctor", {
-                                    const resp = await fetch("https://glorious-halibut-x5v49jq67xw7h99q5-3001.app.github.dev/api/logindoctor" , {
+                                    const resp = await fetch(process.env.BACKEND_URL + "/api/logindoctor", {
                                     method: "POST",
                                     headers: {
                                         "Content-Type": "application/json",
@@ -809,6 +808,88 @@ const getState = ({ getStore, getActions, setStore }) => {
                         },
 
 ////////////////////////////////////////////////////////// END///// LOGIN DOCTOR  /////////////////////////////////
+
+///////////////////START/////////////////////////////////MedicalCenterDoctor///////////////////////////
+
+            // SE CREA ACTION PARA VER LISTA DE ESPECIALIDADES_DOCTOR 
+            getMedicalCenterDoctor: async () => {
+                try {
+                    const response = await fetch(process.env.BACKEND_URL + "/api/medicalcenterdoctor");
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        setStore({ medical_center_doctor: data.MedicalCenterDoctor });
+                    } else {
+                        console.error("Error al obtener medical_center_doctor:", data.msg);
+                    }
+                } catch (error) {
+                    console.error("Error en la solicitud:", error);
+                }
+            },
+
+            // ACTION PARA CREAR medical_center_doctor
+            createMedicalCenterDoctor: async (mcd_Data) => {
+                try {
+                    console.log("Datos a enviar:", mcd_Data);
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/medicalcenterdoctor", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(mcd_Data),
+                    });
+                    if (!resp.ok) throw new Error("Error creating...");
+                    const data = await resp.json();
+                    getActions().getMedicalCenterDoctor();
+                    return data;
+                } catch (error) {
+                    console.log("Error....:", error);
+                    throw error;
+                }
+            },
+
+            // ACTION PARA ELIMINAR 
+            deleteMedicalCenterDoctor: async (id) => {
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + `/api/medicalcenterdoctor/${id}`, {
+                        method: "DELETE",
+                    });
+                    if (!resp.ok) throw new Error("Error al tratar de borrar la MedicalCenterDoctor. revise...");
+                    getActions().getMedicalCenterDoctor(); // esto para que al borrar actualice lista con los que quedan
+                } catch (error) {
+                    console.log("Error al tratar de borrar la MedicalCenterDoctor. revise", error);
+                    throw error;
+                }
+            },
+
+            // UPDATE MedicalCenterDoctor
+            updateMedicalCenterDoctor: async (id, specialtyData) => {
+                try {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/medicalcenterdoctor/${id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(specialtyData),
+                    });
+                    if (!resp.ok) throw new Error("Error updating MedicalCenterDoctor");
+                    const data = await resp.json();
+                    getActions().getMedicalCenterDoctor();
+                    return data;
+                } catch (error) {
+                    console.log("Error updating MedicalCenterDoctor:", error);
+                    throw error;
+                }
+            },
+
+
+
+
+
+
+
+
+
 
         }
     };

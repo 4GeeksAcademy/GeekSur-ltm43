@@ -56,6 +56,10 @@ export const Navbar = () => {
                         <button className="btn btn-primary">Dashboard Doctor</button>
                     </Link>
 
+					<Link to="/medicalcenterdoctor">
+                        <button className="btn btn-primary">Medical Center Doctor</button>
+                    </Link>
+
 				</div>
 			</div>
 		</nav>

@@ -31,7 +31,7 @@ def setup_commands(app):
                 "gender": "male",
                 "birth_date": datetime.strptime("2001-04-12", "%Y-%m-%d"),
                 "phone_number": "4120968200",
-                "password": "guille22"
+                "password": "1234"
             },
             {
                 
@@ -41,7 +41,7 @@ def setup_commands(app):
                 "gender": "female",
                 "birth_date": datetime.strptime("1989-05-05", "%Y-%m-%d"),
                 "phone_number": "4249868415",
-                "password": "veroismy"
+                "password": "1234"
             },
             {
                 
@@ -51,7 +51,7 @@ def setup_commands(app):
                 "gender": "female",
                 "birth_date": datetime.strptime("1992-07-03", "%Y-%m-%d"),
                 "phone_number": "4120864548",
-                "password": "crisafmy"
+                "password": "1234"
             }
         ]
 
@@ -137,7 +137,7 @@ def setup_commands(app):
                 "first_name": "John",
                 "last_name": "Smith",
                 "phone_number": "5551234567",
-                "password": "docsmith123",
+                "password": "1234",
                 "is_active": True
             },
             {
@@ -146,7 +146,16 @@ def setup_commands(app):
                 "first_name": "Emily",
                 "last_name": "Jones",
                 "phone_number": "5559876543",
-                "password": "docjones123",
+                "password": "1234",
+                "is_active": True
+            },
+            {
+                
+                "email": "juan@gmail.com",
+                "first_name": "Juan",
+                "last_name": "Jones",
+                "phone_number": "5559876543",
+                "password": "1234",
                 "is_active": True
             },
             {
@@ -155,7 +164,7 @@ def setup_commands(app):
                 "first_name": "Michael",
                 "last_name": "Brown",
                 "phone_number": "5554567890",
-                "password": "docbrown123",
+                "password": "1234",
                 "is_active": True
             }
         ]

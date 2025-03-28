@@ -16,6 +16,7 @@ import { LoginPatient } from "./pages/loginpatient"; // Importar la nueva vista
 import { DashboardPatient } from "./pages/dashboardpatient"; // Importar la nueva vista
 import { LoginDoctor } from "./pages/logindoctor"; 
 import { DashboardDoctor } from "./pages/dashboarddoctor";
+import { MedicalCenterDoctor } from "./pages/medicalcenterdoctor"; 
 import Reviews from "./pages/Reviews";
 import injectContext from "./store/appContext";
 import { Navbar } from "./component/navbar";
@@ -47,6 +48,7 @@ const Layout = () => {
                         <Route element={<DashboardPatient />} path="/dashboardpatient" /> {/* Nueva ruta */}
                         <Route element={<LoginDoctor />} path="/logindoctor" />
                         <Route element={<DashboardDoctor />} path="/dashboarddoctor" />
+                        <Route element={<MedicalCenterDoctor />} path="/medicalcenterdoctor" />
                         <Route element={<Reviews />} path="/reviews" />
                         <Route element={<h1>Not found!</h1>} path="*" />
                         
