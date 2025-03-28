@@ -2,11 +2,12 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, MedicalCenter, Patient, Doctors, Specialties, Specialties_doctor, Appointment, Review
+from api.models import db, User, MedicalCenter, Patient, Doctors, Specialties, Specialties_doctor, Appointment, Review 
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from datetime import datetime
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from itertools import chain
 
 api = Blueprint('api', __name__)
 
@@ -812,3 +813,96 @@ def update_review(review_id):
     }), 200
 
 #////////////////////// END REVIEWS ///////////////////
+
+#////////////////////// BEGIN SEARCH PROFESSIONALS ///////////////////
+@api.route('/specialties', methods=['GET'])
+def get_all_specialties():
+    list_specialties = Specialties.query.all()
+    obj_all_specialties = [specialty.serialize() for specialty in list_specialties]
+
+    response_body = {
+        "msg": "GET / Specialties for search professionals",
+        "Specialties": obj_all_specialties
+        }    
+    return jsonify(response_body), 200
+
+
+@api.route('/professionals/search', methods=['POST'])
+def search_professionals():
+    try:
+        data = request.get_json()
+        logging.debug(f"Received data: {data}")
+
+        name = data.get('name')
+        specialty_id = data.get('specialty')
+        city = data.get('city')
+        country = data.get('country')
+
+        doctors_query = Doctors.query.filter_by(is_active=True)
+
+        if name:
+            search_term = f'%{name.lower()}%'
+            doctors_query = doctors_query.filter(
+                or_(
+                    db.func.lower(Doctors.first_name).like(search_term),
+                    db.func.lower(Doctors.last_name).like(search_term)
+                )
+            )
+
+        if specialty_id:
+            doctors_query = doctors_query.join(Specialties_doctor, Doctors.id == Specialties_doctor.id_doctor).filter(Specialties_doctor.id_specialty == specialty_id)
+
+        if city:
+            doctors_query = doctors_query.join(Appointment, Doctors.id == Appointment.id_doctor).join(MedicalCenter, Appointment.id_center == MedicalCenter.id).filter(db.func.lower(MedicalCenter.city).like(f'%{city.lower()}%'))
+
+        if country:
+            doctors_query = doctors_query.join(Appointment, Doctors.id == Appointment.id_doctor).join(MedicalCenter, Appointment.id_center == MedicalCenter.id).filter(db.func.lower(MedicalCenter.country).like(f'%{country.lower()}%'))
+
+        doctors = doctors_query.all()
+        results = []
+        for doctor in doctors:
+            specialties = [spec.Specialties.serialize() for spec in doctor.specialties]
+            medical_centers = set([MedicalCenter.query.get(apt.id_center).serialize() for apt in doctor.appointments if apt.id_center]) if doctor.appointments else []
+
+            doctor_info = doctor.serialize()
+            doctor_info['name'] = f"{doctor.first_name} {doctor.last_name}"
+            del doctor_info['first_name']
+            del doctor_info['last_name']
+            doctor_info['specialties'] = [spec['name'] for spec in specialties]
+            doctor_info['medical_centers'] = [
+                {'name': mc['name'], 'city': mc['city'], 'country': mc['country']} for mc in medical_centers
+            ]
+            results.append(doctor_info)
+
+        logging.debug(f"Search results: {results}")
+        return jsonify(results), 200
+
+    except Exception as e:
+        logging.error(f"Error in search_professionals: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/search-doctor', methods=['POST'])
+def searchdoctor():
+    data = request.json
+    print(data)
+
+    list_specialties = Specialties.query.all()
+    obj_all_specialties = [specialty.serialize() for specialty in list_specialties]
+
+    filtered_specialties = list(filter(lambda x: data["specialty"].lower() in x['name'].lower(), obj_all_specialties))
+    print(filtered_specialties)
+    if len(filtered_specialties) == 0:
+        return jsonify({"msg": "No specialties found"}), 404
+    if len(filtered_specialties) > 0 and data["name"] == "":
+        return jsonify({"results": filtered_specialties[0]["specialties"]}), 200
+    elif len(filtered_specialties) > 0 and data["name"] != "":
+        filtered_professional = list(filter(lambda x: data["name"].lower() in x["info_doctor"]["first_name"].lower() or data["name"].lower() in x["info_doctor"]["last_name"].lower(), filtered_specialties[0]["specialties"]))
+        return jsonify({"results": filtered_professional}), 200
+    else:
+        map_specialties = list(chain(*map(lambda x: x["specialties"], obj_all_specialties)))
+        filtered_results = list(filter(lambda x: data["name"].lower() in x["info_doctor"]["first_name"].lower() or data["name"].lower() in x["info_doctor"]["last_name"].lower() , map_specialties))
+        return jsonify({"results":filtered_results}), 200
+    
+    
+
+#////////////////////// END SEARCH PROFESSIONALS ///////////////////

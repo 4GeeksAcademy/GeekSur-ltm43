@@ -47,6 +47,10 @@ export const Navbar = () => {
 					<Link to="/reviews">
 						<button className="btn btn-primary">Reviews</button>
 					</Link>
+					<Link to="/search-professionals">
+                        <button className="btn btn-primary">Buscar Profesional</button>
+                    </Link>
+
 
 				</div>
 			</div>

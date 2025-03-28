@@ -15,6 +15,9 @@ import { Specialties_doctor } from "./pages/specialties_doctor";
 import { LoginPatient } from "./pages/loginpatient"; // Importar la nueva vista
 import { DashboardPatient } from "./pages/dashboardpatient"; // Importar la nueva vista
 import Reviews from "./pages/Reviews";
+import SearchProfessionals from "./pages/SearchProfessionals";
+import DoctorProfile from "./pages/DoctorProfile";
+import AgendarTurno from "./pages/AgendarTurno";
 import injectContext from "./store/appContext";
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
@@ -44,6 +47,9 @@ const Layout = () => {
                         <Route element={<LoginPatient />} path="/loginpatient" /> {/* Nueva ruta */}
                         <Route element={<DashboardPatient />} path="/dashboardpatient" /> {/* Nueva ruta */}
                         <Route element={<Reviews />} path="/reviews" />
+                        <Route element={<SearchProfessionals />} path="/search-professionals" />
+                        <Route path="/doctor/:doctorId" element={<DoctorProfile />} />
+                        <Route path="/agendar-turno" element={<AgendarTurno />} />
                         <Route element={<h1>Not found!</h1>} path="*" />
                         
                     </Routes>

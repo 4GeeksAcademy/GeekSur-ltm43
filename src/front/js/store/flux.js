@@ -40,6 +40,11 @@ const getState = ({ getStore, getActions, setStore }) => {
             reviews: [],
             reviewError: null,
             reviewSuccessMessage: null,
+            specialtiesOptions: [],
+            medicalCoveragesOptions: [],
+            locationsOptions: [],
+            searchProfessionalsResults: [],
+            searchProfessionalsError: null,
         },
         actions: {
             ///////////////////START/////////////////////////////////DOCTORS////////////////////////////////////
@@ -418,10 +423,12 @@ const getState = ({ getStore, getActions, setStore }) => {
 
             // SE CREA ACTION PARA VER LISTA DE ESPECIALIDADES 
             getSpecialties: async () => {
+                
                 try {
                     const response = await fetch(process.env.BACKEND_URL + "/api/specialties");
                     const data = await response.json();
-
+            
+                    
                     if (response.ok) {
                         setStore({ specialties: data.Specialties });
                     } else {
@@ -640,6 +647,49 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
 
             ////////////////////////// END REVIEW  /////////////////////////////////
+
+            ////////////////////////// BEGIN SEARCH PROFESSIONALS  /////////////////////////////////
+            getLocations: async () => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/api/locations`);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.msg || 'Error al obtener ubicaciones');
+                    }
+                    const data = await response.json();
+                    setStore({ locationsOptions: data.locations || [] }); 
+                } catch (error) {
+                    console.error("Error al obtener las ubicaciones:", error);
+                    
+                }
+            },
+            
+            searchProfessionals: async (searchCriteria) => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/professionals/search`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(searchCriteria),
+                    });
+            
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.msg || 'Error al buscar profesionales');
+                    }
+            
+                    const data = await response.json();
+                    setStore({ searchProfessionalsResults: data.professionals || [], searchProfessionalsError: null });
+                    return data.professionals || [];
+                } catch (error) {
+                    console.error("Error al buscar profesionales:", error);
+                    setStore({ searchProfessionalsResults: [], searchProfessionalsError: error.message });
+                    return null;
+                }
+            },
+            ////////////////////////// END SEARCH PROFESSIONALS  /////////////////////////////////
+
 
             // Acción para login de pacientes
             loginPatient: async (email, password) => {
