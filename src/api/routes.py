@@ -135,10 +135,7 @@ def update_doctor(doctor_id):
 @api.route('/medical_centers', methods=['GET'])
 def get_centers():
     centers = MedicalCenter.query.all()
-    return jsonify([{
-        'id': c.id, 'name': c.name, 'address': c.address,
-        'country': c.country, 'city': c.city, 'phone': c.phone, 'email': c.email
-    } for c in centers])
+    return jsonify([center.serialize() for center in centers])  # Usar serialize para incluir todos los campos
 
 # Agregar un nuevo centro médico
 @api.route('/medical_centers', methods=['POST'])

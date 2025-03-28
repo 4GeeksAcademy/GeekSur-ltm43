@@ -90,19 +90,31 @@ function MedicalCenters() {
     setEditingMedicalCenter(center);
     setMedicalCenterFormData({
       ...center,
-      latitude: center.latitude || "",  // Asegúrate de incluir latitud
-      longitude: center.longitude || ""  // Asegúrate de incluir longitud
+      latitude: center.latitude || "",
+      longitude: center.longitude || "",
     });
+  
     if (center.latitude && center.longitude) {
       setCenter({ lat: center.latitude, lng: center.longitude });
       setMarkerPosition({ lat: center.latitude, lng: center.longitude });
     } else if (center.address) {
+      // Si no hay latitud/longitud, intentar geolocalizar la dirección
       const geocoder = new window.google.maps.Geocoder();
       geocoder.geocode({ address: center.address }, (results, status) => {
         if (status === "OK" && results[0]) {
           const location = results[0].geometry.location;
-          setCenter({ lat: location.lat(), lng: location.lng() });
-          setMarkerPosition({ lat: location.lat(), lng: location.lng() });
+          const lat = location.lat();
+          const lng = location.lng();
+          setCenter({ lat, lng });
+          setMarkerPosition({ lat, lng });
+  
+          if (!center.latitude || !center.longitude) {
+            setMedicalCenterFormData((prevData) => ({
+              ...prevData,
+              latitude: lat,
+              longitude: lng,
+            }));
+          }
         }
       });
     }
@@ -307,8 +319,8 @@ function MedicalCenters() {
           <td>{center.city}</td>
           <td>{center.phone}</td>
           <td>{center.email}</td>
-          <td>{center.latitude}</td>
-          <td>{center.longitude}</td>
+          <td>{center.latitude || "N/A"}</td>
+          <td>{center.longitude || "N/A"}</td>
           <td>
             <button
               className="btn btn-primary btn-sm me-2"
