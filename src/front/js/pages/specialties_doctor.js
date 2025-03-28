@@ -46,7 +46,7 @@ export const Specialties_doctor = () => {
     // Manejar edición
     const handleEdit = (specialties_doctor) => {
         setFormData({
-            id_specialty: specialties_doctor.id_specialty,  // Asegúrate de asignar todos los campos necesarios
+            id_specialty: specialties_doctor.id_specialty,  
             id_doctor: specialties_doctor.id_doctor,
         });
         setEditId(specialties_doctor.id);

@@ -31,6 +31,7 @@ const injectContext = PassedComponent => {
 			
     		state.actions.validateAuthPatient(); // Cargar el token al iniciar la app
 			state.actions.getMessage(); // <---- calling this function from the flux.js actions
+			state.actions.validateAuthDoctor(); // Cargar el token al iniciar la app
 		}, []);
 
 		// The initial value for the context is not null anymore, but the current state of this component,

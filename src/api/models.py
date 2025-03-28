@@ -39,6 +39,7 @@ class MedicalCenter(db.Model):
     city = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(100), nullable=False)
+    medical_center_doctors = db.relationship('MedicalCenterDoctor', backref='medical_center_association', lazy=True)  #relationship with doctors
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
 
@@ -64,8 +65,9 @@ class Doctors(db.Model):
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
     specialties = db.relationship('Specialties_doctor', backref='doctor')
+    medical_center_doctors = db.relationship('MedicalCenterDoctor', backref='doctor_association', lazy=True)  
 
-
+   
     def __repr__(self):
         return f'<User {self.email}>'
 
@@ -83,6 +85,7 @@ class Specialties(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
     relation_specialties = db.relationship('Specialties_doctor', backref='Specialties')
+    
 
     def __repr__(self):
         return f'<User {self.name}>'
@@ -146,3 +149,18 @@ class Review(db.Model):
             "rating": self.rating,
             "comments": self.comments
         }
+    
+class MedicalCenterDoctor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    id_medical_center = db.Column(db.Integer, db.ForeignKey('medical_center.id'), nullable=False)
+    id_doctor = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
+    office = db.Column(db.String(255), nullable=True)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "id_medical_center": self.id_medical_center,
+            "id_doctor": self.id_doctor,
+            "office": self.office
+        }
+    
