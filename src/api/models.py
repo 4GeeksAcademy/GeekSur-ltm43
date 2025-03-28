@@ -40,8 +40,9 @@ class MedicalCenter(db.Model):
     phone = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(100), nullable=False)
     medical_center_doctors = db.relationship('MedicalCenterDoctor', backref='medical_center_association', lazy=True)  
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
 
-    
     def serialize(self):
         return {
             "id": self.id,
@@ -50,9 +51,11 @@ class MedicalCenter(db.Model):
             "country": self.country,
             "city": self.city,
             "phone": self.phone,
-            "email": self.email
+            "email": self.email,
+            "latitude": self.latitude,
+            "longitude": self.longitude
         }
-
+    
 class Doctors(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)

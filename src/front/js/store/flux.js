@@ -26,14 +26,16 @@ const getState = ({ getStore, getActions, setStore }) => {
                 city: "",
                 phone: "",
                 email: "",
-            },
+                latitude: "", 
+                longitude: ""
+              },
             editingMedicalCenter: null,
             medicalCenterError: null,
             medicalCenterSuccessMessage: null,
             appointments: [],
             appointmentError: null,
             appointmentSuccessMessage: null,
-            tokenpatient: null,
+            authPatient: false,
             currentPatient: null,
             dashboardPatientData: null,
             loginPatientError: null,
@@ -207,6 +209,10 @@ const getState = ({ getStore, getActions, setStore }) => {
                     throw error;
                 }
             },
+
+            validatePatientAuth: () => {
+                console.log("validatePatientAuth")
+            },
             ///////////////////End Patients/////////////////////////////////End Patients/////////////////////////////////////
 
             ///////////////////START/////////////////////////////////APPOINTMENTS/////////////////////////////////////
@@ -290,32 +296,25 @@ const getState = ({ getStore, getActions, setStore }) => {
             ///////////// BEGIN MEDICAL CENTER /////////////
             getMedicalCenters: async () => {
                 try {
-                    const resp1 = await fetch(process.env.BACKEND_URL + "/api/hello")
-                    
-                    const data1 = await resp1.json()
-                
-                    console.log(data1)
-                    const resp = await fetch(process.env.BACKEND_URL + "/api/medical_centers", {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json"
-                        }
-                    });
-                    console.log(resp)
-                    // if (!resp.ok) {
-                    //     const errorText = await resp.text();
-                    //     // throw new Error(`Error fetching medical centers: ${resp.status} - ${errorText}`);
-                    // }
-                    const data = await resp.json();
-                    console.log(data)
-                    console.log("Medical centers obtained:", data);
-                    setStore({ medicalCenters: data, medicalCenterError: null });
-                    return data;
+                  const resp = await fetch(process.env.BACKEND_URL + "/api/medical_centers", {
+                    method: "GET",
+                    headers: {
+                      "Content-Type": "application/json"
+                    }
+                  });
+                  if (!resp.ok) {
+                    const errorText = await resp.text();
+                    throw new Error(`Error fetching medical centers: ${resp.status} - ${errorText}`);
+                  }
+                  const data = await resp.json();
+                  console.log("Medical centers obtained:", data);
+                  setStore({ medicalCenters: data, medicalCenterError: null });
+                  return data;
                 } catch (error) {
-                    console.log("Error fetching medical centers:", error.message);
-                    setStore({ medicalCenterError: "Error loading medical centers." });
+                  console.log("Error fetching medical centers:", error.message);
+                  setStore({ medicalCenterError: "Error loading medical centers: " + error.message });
                 }
-            },
+              },
 
             setMedicalCenterFormData: (data) => {
                 setStore({ medicalCenterFormData: { ...getStore().medicalCenterFormData, ...data } });
@@ -661,7 +660,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 
                     // Guardar el tokenpatient y los datos del paciente en el store y localStorage
                     setStore({
-                        tokenpatient: data.tokenpatient,
+                        authPatient: true,
                         currentPatient: data.patient,
                         loginPatientError: null,
                     });
@@ -706,7 +705,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             // Acción para logout
             logoutPatient: () => {
                 setStore({
-                    tokenpatient: null,
+                    authPatient: false,
                     currentPatient: null,
                     dashboardPatientData: null,
                     loginPatientError: null,
@@ -715,11 +714,12 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
 
             // Acción para cargar el token desde localStorage al iniciar la app
-            loadTokenPatient: () => {
-                const token = localStorage.getItem("tokenpatient");
-                if (token) {
-                    setStore({ tokenpatient: token });
-                    getActions().getDashboardPatient(); // Cargar el dashboard si hay token
+            validateAuthPatient: async () => {
+                console.log("validateAuthPatient")
+                if (localStorage.getItem("tokenpatient")) {
+                    setStore({ authPatient: true})
+                        console.log("usuario logueado")
+                    //getActions().getDashboardPatient(); // Cargar el dashboard si hay token
                 }
                
             },
