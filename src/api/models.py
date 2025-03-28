@@ -39,7 +39,7 @@ class MedicalCenter(db.Model):
     city = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(100), nullable=False)
-    medical_center_doctors = db.relationship('MedicalCenterDoctor', backref='medical_center_association', lazy=True)  
+    medical_center_doctors = db.relationship('MedicalCenterDoctor', backref='medical_center_association', lazy=True)  #relationship with doctors
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
 
@@ -163,3 +163,4 @@ class MedicalCenterDoctor(db.Model):
             "id_doctor": self.id_doctor,
             "office": self.office
         }
+    
