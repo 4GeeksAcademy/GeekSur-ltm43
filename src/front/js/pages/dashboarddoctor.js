@@ -1,48 +1,41 @@
 import React, { useEffect, useContext } from "react";
 import { Context } from "../store/appContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 export const DashboardDoctor = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
+    console.log("se cargo dashboard Doctor")
 
     useEffect(() => {
-        if (!store.tokendoctor) {
-            navigate("/logindoctor"); 
-        } else {
-            actions.getDashboardDoctor(); 
+        if (!store.authDoctor && !localStorage.getItem("tokendoctor")) {
+            navigate("/logindoctor"); // Redirigir solo si no hay token ni auth
+        } else if (!store.dashboardDoctorData) {
+            actions.getDashboardDoctor(); // Cargar datos si hay token pero no datos
         }
-    }, [store.tokendoctor]);
+        }, [store.authDoctor, store.dashboardDoctorData]);
 
-    const handleLogout = () => {
-        actions.logoutDoctor();
-        navigate("/logindoctor");
-    };
+        const handleLogout = () => {
+            actions.logoutDoctor();
+            navigate("/logindoctor");
+        };
 
     return (
-        <div className="container">
+       <>
+        {store.authDoctor === true || localStorage.getItem("tokendoctor") ? 
+            <div className="container">
+                <button onClick={handleLogout}>Cerrar Sesión</button>
+                <h1>Dashboard del Doctor</h1>
+            </div>
+            
+            : <Navigate to="/logindoctor"/>}    
 
-            {store.dashboardDoctorData ? (
-                <div>
-                    <p>Hola: , {store.dashboardDoctorData.first_name} {store.dashboardDoctorData.last_name}</p>
-                    <p>Su Email es : {store.dashboardDoctorData.email}</p>
-                    <p>Su telefono es: {store.dashboardDoctorData.phone_number}</p>
-                    <button onClick={handleLogout}> Log Out</button>
-                </div>
-            ) : (
-                <p>Ingresando a su DashBoard...</p>
-            )}
-            {store.loginDoctorError && <p style={{ color: "red" }}>{store.loginDoctorError}</p>}
+            <br />
+            <Link to="/">
+            <button className="btn btn-primary">Back home</button>
+            </Link>
 
-        <br />
-        <Link to="/">
-        <button className="btn btn-primary">Back home</button>
-        </Link>
-
-
-
-
-        </div>
+        </>
     );
 };

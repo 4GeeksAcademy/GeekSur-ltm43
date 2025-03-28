@@ -47,6 +47,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             dashboardDoctorData: null,
             loginDoctorError: null,
             medicalCenterDoctor: [],
+            authDoctor: false,
         },
         actions: {
             ///////////////////START/////////////////////////////////DOCTORS////////////////////////////////////
@@ -726,86 +727,88 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 ////////////////////////////////////////////////////////// START///// LOGIN DOCTOR  /////////////////////////////////
 
-                         loginDoctor: async (email, password) => {
-                            try {
-                                    const resp = await fetch(process.env.BACKEND_URL + "/api/logindoctor", {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                    },
-                                    body: JSON.stringify({ email, password }),
-                                });
-                                const data = await resp.json();
-                                if (!resp.ok) throw new Error(data.msg || "Revise el error en el login...");
-            
-                                // Guardar el tokendoctor y sus datos en el store y localStorage
-            
-                                setStore({
-                                    tokendoctor: data.tokendoctor,
-                                    currentDoctor: data.doctor,
-                                    loginDoctorError: null,
-                                });
-                                localStorage.setItem("tokendoctor", data.tokendoctor);
-                                return data;
-                            } catch (error) {
-                                console.log("Error en el login:", error.message);
-                                setStore({ loginDoctorError: error.message });
-                                throw error;
-                            }
+                loginDoctor: async (email, password) => {
+                try {
+                        const resp = await fetch(process.env.BACKEND_URL + "/api/logindoctor", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
                         },
-            
-                        // ACTION: Upload the Dashboard 
-            
-                        getDashboardDoctor: async () => {
-                            const store = getStore();
-                            const token = store.tokendoctor || localStorage.getItem("tokendoctor");
-                            if (!token) {
-                                setStore({ loginDoctorError: "No hay token, por favor inicia sesión" });
-                                return;
-                            }
-            
-                            try {
-                                const resp = await fetch(process.env.BACKEND_URL + "/api/dashboarddoctor", {
-                                    method: "GET",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                        "Authorization": `Bearer ${token}`,
-                                    },
-                                });
-                                const data = await resp.json();
-                                if (!resp.ok) throw new Error(data.msg || "Error al cargar el dashboard");
-            
-                                setStore({ dashboardDoctorData: data.doctor });
-                                return data;
-                            } catch (error) {
-                                console.log("Error al cargar el dashboard:", error.message);
-                                setStore({ loginDoctorError: error.message });
-                                throw error;
-                            }
+                        body: JSON.stringify({ email, password }),
+                    });
+                    const data = await resp.json();
+                    if (!resp.ok) throw new Error(data.msg || "Revise el error en el login...");
+
+                    // Guardar el tokendoctor y sus datos en el store y localStorage
+
+                    setStore({
+
+                        // tokendoctor: data.tokendoctor,
+                        authDoctor: true,
+                        currentDoctor: data.doctor,
+                        loginDoctorError: null,
+                    });
+                    localStorage.setItem("tokendoctor", data.tokendoctor);
+                    return data;
+                } catch (error) {
+                    console.log("Error en el login:", error.message);
+                    setStore({ loginDoctorError: error.message });
+                    throw error;
+                }
+            },
+
+            // ACTION: Upload the Dashboard 
+
+            getDashboardDoctor: async () => {
+                const store = getStore();
+                const token = store.tokendoctor || localStorage.getItem("tokendoctor");
+                if (!token) {
+                    setStore({ loginDoctorError: "No hay token, por favor inicia sesión" });
+                    return;
+                }
+
+                try {
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/dashboarddoctor", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                                "Authorization": `Bearer ${token}`,
                         },
-            
-                        // Acción para logout
-            
-                        logoutDoctor: () => {
-                            setStore({
-                                tokendoctor: null,
-                                currentDoctor: null,
-                                dashboardDoctorData: null,
-                                loginDoctorError: null,
-                            });
-                            localStorage.removeItem("tokendoctor");
-                        },
-            
-                        // Acción para cargar el token desde localStorage al iniciar la app
-            
-                        loadTokenDoctor: () => {
-                            const token = localStorage.getItem("tokendoctor");
-                            if (token) {
-                                setStore({ tokendoctor: token });
-                                getActions().getDashboardDoctor(); 
-                            }
-                           
-                        },
+                    });
+                    const data = await resp.json();
+                    if (!resp.ok) throw new Error(data.msg || "Error al cargar el dashboard");
+
+                    setStore({ dashboardDoctorData: data.doctor });
+                    return data;
+                } catch (error) {
+                    console.log("Error al cargar el dashboard:", error.message);
+                    setStore({ loginDoctorError: error.message });
+                    throw error;
+                }
+            },
+
+            // Acción para logout
+
+            logoutDoctor: () => {
+                setStore({
+                    //tokendoctor: null,
+                    authDoctor: false,
+                    currentDoctor: null,
+                    dashboardDoctorData: null,
+                    loginDoctorError: null,
+                });
+                localStorage.removeItem("tokendoctor");
+            },
+
+            // Acción para cargar el token desde localStorage al iniciar la app
+            validateAuthDoctor: async () => {
+                console.log("validateAuthDoctor")
+                if (localStorage.getItem("tokendoctor")) {
+                    setStore({ authDoctor: true})
+                        console.log("Doctor Logueado")
+                    }
+
+            },
 
 ////////////////////////////////////////////////////////// END///// LOGIN DOCTOR  /////////////////////////////////
 
@@ -882,9 +885,6 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 ///////////////////END/////////////////////////////////MedicalCenterDoctor///////////////////////////
-
-
-
 
         }
     };

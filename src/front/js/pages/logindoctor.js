@@ -14,34 +14,19 @@ export const LoginDoctor = () => {
 
         const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            console.log("Intentando iniciar sesión con:", email, password);
-            await actions.loginDoctor(email, password);
-    
-            setTimeout(() => {
-                console.log("Token después del login:", store.tokendoctor); 
-    
-                if (store.tokendoctor) {
-                    navigate("/dashboarddoctor");
-                } else {
-                    alert("Error: No se recibió el token del backend.");
-                }
-            }, 500);
-        } catch (error) {
-            console.error("Error en login:", error.message);
-            alert("Revise su inicio, tiene un error: " + store.loginDoctorError);
-        }
-    };
-    
-
+            try {
+                await actions.loginDoctor(email, password);
+                navigate("/dashboarddoctor"); // Redirigir al dashboard tras login exitoso
+            } catch (error) {
+                alert("Error al iniciar sesión: " + (store.loginDoctorError || "Inténtalo de nuevo"));
+            }
+        };
+   
 	return (
 
         <div className="container">
-
                 <div className="container d-flex justify-content-center align-items-center"></div>
-
                 <form onSubmit={handleSubmit}>
-
                 <div>
                     <label>Email:</label>
                     <input
@@ -65,11 +50,10 @@ export const LoginDoctor = () => {
             {store.loginDoctorError && <p style={{ color: "red" }}>{store.loginDoctorError}</p>}
 
         <br />
-        
+
         <Link to="/">
         <button className="btn btn-primary">Back home</button>
         </Link>
-
         </div>
     );
 };

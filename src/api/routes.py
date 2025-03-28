@@ -287,7 +287,7 @@ def delete_patient(id):
     return jsonify({"message": f"Patient with id {id} has been deleted"}), 200
 ################## End patients services#########
 
-            ################## Beguin login patients services##############
+ ################## Beguin login patients services##############
 
 # Ruta para login de pacientes
 @api.route('/loginpatient', methods=['POST'])
@@ -430,9 +430,7 @@ def update_specialty(specialty_id):
 
 #//////////////////////////////////////////////////END //////////////////SPECIALITIES////////////////////////////######
 
-
 #//////////////////////////////START //////SPECIALTIES_DOCTOR////////////////////////////////////////////////////////
-
 
 #-------------------------------------GET-----ALL SPECIALTIES_DOCTOR-----------------------------------------------#
 
@@ -678,8 +676,6 @@ def update_appointment(appointment_id):
     }), 200
 
 #//////////////////////////////END //////APPOINTMENT
-
-
 #///////////////////// BEGIN REVIEWS /////////////////////////////
 @api.route('/reviews', methods=['GET'])
 def get_reviews():
@@ -814,19 +810,16 @@ def update_review(review_id):
         "updated_review": review_one.serialize()
     }), 200
 
-#////////////////////// END REVIEWS ///////////////////
+#/////////////////END///////////////////////# REVIEW ///////////////////////////////////////////////
 
-#/////////////////START/////////////////////////////////////////# DOCTORLOGIN///////////////////////////////////////////////
-# DOCTORLOGIN
+#/////////////////START///////////////////////# DOCTORLOGIN///////////////////////////////////////////////
 @api.route('/logindoctor', methods=['POST'])
 def login_doctor():
     data = request.get_json()
 
-    # Validar que se envíen email y password
     if not data or 'email' not in data or 'password' not in data:
         return jsonify({"msg": "Faltan email o password"}), 400
 
-    # Buscar al doctor en la base de datos
     doctor = Doctors.query.filter_by(email=data['email']).first()
 
     # Verificar si el doctor existe y la contraseña es correcta
@@ -836,8 +829,8 @@ def login_doctor():
     # Imprimir el valor de doctor.id para depurar
     print(f"doctor.id: {doctor.id}, tipo: {type(doctor.id)}")
 
-    # Generar el tokendoctor (access token)
-    tokendoctor = create_access_token(identity= json.dumps({"id": doctor.id, "role": "doctor"}))
+    # Generar el tokendoctor con un ID simple (como pacientes)
+    tokendoctor = create_access_token(identity=str(doctor.id))
     
     return jsonify({
         "msg": "Login exitoso",
@@ -845,31 +838,27 @@ def login_doctor():
         "doctor": doctor.serialize()
     }), 200
 
+##////////////////////////////////////////////////// Ruta protegida para el dashboard de Doctor  doctor
 
-# Ruta protegida para el dashboard de Doctor  doctor
 @api.route('/dashboarddoctor', methods=['GET'])
 @jwt_required()
 def dashboard_doctor():
-    # Obtener el ID del doctor desde el token
-    data = get_jwt_identity()
-  
-    doctor_data = json.loads(data)
+    # Obtener el ID del doctor desde el token (como cadena)
+    doctor_id = get_jwt_identity()
 
     # Buscar al doctor en la base de datos
-    doctor = Doctors.query.get(doctor_data["id"])
+    doctor = Doctors.query.get(doctor_id)
     if not doctor:
-        return jsonify({"msg": "doctor no encontrado"}), 404
+        return jsonify({"msg": "Doctor no encontrado"}), 404
 
-    # Retornar información del doctor (puedes personalizar lo que quieras mostrar)
+    # Retornar información del doctor
     return jsonify({
         "msg": "Bienvenido al dashboard del doctor",
         "doctor": doctor.serialize()
     }), 200
-
 #/////////////////START/////////////////////////////////////////# DOCTORLOGIN///////////////////////////////////////////////
 
 #//////////////////////////////START //////MEDICAL CENTER DOCTOR////////////////////////////////////////////////////////
-
 
 #-------------------------------------GET-----ALL MEDICAL CENTER DOCTOR-----------------------------------------------#
 
@@ -883,7 +872,6 @@ def get_medical_center_doctor():
        "MedicalCenterDoctor": obj_all_medical_center_doctor
     }
     return jsonify(response_body), 200
-
 
 #-------------------------------------------------POST------------------------------------------------#
 #-------------------------------------POST----------------------------------------------------#
