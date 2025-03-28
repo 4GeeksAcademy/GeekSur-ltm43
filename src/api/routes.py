@@ -814,7 +814,7 @@ def update_review(review_id):
 
 #////////////////////// END REVIEWS ///////////////////
 
-#//////
+#/////////////////START/////////////////////////////////////////# DOCTORLOGIN///////////////////////////////////////////////
 # DOCTORLOGIN
 @api.route('/logindoctor', methods=['POST'])
 def login_doctor():
@@ -864,6 +864,7 @@ def dashboard_doctor():
         "doctor": doctor.serialize()
     }), 200
 
+#/////////////////START/////////////////////////////////////////# DOCTORLOGIN///////////////////////////////////////////////
 
 #//////////////////////////////START //////MEDICAL CENTER DOCTOR////////////////////////////////////////////////////////
 
@@ -912,7 +913,7 @@ def post_medical_center_doctor():
         }
     return jsonify(response_body), 201
 
-#-------------------------------------DELETE----SPECIALTIES_DOCTOR-----------------------------------------------#
+#-------------------------------------DELETE---MEDICAL CENTER DOCTOR-----------------------------------------------#
 
 @api.route('/medicalcenterdoctor/<int:cmd_id>', methods=['DELETE'])
 def delete_medical_center_doctor(cmd_id):
@@ -926,7 +927,7 @@ def delete_medical_center_doctor(cmd_id):
 
     return jsonify({"msg": "ok"}), 200
 
-#-------------------------------------PUT---SPECIALTIES_DOCTOR-------------------------------------------------#
+#-------------------------------------PUT--MEDICAL CENTER DOCTOR----------------------------------------------#
 
 @api.route('/medicalcenterdoctor/<int:cmd_id>', methods=['PUT'])
 def update_medical_center_doctor(cmd_id):

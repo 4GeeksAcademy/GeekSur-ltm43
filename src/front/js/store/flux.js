@@ -881,12 +881,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     throw error;
                 }
             },
-
-
-
-
-
-
+///////////////////END/////////////////////////////////MedicalCenterDoctor///////////////////////////
 
 
 
