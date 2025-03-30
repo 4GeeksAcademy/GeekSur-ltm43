@@ -130,6 +130,51 @@ def update_doctor(doctor_id):
 
 #//////////////////////////////END //////DOCTOR
 
+#//////////////////////////////Beguin //////doctor_appointment
+
+@api.route('/doctor/appointments', methods=['GET'])
+@jwt_required()
+def get_doctor_appointments():
+    doctor_id = get_jwt_identity()  # Obtener el ID del doctor desde el token
+    doctor = Doctors.query.get(doctor_id)  # Cambiar "Doctor" por "Doctors"
+    if not doctor:
+        return jsonify({"msg": "Doctor not found"}), 404
+
+    appointments = Appointment.query.filter_by(id_doctor=doctor_id).all()
+    if not appointments:
+        return jsonify({"msg": "No appointments found for this doctor"}), 404
+
+    return jsonify({
+        "msg": "Appointments retrieved successfully",
+        "appointments": [appointment.serialize() for appointment in appointments]
+    }), 200
+
+@api.route('/doctor/appointments/<int:appointment_id>', methods=['PUT'])
+@jwt_required()
+def manage_doctor_appointment(appointment_id):
+    doctor_id = int(get_jwt_identity())  # Convertir a entero
+    appointment = Appointment.query.get(appointment_id)
+    
+    if not appointment:
+        return jsonify({"msg": "Appointment not found"}), 404
+    if appointment.id_doctor != doctor_id:
+        return jsonify({"msg": "You are not authorized to manage this appointment"}), 403
+
+    data = request.get_json()
+    action = data.get("action")
+
+    if action == "cancel":
+        appointment.confirmation = "cancelled"
+    elif action == "complete":
+        appointment.confirmation = "completed"
+    else:
+        return jsonify({"msg": "Invalid action. Use 'cancel' or 'complete'"}), 400
+
+    db.session.commit()
+    return jsonify({"msg": f"Appointment {action}ed successfully", "appointment": appointment.serialize()}), 200
+
+        #//////////////////////////////End //////doctor_appointment
+
 #//////////////////////////////Beguin //////Medical Center
 
 @api.route('/medical_centers', methods=['GET'])

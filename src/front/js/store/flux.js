@@ -48,6 +48,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             loginDoctorError: null,
             medicalCenterDoctor: [],
             authDoctor: false,
+            doctorAppointments: [],
         },
         actions: {
             ///////////////////START/////////////////////////////////DOCTORS////////////////////////////////////
@@ -293,6 +294,51 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
             ///////////////////END/////////////////////////////////APPOINTMENTS/////////////////////////////////////
+
+            ///////////////////BEGUIN/////////////////////////////////doctor_appointment/////////////////////////////////////
+
+            getDoctorAppointments: async () => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/api/doctor/appointments`, {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem("tokendoctor")}`,
+                        },
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        setStore({ doctorAppointments: data.appointments });
+                    } else {
+                        setStore({ doctorAppointments: [], error: data.msg });
+                    }
+                } catch (error) {
+                    console.error("Error fetching doctor appointments:", error);
+                    setStore({ doctorAppointments: [], error: "Error fetching appointments" });
+                }
+            },
+            
+            manageDoctorAppointment: async (appointmentId, action) => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/api/doctor/appointments/${appointmentId}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${localStorage.getItem("tokendoctor")}`,
+                        },
+                        body: JSON.stringify({ action }),
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        getActions().getDoctorAppointments(); // Refrescar la lista
+                    } else {
+                        console.error("Error managing appointment:", data.msg);
+                    }
+                } catch (error) {
+                    console.error("Error managing appointment:", error);
+                }
+            },
+
+            ///////////////////END/////////////////////////////////doctor_appointment/////////////////////////////////////
 
             ///////////// BEGIN MEDICAL CENTER /////////////
             getMedicalCenters: async () => {

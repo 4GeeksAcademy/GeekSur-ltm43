@@ -18,6 +18,7 @@ import { LoginDoctor } from "./pages/logindoctor";
 import { DashboardDoctor } from "./pages/dashboarddoctor";
 import { MedicalCenterDoctor } from "./pages/medicalcenterdoctor"; 
 import Reviews from "./pages/Reviews";
+import { DoctorAppointment } from "./pages/doctor_appointment";
 import injectContext from "./store/appContext";
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
@@ -50,6 +51,7 @@ const Layout = () => {
                         <Route element={<DashboardDoctor />} path="/dashboarddoctor" />
                         <Route element={<MedicalCenterDoctor />} path="/medicalcenterdoctor" />
                         <Route element={<Reviews />} path="/reviews" />
+                        <Route element={<DoctorAppointment />} path="/doctor-appointment" />
                         <Route element={<h1>Not found!</h1>} path="*" />
                         
                     </Routes>
