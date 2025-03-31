@@ -49,6 +49,8 @@ const getState = ({ getStore, getActions, setStore }) => {
             medicalCenterDoctor: [],
             authDoctor: false,
             doctorAppointments: [],
+            patientAppointments: [],
+            patientAppointmentError: null,
         },
         actions: {
             ///////////////////START/////////////////////////////////DOCTORS////////////////////////////////////
@@ -216,6 +218,64 @@ const getState = ({ getStore, getActions, setStore }) => {
                 console.log("validatePatientAuth")
             },
             ///////////////////End Patients/////////////////////////////////End Patients/////////////////////////////////////
+
+            ///////////////////Beguin Patients appointment and review/////////////////////////////////
+
+            getPatientAppointments: async () => {
+                try {
+                    const token = localStorage.getItem("tokenpatient");
+                    if (!token) {
+                        setStore({ patientAppointmentError: "No hay token, por favor inicia sesión" });
+                        return;
+                    }
+                    const response = await fetch(`${process.env.BACKEND_URL}/api/patient/appointments`, {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                        },
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        setStore({ patientAppointments: data.appointments, patientAppointmentError: null });
+                    } else {
+                        setStore({ patientAppointmentError: data.msg || "Error al cargar las citas" });
+                    }
+                } catch (error) {
+                    console.error("Error fetching patient appointments:", error);
+                    setStore({ patientAppointmentError: "Error al cargar las citas" });
+                }
+            },
+
+            // Nueva acción para crear una reseña desde el paciente
+            createPatientReview: async (reviewData) => {
+                try {
+                    const token = localStorage.getItem("tokenpatient");
+                    if (!token) {
+                        setStore({ reviewError: "No hay token, por favor inicia sesión" });
+                        return;
+                    }
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/patient/reviews`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
+                        },
+                        body: JSON.stringify(reviewData),
+                    });
+                    const data = await resp.json();
+                    if (!resp.ok) {
+                        throw new Error(data.msg || "Error creando la reseña");
+                    }
+                    setStore({ reviewSuccessMessage: "Reseña creada exitosamente", reviewError: null });
+                    getActions().getReviews(); // Refrescar la lista de reseñas generales
+                    return data;
+                } catch (error) {
+                    console.error("Error creando la reseña:", error);
+                    setStore({ reviewError: error.message, reviewSuccessMessage: null });
+                    throw error;
+                }
+            },
+            ///////////////////End Patients appointment and review/////////////////////////////////
 
             ///////////////////START/////////////////////////////////APPOINTMENTS/////////////////////////////////////
             getAppointments: async () => {

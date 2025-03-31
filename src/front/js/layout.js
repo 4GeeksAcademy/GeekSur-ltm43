@@ -12,13 +12,15 @@ import MedicalCenters from "./pages/MedicalCenters";
 import { Doctors } from "./pages/doctors";
 import { Specialties } from "./pages/specialties"; 
 import { Specialties_doctor } from "./pages/specialties_doctor";
-import { LoginPatient } from "./pages/loginpatient"; // Importar la nueva vista
-import { DashboardPatient } from "./pages/dashboardpatient"; // Importar la nueva vista
+import { LoginPatient } from "./pages/loginpatient"; 
+import { DashboardPatient } from "./pages/dashboardpatient"; 
 import { LoginDoctor } from "./pages/logindoctor"; 
 import { DashboardDoctor } from "./pages/dashboarddoctor";
 import { MedicalCenterDoctor } from "./pages/medicalcenterdoctor"; 
 import Reviews from "./pages/Reviews";
 import { DoctorAppointment } from "./pages/doctor_appointment";
+import { PatientAppointments } from "./pages/patient_appointments"; 
+import { RateAppointment } from "./pages/rate_appointment"; 
 import injectContext from "./store/appContext";
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
@@ -45,13 +47,15 @@ const Layout = () => {
                         <Route element={<Doctors />} path="/doctors" />
                         <Route element={<Specialties />} path="/specialties" />
                         <Route element={<Specialties_doctor />} path="/specialties_doctor" />
-                        <Route element={<LoginPatient />} path="/loginpatient" /> {/* Nueva ruta */}
-                        <Route element={<DashboardPatient />} path="/dashboardpatient" /> {/* Nueva ruta */}
+                        <Route element={<LoginPatient />} path="/loginpatient" />
+                        <Route element={<DashboardPatient />} path="/dashboardpatient" />
                         <Route element={<LoginDoctor />} path="/logindoctor" />
                         <Route element={<DashboardDoctor />} path="/dashboarddoctor" />
                         <Route element={<MedicalCenterDoctor />} path="/medicalcenterdoctor" />
                         <Route element={<Reviews />} path="/reviews" />
                         <Route element={<DoctorAppointment />} path="/doctor-appointment" />
+                        <Route element={<PatientAppointments />} path="/patient-appointments" />
+                        <Route element={<RateAppointment />} path="/rate-appointment/:appointmentId" />
                         <Route element={<h1>Not found!</h1>} path="*" />
                         
                     </Routes>

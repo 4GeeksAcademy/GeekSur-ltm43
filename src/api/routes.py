@@ -987,3 +987,70 @@ def update_medical_center_doctor(cmd_id):
         "msg": "actualizado correctamente",
         "update_specialty_doctor": medical_center_doctor_one.serialize()
     }), 200
+
+################## Beguin patients appointments and patient review##############
+            
+            # Nueva ruta para obtener todas las citas de un paciente autenticado
+@api.route('/patient/appointments', methods=['GET'])
+@jwt_required()
+def get_patient_appointments():
+    try:
+        patient_id = get_jwt_identity()  # Obtener el ID del paciente desde el token
+        patient = Patient.query.get(patient_id)
+        if not patient:
+            return jsonify({"msg": "Paciente no encontrado"}), 404
+
+        # Obtener todas las citas del paciente
+        appointments = Appointment.query.filter_by(id_patient=patient_id).all()
+        appointments_list = [appointment.serialize() for appointment in appointments]
+        
+        return jsonify({"appointments": appointments_list}), 200
+    except Exception as e:
+        return jsonify({"msg": f"Error al obtener las citas: {str(e)}"}), 500
+
+# Nueva ruta para que un paciente cree una reseña
+@api.route('/patient/reviews', methods=['POST'])
+@jwt_required()
+def create_patient_review():
+    try:
+        patient_id = get_jwt_identity()  # Obtener el ID del paciente desde el token
+        patient = Patient.query.get(patient_id)
+        if not patient:
+            return jsonify({"msg": "Paciente no encontrado"}), 404
+
+        data = request.get_json()
+        if not data:
+            return jsonify({"msg": "No se proporcionaron datos"}), 400
+
+        required_fields = ["id_doctor", "id_center", "rating", "comments", "date"]
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({"msg": f"El campo {field} es requerido"}), 400
+
+        # Validar que la cita existe para este paciente, doctor y centro médico
+        appointment = Appointment.query.filter_by(
+            id_patient=patient_id,
+            id_doctor=data["id_doctor"],
+            id_center=data["id_center"]
+        ).first()
+        if not appointment:
+            return jsonify({"msg": "No se encontró una cita válida para esta reseña"}), 400
+
+        # Crear la reseña
+        new_review = Review(
+            id_patient=patient_id,
+            id_doctor=data["id_doctor"],
+            id_center=data["id_center"],
+            rating=data["rating"],
+            comments=data["comments"],
+            date=datetime.strptime(data["date"], "%Y-%m-%d")
+        )
+        db.session.add(new_review)
+        db.session.commit()
+
+        return jsonify({"msg": "Reseña creada exitosamente", "review": new_review.serialize()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": f"Error al crear la reseña: {str(e)}"}), 500
+    
+    ################## End patients appointments and patient review##############
