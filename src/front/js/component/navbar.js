@@ -44,6 +44,11 @@ export const Navbar = () => {
 					<Link to="/dashboardpatient">
                         <button className="btn btn-primary">Dashboard Patient</button>
                     </Link>
+
+					<Link to="/patient-appointments">
+                        <button className="btn btn-primary">My Appointments</button> {/* Nuevo enlace */}
+                    </Link>
+
 					<Link to="/reviews">
 						<button className="btn btn-primary">Reviews</button>
 					</Link>
@@ -54,6 +59,10 @@ export const Navbar = () => {
                     
 					<Link to="/dashboarddoctor">
                         <button className="btn btn-primary">Dashboard Doctor</button>
+                    </Link>
+
+					<Link to="/doctor-appointment">
+                        <button className="btn btn-primary">My Doctor Appointments</button>
                     </Link>
 
 					<Link to="/medicalcenterdoctor">

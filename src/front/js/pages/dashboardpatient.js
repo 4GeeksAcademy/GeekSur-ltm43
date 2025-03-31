@@ -1,18 +1,11 @@
 import React, { useEffect, useContext } from "react";
 import { Context } from "../store/appContext";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate, Link } from "react-router-dom";
 
 export const DashboardPatient = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
-    console.log("se cargo dashboardPatient")
-    // useEffect(() => {
-    //     if (!store.authPatient) {
-    //          navigate("/loginpatient"); // Redirigir al login si no hay token
-    //     } else {
-    //         actions.getDashboardPatient(); // Cargar los datos del dashboard
-    //     }
-    // }, [store.authPatient]);
+    console.log("se cargo dashboardPatient");
 
     const handleLogout = () => {
         actions.logoutPatient();
@@ -21,15 +14,21 @@ export const DashboardPatient = () => {
 
     return (
         <>
-        {store.authPatient === true || localStorage.getItem("tokenpatient") ? 
-            <div className="container">
-                <button onClick={handleLogout}>Cerrar Sesión</button>
-                <h1>Dashboard del Paciente</h1>
-                
-            </div>
-        
-        : <Navigate to="/loginpatient"/>}
-        
+            {store.authPatient || localStorage.getItem("tokenpatient") ? (
+                <div className="container">
+                    <button onClick={handleLogout}>Cerrar Sesión</button>
+                    <h1>Dashboard del Paciente</h1>
+                    <Link to="/patient-appointments">
+                        <button className="btn btn-primary">Ver Mis Citas</button>
+                    </Link>
+                    <br />
+                    <Link to="/">
+                        <button className="btn btn-primary">Back Home</button>
+                    </Link>
+                </div>
+            ) : (
+                <Navigate to="/loginpatient" />
+            )}
         </>
     );
 };
