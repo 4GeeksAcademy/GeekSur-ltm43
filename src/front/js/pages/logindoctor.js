@@ -54,7 +54,14 @@ export const LoginDoctor = () => {
         <Link to="/">
         <button className="btn btn-primary">Back home</button>
         </Link>
+
+        <Link to="/">
+        <button className="btn btn-success">Registrate</button>
+        </Link>
+
         </div>
+
+
     );
 };
 

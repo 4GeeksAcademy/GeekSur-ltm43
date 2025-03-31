@@ -86,6 +86,10 @@ def post_doctor():
         }
     return jsonify(response_body), 201
 
+
+
+
+
 #-------------------------------------DELETE-----Doctor------------------------------------------------#
 
 @api.route('/doctors/<int:doctor_id>', methods=['DELETE'])

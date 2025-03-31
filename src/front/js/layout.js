@@ -12,11 +12,12 @@ import MedicalCenters from "./pages/MedicalCenters";
 import { Doctors } from "./pages/doctors";
 import { Specialties } from "./pages/specialties"; 
 import { Specialties_doctor } from "./pages/specialties_doctor";
-import { LoginPatient } from "./pages/loginpatient"; // Importar la nueva vista
-import { DashboardPatient } from "./pages/dashboardpatient"; // Importar la nueva vista
+import { LoginPatient } from "./pages/loginpatient"; 
+import { DashboardPatient } from "./pages/dashboardpatient"; 
 import { LoginDoctor } from "./pages/logindoctor"; 
 import { DashboardDoctor } from "./pages/dashboarddoctor";
 import { MedicalCenterDoctor } from "./pages/medicalcenterdoctor"; 
+import { RegistrationDoctor } from "./pages/registrationdoctor"; 
 import Reviews from "./pages/Reviews";
 import injectContext from "./store/appContext";
 import { Navbar } from "./component/navbar";
@@ -44,11 +45,12 @@ const Layout = () => {
                         <Route element={<Doctors />} path="/doctors" />
                         <Route element={<Specialties />} path="/specialties" />
                         <Route element={<Specialties_doctor />} path="/specialties_doctor" />
-                        <Route element={<LoginPatient />} path="/loginpatient" /> {/* Nueva ruta */}
-                        <Route element={<DashboardPatient />} path="/dashboardpatient" /> {/* Nueva ruta */}
+                        <Route element={<LoginPatient />} path="/loginpatient" /> 
+                        <Route element={<DashboardPatient />} path="/dashboardpatient" /> 
                         <Route element={<LoginDoctor />} path="/logindoctor" />
                         <Route element={<DashboardDoctor />} path="/dashboarddoctor" />
                         <Route element={<MedicalCenterDoctor />} path="/medicalcenterdoctor" />
+                        <Route element={<RegistrationDoctor />} path="/registrationdoctor" />
                         <Route element={<Reviews />} path="/reviews" />
                         <Route element={<h1>Not found!</h1>} path="*" />
                         
