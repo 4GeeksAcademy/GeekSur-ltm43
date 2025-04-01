@@ -64,10 +64,10 @@ class Doctors(db.Model):
     phone_number = db.Column(db.String(80), unique=False, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+    url = db.Column(db.String(255), nullable=True)  # Nuevo campo para la URL
     specialties = db.relationship('Specialties_doctor', backref='doctor')
     medical_center_doctors = db.relationship('MedicalCenterDoctor', backref='doctor_association', lazy=True)  
 
-   
     def __repr__(self):
         return f'<User {self.email}>'
 
@@ -77,8 +77,8 @@ class Doctors(db.Model):
             "email": self.email,
             "first_name": self.first_name,
             "last_name": self.last_name,
-            "phone_number":self.phone_number
-                 
+            "phone_number": self.phone_number,
+            "url": self.url
         } 
     
 class Specialties(db.Model):
