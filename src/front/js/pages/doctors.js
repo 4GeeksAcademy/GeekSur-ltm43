@@ -33,7 +33,7 @@ export const Doctors = () => {
     const handleRemoveImageChange = (e) => {
         setRemoveImage(e.target.checked);  // Actualizar el estado de eliminar imagen
         if (e.target.checked) {
-            setPhoto(null);  // Si se marca eliminar, limpiar el archivo seleccionado
+            setPhoto(null); 
         }
     };
 
@@ -47,7 +47,7 @@ export const Doctors = () => {
             data.append("phone_number", formData.phone_number);
             data.append("password", formData.password);
             if (photo) {
-                data.append("photo", photo);  // Añadir la imagen si existe
+                data.append("photo", photo); 
             }
             if (editId && removeImage) {
                 data.append("remove_image", "true");  // Añadir el campo para eliminar la imagen

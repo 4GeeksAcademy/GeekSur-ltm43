@@ -62,7 +62,7 @@ def post_doctor():
     last_name = request.form.get("last_name")
     phone_number = request.form.get("phone_number")
     password = request.form.get("password")
-    file = request.files.get("photo")  # Obtener el archivo de imagen
+    file = request.files.get("photo")
 
     # Validar los campos requeridos
     if not email:
@@ -81,7 +81,7 @@ def post_doctor():
         last_name=last_name,
         phone_number=phone_number,
         password=password,
-        url=image_url,  # Guardar la URL de la imagen
+        url=image_url,
         is_active=True  
     )
     db.session.add(new_doctor)
@@ -122,7 +122,7 @@ def update_doctor(doctor_id):
     last_name = request.form.get("last_name")
     phone_number = request.form.get("phone_number")
     file = request.files.get("photo")  # Obtener el archivo de imagen
-    remove_image = request.form.get("remove_image") == "true"  # Nuevo campo para eliminar la imagen
+    remove_image = request.form.get("remove_image") == "true"
 
     # Actualizar los campos si se proporcionaron
     doctor_one.email = email if email else doctor_one.email

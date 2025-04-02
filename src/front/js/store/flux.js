@@ -90,7 +90,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                 try {
                     const resp = await fetch(process.env.BACKEND_URL + "/api/doctors", {
                         method: "POST",
-                        body: formData,  // Enviar FormData directamente
+                        body: formData,
                     });
                     if (!resp.ok) throw new Error("Error creating...");
                     const data = await resp.json();
@@ -109,7 +109,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                 try {
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/doctors/${id}`, {
                         method: "PUT",
-                        body: formData,  // Enviar FormData directamente
+                        body: formData,
                     });
                     if (!resp.ok) throw new Error("Error updating Doctor");
                     const data = await resp.json();

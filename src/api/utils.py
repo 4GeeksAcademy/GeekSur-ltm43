@@ -66,9 +66,8 @@ def delete_image(image_url):
         if not image_url:
             return
         # Extraer el public_id de la URL de la imagen
-        # Ejemplo de URL: https://res.cloudinary.com/<cloud_name>/image/upload/v1234567890/doctors_photos/<public_id>.jpg
-        public_id = image_url.split("/")[-1].split(".")[0]  # Obtener el nombre del archivo sin extensión
-        public_id = f"doctors_photos/{public_id}"  # Agregar la carpeta
+        public_id = image_url.split("/")[-1].split(".")[0]
+        public_id = f"doctors_photos/{public_id}"
         cloudinary.uploader.destroy(public_id)
     except Exception as e:
         raise Exception(f"Error deleting image from Cloudinary: {str(e)}")
