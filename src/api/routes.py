@@ -7,6 +7,7 @@ from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from datetime import datetime
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from api.utils import upload_image, delete_image
 import json
 
 api = Blueprint('api', __name__)
@@ -55,35 +56,41 @@ def get_doctor_id(doctor_id):
 #-------------------------------------POST-----NEW DOCTOR-------------------------------------------------#
 @api.route('/doctors', methods=['POST'])
 def post_doctor():
-    # Obtener los datos del cuerpo de la solicitud
-    data = request.get_json()
+    # Obtener los datos del formulario (multipart/form-data)
+    email = request.form.get("email")
+    first_name = request.form.get("first_name")
+    last_name = request.form.get("last_name")
+    phone_number = request.form.get("phone_number")
+    password = request.form.get("password")
+    file = request.files.get("photo")
 
-    # Validar que los datos necesarios estén presentes
-    if not data:
-         raise APIException('No se proporcionaron datos', status_code=400)
-    if 'email' not in data:
-         raise APIException('El campo "email" es requerido', status_code=400)
-    if data["first_name"]=="":
+    # Validar los campos requeridos
+    if not email:
+        raise APIException('El campo "email" es requerido', status_code=400)
+    if not first_name:
         raise APIException('El campo "first_name" es requerido', status_code=400)
 
-    # siempre tiene que haber data dentro de los corchetes.
+    # Subir la imagen a Cloudinary si se proporcionó
+    image_url = None
+    if file:
+        image_url = upload_image(file)
+
     new_doctor = Doctors(
-        email=data["email"],
-        first_name=data["first_name"],
-        last_name=data["last_name"],
-        phone_number=data["phone_number"],
-        password=data["password"],
+        email=email,
+        first_name=first_name,
+        last_name=last_name,
+        phone_number=phone_number,
+        password=password,
+        url=image_url,
         is_active=True  
     )
-    # Guardar el nuevo doctor en la base de datos
     db.session.add(new_doctor)
     db.session.commit()
 
-    # Devolver una respuesta con el planeta creado
     response_body = {
         "msg": f"El nuevo Doctor creado es: {new_doctor.first_name}",
         "new_Doctor": new_doctor.serialize() 
-        }
+    }
     return jsonify(response_body), 201
 
 #-------------------------------------DELETE-----Doctor------------------------------------------------#
@@ -104,23 +111,36 @@ def delete_doctor(doctor_id):
 
 @api.route('/doctors/<int:doctor_id>', methods=['PUT'])
 def update_doctor(doctor_id):
-    # Buscar el doctor en la base de datos
     doctor_one = Doctors.query.get(doctor_id)
 
     if not doctor_one:
         return jsonify({"msg": "Doctor no encontrado"}), 404
 
-    data = request.get_json()
-    if not data:
-        return jsonify({"msg": "No se enviaron datos"}), 400
+    # Obtener los datos del formulario
+    email = request.form.get("email")
+    first_name = request.form.get("first_name")
+    last_name = request.form.get("last_name")
+    phone_number = request.form.get("phone_number")
+    file = request.files.get("photo")  # Obtener el archivo de imagen
+    remove_image = request.form.get("remove_image") == "true"
 
-    # Actualizar los campos si existen en el JSON recibido
-    doctor_one.email = data.get("email", doctor_one.email)
-    doctor_one.first_name = data.get("first_name", doctor_one.first_name)
-    doctor_one.last_name = data.get("last_name", doctor_one.last_name)
-    doctor_one.phone_number = data.get("phone_number", doctor_one.phone_number)
+    # Actualizar los campos si se proporcionaron
+    doctor_one.email = email if email else doctor_one.email
+    doctor_one.first_name = first_name if first_name else doctor_one.first_name
+    doctor_one.last_name = last_name if last_name else doctor_one.last_name
+    doctor_one.phone_number = phone_number if phone_number else doctor_one.phone_number
 
-  
+    # Manejar la imagen
+    if remove_image and doctor_one.url:  # Si se solicita eliminar la imagen
+        delete_image(doctor_one.url)  # Eliminar la imagen de Cloudinary
+        doctor_one.url = None  # Establecer el campo url como null
+    elif file:  # Si se proporciona una nueva imagen
+        # Si ya había una imagen, eliminarla primero
+        if doctor_one.url:
+            delete_image(doctor_one.url)
+        image_url = upload_image(file)
+        doctor_one.url = image_url
+
     db.session.commit()
 
     return jsonify({

@@ -86,14 +86,11 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
 
             // ACTION PARA CREAR DOCTOR
-            createDoctor: async (doctorData) => {
+            createDoctor: async (formData) => {
                 try {
                     const resp = await fetch(process.env.BACKEND_URL + "/api/doctors", {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(doctorData),
+                        body: formData,
                     });
                     if (!resp.ok) throw new Error("Error creating...");
                     const data = await resp.json();
@@ -104,16 +101,15 @@ const getState = ({ getStore, getActions, setStore }) => {
                     throw error;
                 }
             },
+            
+
 
             // UPDATE A DOCTOR
-            updateDoctor: async (id, doctorData) => {
+            updateDoctor: async (id, formData) => {
                 try {
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/doctors/${id}`, {
                         method: "PUT",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(doctorData),
+                        body: formData,
                     });
                     if (!resp.ok) throw new Error("Error updating Doctor");
                     const data = await resp.json();
