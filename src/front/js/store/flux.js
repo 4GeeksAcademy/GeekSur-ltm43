@@ -47,6 +47,54 @@ const getState = ({ getStore, getActions, setStore }) => {
             searchProfessionalsError: null,
         },
         actions: {
+            updatePatientProfile: async (patientData) => {
+                try {
+                    const store = getStore();
+                    const resp = await fetch(process.env.BACKEND_URL + `/api/patients/${store.dashboardPatientData.id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${store.tokenpatient}` // Asegúrate de enviar el token
+                        },
+                        body: JSON.stringify(patientData),
+                    });
+                    if (!resp.ok) {
+                        const errorData = await resp.json();
+                        throw new Error(errorData.message || "Error al actualizar el perfil.");
+                    }
+                    const updatedPatient = await resp.json();
+                    setStore({ dashboardPatientData: updatedPatient }); // Actualiza el store
+                    return true; // Indica éxito
+                } catch (error) {
+                    console.error("Error al actualizar perfil:", error);
+                    throw error; // Lanza el error para que el componente lo maneje
+                }
+            },
+            getDashboardPatient: async () => {
+                try {
+                    const store = getStore();
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/patients/profile", {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${store.tokenpatient}`
+                        }
+                    });
+                    if (!resp.ok) {
+                        const errorData = await resp.json();
+                        throw new Error(errorData.message || "Error al obtener perfil del paciente.");
+                    }
+                    const data = await resp.json();
+                    setStore({ dashboardPatientData: data });
+                    return data;
+                } catch (error) {
+                    console.error("Error al obtener datos del paciente:", error);
+                    throw error;
+                }
+            },
+            logoutPatient: () => {
+                setStore({ tokenpatient: null, currentPatient: null, dashboardPatientData: null });
+                localStorage.removeItem('tokenpatient');
+            },
             ///////////////////START/////////////////////////////////DOCTORS////////////////////////////////////
 
             // SE CREA ACTION PARA VER LISTA DE DOCTOR EN COMPONENTE DOCTORS

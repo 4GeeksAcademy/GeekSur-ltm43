@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Context } from '../store/appContext';
 import { useNavigate } from 'react-router-dom';
+import { FaSearch } from 'react-icons/fa';
 
 function SearchProfessionals() {
     const { store, actions } = useContext(Context);
@@ -91,72 +92,91 @@ function SearchProfessionals() {
     };
 
     const handleViewProfile = (doctorId, specialtyId) => {
-        navigate(`/doctor/${doctorId}/${specialtyId}`);
+        if (doctorId && specialtyId) {
+            navigate(`/doctor/${doctorId}/${specialtyId}`);
+        } else {
+            console.error("doctorId o specialtyId no están disponibles");
+        }
     };
 
     return (
-        <div style={{ fontFamily: 'sans-serif', padding: '20px', maxWidth: '960px', margin: '0 auto' }}>
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-                <div style={{ fontWeight: 'bold', fontSize: '1.5em' }}>logo</div>
-                <nav>
-                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex' }}>
-                        <li style={{ marginLeft: '15px' }}>
-                            <a href="/cuenta" style={{ textDecoration: 'none', color: '#333' }}>Cuenta</a>
-                        </li>
-                        <li style={{ marginLeft: '15px' }}>
-                            <a href="/salir" style={{ textDecoration: 'none', color: '#333' }}>Salir</a>
-                        </li>
-                    </ul>
-                </nav>
-            </header>
-
-            <main style={{ padding: '10px 0' }}>
+        <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            minHeight: '100vh', 
+            backgroundColor: 'rgb(225 250 255)' 
+        }}>
+            <div style={{ 
+                backgroundColor: 'rgb(152 210 237)', 
+                padding: '40px', 
+                borderRadius: '10px', 
+                width: '90%', 
+                maxWidth: '100%', 
+                textAlign: 'left' 
+            }}>
+                <h1 style={{ color: 'white', marginBottom: '30px', textAlign: 'center' }}>Buscar Profesional</h1>
                 <section style={{ marginBottom: '20px', padding: '20px', border: '1px solid #eee', borderRadius: '5px', backgroundColor: '#f9f9f9' }}>
-                    <h2>Buscar Profesional</h2>
-                    <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <input
                             type="text"
                             name="searchTerm"
                             placeholder="Nombre del profesional o especialidad"
                             value={searchTerm}
                             onChange={handleInputChange}
+                            style={{ padding: '10px', marginRight: '10px', border: 'none', borderRadius: '5px', flex: '1' }}
                         />
-                        <select name="specialty" value={selectedSpecialty} onChange={handleInputChange}>
+                        <select name="specialty" value={selectedSpecialty} onChange={handleInputChange} style={{ padding: '10px', marginRight: '10px', border: 'none', borderRadius: '5px', flex: '1' }}>
                             <option value="">Especialidades</option>
                             {store.specialties && store.specialties.map((specialty, index) => (
                                 <option key={index} value={specialty.name}>{specialty.name}</option>
                             ))}
                         </select>
-                        <select name="location" value={selectedLocation} onChange={handleInputChange}>
+                        <select name="location" value={selectedLocation} onChange={handleInputChange} style={{ padding: '10px', marginRight: '10px', border: 'none', borderRadius: '5px', flex: '1' }}>
                             <option value="">Ubicación</option>
                             <option value="buenos-aires">Buenos Aires</option>
                             <option value="cordoba">Córdoba</option>
                         </select>
-                        <button onClick={handleSearch} disabled={loading}>
-                            {loading ? 'Buscando...' : 'Buscar'}
+                        <button 
+                            onClick={handleSearch} 
+                            disabled={loading} 
+                            style={{ 
+                                padding: '10px 20px', 
+                                backgroundColor: 'rgb(93 177 212)', 
+                                color: 'white', 
+                                border: 'none', 
+                                borderRadius: '5px', 
+                                cursor: 'pointer', 
+                                flex: '0.5',
+                                display: 'flex', // Para alinear el icono y el texto
+                                alignItems: 'center', // Centrar verticalmente
+                                justifyContent: 'center' // Centrar horizontalmente
+                            }}
+                        >
+                            {loading ? <span style={{ marginRight: '8px' }}>Buscando...</span> : <FaSearch />}
                         </button>
                     </div>
                 </section>
 
                 <section>
-                    <h2>Resultados de la Búsqueda</h2>
+                    <h2 style={{ color: 'white', marginBottom: '20px' }}>Resultados de la Búsqueda</h2>
                     {error && <div style={{ color: 'red' }}>{error}</div>}
-                    {loading && !error && <div style={{ fontStyle: 'italic' }}></div>}
+                    {loading && !error && <div style={{ fontStyle: 'italic', color: 'white' }}>Cargando...</div>}
                     {searchResults.length > 0 ? (
                         <div>
                             {searchResults.map((professional) => (
-                                <div key={professional.id}>
-                                    <h3>{professional.info_doctor.first_name}</h3>
-                                    <p>Especialidades: {professional.specialty_name}</p>
-                                    <button onClick={() => handleViewProfile(professional.info_doctor.id, professional.id_specialty)}>Ver Perfil</button>
+                                <div key={professional.id} style={{ backgroundColor: '#f0f0f0', padding: '15px', borderRadius: '5px', marginBottom: '10px' }}>
+                                    <h3 style={{ color: '#333' }}>{professional.info_doctor.first_name}</h3>
+                                    <p style={{ color: '#555' }}>Especialidades: {professional.specialty_name}</p>
+                                    <button onClick={() => handleViewProfile(professional.info_doctor.id, professional.id_specialty)} style={{ padding: '8px 16px', backgroundColor: 'rgb(93 177 212)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Ver Perfil</button>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        !loading && <p>Sin resultados encontrados.</p>
+                        !loading && <p style={{ color: 'white' }}>Sin resultados encontrados.</p>
                     )}
                 </section>
-            </main>
+            </div>
         </div>
     );
 }

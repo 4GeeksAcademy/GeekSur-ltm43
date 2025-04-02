@@ -53,7 +53,7 @@ const Layout = () => {
                         <Route element={<SearchProfessionals />} path="/search-professionals" />
                         <Route path="/doctor/:doctorId/:specialtyId" element={<DoctorProfile />} />
                         <Route path="/agendar-turno/:id_doctor/:specialtyId" element={<AgendarTurno />} />
-                        <Route path="/mis-citas" element={<MisCitas />} />
+                        <Route path="/miscitas" element={<MisCitas />} />
                         <Route element={<h1>Not found!</h1>} path="*" />
                         
                     </Routes>

@@ -1,28 +1,10 @@
 import React, { useState, useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Context } from "../store/appContext";
 
 export const SignupPatient = () => {
-  const { actions } = useContext(Context);
-  const [formData, setFormData] = useState({
-    email: "",
-    first_name: "",
-    last_name: "",
-    gender: "",
-    birth_date: "",
-    phone_number: "",
-    password: "",
-  });
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await actions.createPatient(formData);
-      setFormData({
+    const { actions } = useContext(Context);
+    const [formData, setFormData] = useState({
         email: "",
         first_name: "",
         last_name: "",
@@ -30,55 +12,132 @@ export const SignupPatient = () => {
         birth_date: "",
         phone_number: "",
         password: "",
-      });
-      alert("Paciente registrado exitosamente");
-    } catch (error) {
-      alert("Error: " + error.message);
-    }
-  };
+    });
+    const navigate = useNavigate();
 
-  return (
-    <div className="container">
-      <h1>Registro de Paciente</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Email:</label>
-          <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await actions.createPatient(formData);
+            setFormData({
+                email: "",
+                first_name: "",
+                last_name: "",
+                gender: "",
+                birth_date: "",
+                phone_number: "",
+                password: "",
+            });
+            alert("Paciente registrado exitosamente");
+            navigate("/loginpatient");
+        } catch (error) {
+            alert("Error: " + error.message);
+        }
+    };
+
+    return (
+        <div className="container" style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '100vh', 
+            backgroundColor: 'rgb(225 250 255)' 
+        }}>
+            <div style={{ 
+                backgroundColor: 'rgb(152 210 237)', 
+                padding: '40px', 
+                borderRadius: '10px', 
+                width: '500px', 
+                textAlign: 'center' 
+            }}>
+                <h1 style={{ color: 'white', marginBottom: '30px' }}>Regístrate</h1>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
+                    <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="Email"
+                        required
+                        style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }}
+                    />
+                    <input
+                        type="text"
+                        name="first_name"
+                        value={formData.first_name}
+                        onChange={handleChange}
+                        placeholder="Nombre"
+                        required
+                        style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }}
+                    />
+                    <input
+                        type="text"
+                        name="last_name"
+                        value={formData.last_name}
+                        onChange={handleChange}
+                        placeholder="Apellido"
+                        required
+                        style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }}
+                    />
+                    <select
+                        name="gender"
+                        value={formData.gender}
+                        onChange={handleChange}
+                        required
+                        style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }}
+                    >
+                        <option value="">Selecciona</option>
+                        <option value="male">Masculino</option>
+                        <option value="female">Femenino</option>
+                    </select>
+                    <input
+                        type="date"
+                        name="birth_date"
+                        value={formData.birth_date}
+                        onChange={handleChange}
+                        required
+                        style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }}
+                    />
+                    <input
+                        type="text"
+                        name="phone_number"
+                        value={formData.phone_number}
+                        onChange={handleChange}
+                        placeholder="Teléfono"
+                        required
+                        style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }}
+                    />
+                    <input
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="Contraseña"
+                        required
+                        style={{ padding: '10px', marginBottom: '20px', border: 'none', borderRadius: '5px' }}
+                    />
+                    <button 
+                        type="submit" 
+                        style={{ 
+                            padding: '10px 20px', 
+                            backgroundColor: 'rgb(93 177 212)', 
+                            color: 'white', 
+                            border: 'none', 
+                            borderRadius: '5px', 
+                            cursor: 'pointer' 
+                        }}
+                    >
+                        Continuar
+                    </button>
+                </form>
+                <Link to="/" style={{ marginTop: '20px' }}>
+                
+                </Link>
+            </div>
         </div>
-        <div>
-          <label>Nombre:</label>
-          <input type="text" name="first_name" value={formData.first_name} onChange={handleChange} required />
-        </div>
-        <div>
-          <label>Apellido:</label>
-          <input type="text" name="last_name" value={formData.last_name} onChange={handleChange} required />
-        </div>
-        <div>
-          <label>Género:</label>
-          <select name="gender" value={formData.gender} onChange={handleChange} required>
-            <option value="">Selecciona</option>
-            <option value="male">Masculino</option>
-            <option value="female">Femenino</option>
-          </select>
-        </div>
-        <div>
-          <label>Fecha de Nacimiento:</label>
-          <input type="date" name="birth_date" value={formData.birth_date} onChange={handleChange} required />
-        </div>
-        <div>
-          <label>Teléfono:</label>
-          <input type="text" name="phone_number" value={formData.phone_number} onChange={handleChange} required />
-        </div>
-        <div>
-          <label>Contraseña:</label>
-          <input type="password" name="password" value={formData.password} onChange={handleChange} required />
-        </div>
-        <button type="submit">Registrar Paciente</button>
-      </form>
-      <br />
-      <Link to="/">
-        <button className="btn btn-primary">Volver al inicio</button>
-      </Link>
-    </div>
-  );
+    );
 };

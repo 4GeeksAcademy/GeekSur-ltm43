@@ -235,7 +235,7 @@ def update_patient(id):
     data = request.get_json()
     
     # Campos requeridos (todos deben enviarse)
-    required_fields = ['email', 'first_name', 'last_name', 'gender', 'birth_date', 'phone_number', 'password']
+    required_fields = ['email', 'first_name', 'last_name', 'gender', 'birth_date', 'phone_number']
     for field in required_fields:
         if field not in data:
             raise APIException(f"Missing required field: {field}", status_code=400)
@@ -257,14 +257,16 @@ def update_patient(id):
     if existing_patient and existing_patient.id != id:
         raise APIException("Email already exists", status_code=400)
     
-    # Actualiza los campos del paciente
+    # Actualiza los campos del paciente (excepto password)
     patient.email = data['email']
     patient.first_name = data['first_name']
     patient.last_name = data['last_name']
     patient.gender = data['gender']
     patient.birth_date = birth_date
     patient.phone_number = data['phone_number']
-    patient.password = data['password']
+
+    if 'password' in data:
+        patient.password = data['password']
     
     db.session.commit()
     
