@@ -704,7 +704,6 @@ const getState = ({ getStore, getActions, setStore }) => {
                     const data = await resp.json();
                     if (!resp.ok) throw new Error(data.msg || "Error en el login");
 
-                    // Guardar el tokenpatient y los datos del paciente en el store y localStorage
                     setStore({
                         tokenpatient: data.tokenpatient,
                         currentPatient: data.patient,
@@ -719,7 +718,6 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-            // Acción para cargar el dashboard del paciente
             getDashboardPatient: async () => {
                 const store = getStore();
                 const token = store.tokenpatient || localStorage.getItem("tokenpatient");
@@ -759,12 +757,12 @@ const getState = ({ getStore, getActions, setStore }) => {
                 localStorage.removeItem("tokenpatient");
             },
 
-            // Acción para cargar el token desde localStorage al iniciar la app
+            
             loadTokenPatient: () => {
                 const token = localStorage.getItem("tokenpatient");
                 if (token) {
                     setStore({ tokenpatient: token });
-                    getActions().getDashboardPatient(); // Cargar el dashboard si hay token
+                    getActions().getDashboardPatient();
                 }
             },
         }

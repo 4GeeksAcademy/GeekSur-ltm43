@@ -45,12 +45,10 @@ def get_doctors():
 def get_doctor_id(doctor_id):
     doctor_one = Doctors.query.get(doctor_id)
 
-    response_body = {
-        "msg": "GET / Data solo 1 Doctor",
-        "Doctor": doctor_one.serialize() 
-    }
-    return jsonify(response_body), 200
+    if not doctor_one:
+        return jsonify({"msg": "Doctor no encontrado"}), 404
 
+    return jsonify(doctor_one.serialize()), 200
 #-------------------------------------------------POST------------------------------------------------#
 #-------------------------------------POST-----NEW DOCTOR-------------------------------------------------#
 @api.route('/doctors', methods=['POST'])
@@ -529,8 +527,12 @@ def update_specialty_doctor(specialty_id):
 #-------------------------------------GET-----ALL APPOINTMENTS------------------------------------------------#
 
 @api.route('/appointments', methods=['GET'])
+@jwt_required()
 def get_appointments():
-    list_appointments = Appointment.query.all()
+    # Obtener el ID del paciente del token
+    id_patient = get_jwt_identity()
+# Filtrar las citas por el ID del paciente
+    list_appointments = Appointment.query.filter_by(id_patient=id_patient).all()
     obj_all_appointments = [appointment.serialize() for appointment in list_appointments]
 
     response_body = {
@@ -554,11 +556,16 @@ def get_appointment_id(appointment_id):
 
 #-------------------------------------POST-----NEW APPOINTMENT-------------------------------------------------#
 @api.route('/appointments', methods=['POST'])
+@jwt_required()  # Agrega el decorador para requerir un token válido
 def post_appointment():
     data = request.get_json()
 
-    # Validate required fields
-    required_fields = ['id_patient', 'id_doctor', 'id_center', 'date', 'hour', 'id_specialty', 'confirmation']
+    # Obtener el ID del paciente del token
+    id_patient = get_jwt_identity()
+
+    # Validate required fields (except id_patient)
+    required_fields = ['id_doctor', 'id_center', 'date', 'hour', 'id_specialty']
+    
     for field in required_fields:
         if field not in data:
             raise APIException(f'The field "{field}" is required', status_code=400)
@@ -570,9 +577,7 @@ def post_appointment():
     except ValueError:
         raise APIException("Invalid date or hour format. Use YYYY-MM-DD for date and HH:MM for hour", status_code=400)
 
-    # Validate foreign keys
-    if not Patient.query.get(data["id_patient"]):
-        raise APIException("Patient not found", status_code=404)
+    # Validate foreign keys (except id_patient)
     if not Doctors.query.get(data["id_doctor"]):
         raise APIException("Doctor not found", status_code=404)
     if not MedicalCenter.query.get(data["id_center"]):
@@ -581,17 +586,17 @@ def post_appointment():
         raise APIException("Specialty not found", status_code=404)
 
     # Validate confirmation value
-    if data["confirmation"] not in ["confirmed", "to_be_confirmed"]:
-        raise APIException("Confirmation must be 'confirmed' or 'to_be_confirmed'", status_code=400)
+    # if data["confirmation"] not in ["confirmed", "to_be_confirmed"]:
+    #     raise APIException("Confirmation must be 'confirmed' or 'to_be_confirmed'", status_code=400)
 
     new_appointment = Appointment(
-        id_patient=data["id_patient"],
+        id_patient=id_patient, 
         id_doctor=data["id_doctor"],
         id_center=data["id_center"],
         date=appointment_date,
         hour=appointment_hour,
         id_specialty=data["id_specialty"],
-        confirmation=data["confirmation"]
+        confirmation="confirmed"
     )
 
     db.session.add(new_appointment)
@@ -602,7 +607,6 @@ def post_appointment():
         "new_appointment": new_appointment.serialize()
     }
     return jsonify(response_body), 201
-
 #-------------------------------------DELETE-----APPOINTMENT------------------------------------------------#
 
 @api.route('/appointments/<int:appointment_id>', methods=['DELETE'])
@@ -906,3 +910,4 @@ def searchdoctor():
     
 
 #////////////////////// END SEARCH PROFESSIONALS ///////////////////
+

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Context } from '../store/appContext';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 
 function SearchProfessionals() {
     const { store, actions } = useContext(Context);
@@ -11,7 +11,7 @@ function SearchProfessionals() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [isMounted, setIsMounted] = useState(true);
-    const navigate = useNavigate(); // Inicializar useNavigate
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function fetchSpecialties() {
@@ -68,10 +68,10 @@ function SearchProfessionals() {
             }
         } catch (err) {
             console.log(err);
+        } finally {
+            setLoading(false);
         }
     };
-
-    console.log(searchResults);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -90,8 +90,8 @@ function SearchProfessionals() {
         }
     };
 
-    const handleViewProfile = (doctorId) => {
-        navigate(`/doctor/${doctorId}`);
+    const handleViewProfile = (doctorId, specialtyId) => {
+        navigate(`/doctor/${doctorId}/${specialtyId}`);
     };
 
     return (
@@ -148,7 +148,7 @@ function SearchProfessionals() {
                                 <div key={professional.id}>
                                     <h3>{professional.info_doctor.first_name}</h3>
                                     <p>Especialidades: {professional.specialty_name}</p>
-                                    <button onClick={() => handleViewProfile(professional.id)}>Ver Perfil</button>
+                                    <button onClick={() => handleViewProfile(professional.info_doctor.id, professional.id_specialty)}>Ver Perfil</button>
                                 </div>
                             ))}
                         </div>

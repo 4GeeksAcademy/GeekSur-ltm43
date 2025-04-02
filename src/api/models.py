@@ -66,6 +66,7 @@ class Doctors(db.Model):
         return f'<User {self.email}>'
 
     def serialize(self):
+        print(self.specialties)
         return {
             "id": self.id,
             "email": self.email,

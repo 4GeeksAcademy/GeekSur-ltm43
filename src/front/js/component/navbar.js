@@ -50,7 +50,10 @@ export const Navbar = () => {
 					<Link to="/search-professionals">
                         <button className="btn btn-primary">Buscar Profesional</button>
                     </Link>
-
+					<Link to="/signuppatient">
+						<button className="btn btn-primary">INGRESO AQUI</button>
+					</Link>
+					
 
 				</div>
 			</div>
