@@ -69,7 +69,7 @@ function AgendarTurno() {
                 specialty: specialtyId,
             };
 
-            navigate('/mis-citas', { state: { cita: citaAgendada } });
+            navigate('/miscitas', { state: { cita: citaAgendada } });
         } catch (error) {
             console.error('Error:', error);
             alert('Error al agendar la cita.');

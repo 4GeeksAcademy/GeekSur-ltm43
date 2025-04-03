@@ -1,6 +1,7 @@
 import React, { useContext ,useEffect, useState} from "react";
 import { Context } from "../store/appContext";
 import "../../styles/home.css";
+import { Link } from "react-router-dom";
 
 export const Specialties_doctor = () => {
     const { store, actions } = useContext(Context);
@@ -45,7 +46,7 @@ export const Specialties_doctor = () => {
     // Manejar edición
     const handleEdit = (specialties_doctor) => {
         setFormData({
-            id_specialty: specialties_doctor.id_specialty,  // Asegúrate de asignar todos los campos necesarios
+            id_specialty: specialties_doctor.id_specialty,  
             id_doctor: specialties_doctor.id_doctor,
         });
         setEditId(specialties_doctor.id);
@@ -99,6 +100,13 @@ export const Specialties_doctor = () => {
                     <p>No hay especialidades registradas.</p>
                 )}
             </ul>
+        
+        <br />
+        <Link to="/">
+        <button className="btn btn-primary">Back home</button>
+        </Link>
+
+
       </div>
   );
 }

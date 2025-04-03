@@ -1,6 +1,7 @@
 import React, { useContext ,useEffect, useState} from "react";
 import { Context } from "../store/appContext";
 import "../../styles/home.css";
+import { Link } from "react-router-dom";
 
 export const Specialties = () => {
     const { store, actions } = useContext(Context);
@@ -92,6 +93,15 @@ export const Specialties = () => {
                   <p>No hay especialidades registrados.</p>
               )}
           </ul>
+          
+          <br />
+        <Link to="/">
+        <button className="btn btn-primary">Back home</button>
+        </Link>
+
+
+
+
       </div>
   );
 

@@ -22,6 +22,8 @@ export const DashboardPatient = () => {
     const [updateError, setUpdateError] = useState('');
 
     useEffect(() => {
+        console.log(store.tokenpatient);
+        
         if (!store.tokenpatient && !store.processingAction) {
             navigate("/loginpatient");
         } else if (store.tokenpatient) {
