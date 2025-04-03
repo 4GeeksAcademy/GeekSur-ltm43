@@ -72,6 +72,7 @@ class Doctors(db.Model):
         return f'<User {self.email}>'
 
     def serialize(self):
+        print(self.specialties)
         return {
             "id": self.id,
             "email": self.email,
@@ -93,7 +94,8 @@ class Specialties(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "name": self.name                 
+            "name": self.name ,
+            "specialties": [{**specialties_doctor.serialize(),"specialty_name": self.name} for specialties_doctor in self.relation_specialties]          
         } 
 
 class Specialties_doctor(db.Model):
@@ -102,10 +104,12 @@ class Specialties_doctor(db.Model):
     id_doctor = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
 
     def serialize(self):
+        doctor_info = Doctors.query.get(self.id_doctor)
+    
         return {
             "id": self.id,
             "id_specialty": self.id_specialty,    
-            "id_doctor": self.id_doctor             
+            "info_doctor": doctor_info.serialize()             
         }
     
 class Appointment(db.Model):

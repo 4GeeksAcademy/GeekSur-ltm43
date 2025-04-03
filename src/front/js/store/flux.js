@@ -14,6 +14,37 @@ const getState = ({ getStore, getActions, setStore }) => {
                     initial: "white"
                 }
             ],
+            // patients: [],
+            // doctors: [],
+            // specialties: [],
+            // specialties_doctor: [],
+            // medicalCenters: [],
+            // medicalCenterFormData: {
+            //     name: "",
+            //     address: "",
+            //     country: "",
+            //     city: "",
+            //     phone: "",
+            //     email: "",
+            // },
+            // editingMedicalCenter: null,
+            // medicalCenterError: null,
+            // medicalCenterSuccessMessage: null,
+            // appointments: [],
+            // appointmentError: null,
+            // appointmentSuccessMessage: null,
+            // tokenpatient: null,
+            // currentPatient: null,
+            // dashboardPatientData: null,
+            // loginPatientError: null,
+            // reviews: [],
+            // reviewError: null,
+            // reviewSuccessMessage: null,
+            // specialtiesOptions: [],
+            // medicalCoveragesOptions: [],
+            // locationsOptions: [],
+            // searchProfessionalsResults: [],
+            // searchProfessionalsError: null,
             patients: [],
             doctors: [],
             specialties: [],
@@ -26,15 +57,16 @@ const getState = ({ getStore, getActions, setStore }) => {
                 city: "",
                 phone: "",
                 email: "",
-                latitude: "", 
+                latitude: "",
                 longitude: ""
-              },
+            },
             editingMedicalCenter: null,
             medicalCenterError: null,
             medicalCenterSuccessMessage: null,
             appointments: [],
             appointmentError: null,
             appointmentSuccessMessage: null,
+            tokenpatient: null,
             authPatient: false,
             currentPatient: null,
             dashboardPatientData: null,
@@ -42,6 +74,11 @@ const getState = ({ getStore, getActions, setStore }) => {
             reviews: [],
             reviewError: null,
             reviewSuccessMessage: null,
+            specialtiesOptions: [],
+            medicalCoveragesOptions: [],
+            locationsOptions: [],
+            searchProfessionalsResults: [],
+            searchProfessionalsError: null,
             tokendoctor: null,
             currentDoctor: null,
             dashboardDoctorData: null,
@@ -53,6 +90,54 @@ const getState = ({ getStore, getActions, setStore }) => {
             patientAppointmentError: null,
         },
         actions: {
+            updatePatientProfile: async (patientData) => {
+                try {
+                    const store = getStore();
+                    const resp = await fetch(process.env.BACKEND_URL + `/api/patients/${store.dashboardPatientData.id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${store.tokenpatient}` // Asegúrate de enviar el token
+                        },
+                        body: JSON.stringify(patientData),
+                    });
+                    if (!resp.ok) {
+                        const errorData = await resp.json();
+                        throw new Error(errorData.message || "Error al actualizar el perfil.");
+                    }
+                    const updatedPatient = await resp.json();
+                    setStore({ dashboardPatientData: updatedPatient }); // Actualiza el store
+                    return true; // Indica éxito
+                } catch (error) {
+                    console.error("Error al actualizar perfil:", error);
+                    throw error; // Lanza el error para que el componente lo maneje
+                }
+            },
+            getDashboardPatient: async () => {
+                try {
+                    const store = getStore();
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/patients/profile", {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${store.tokenpatient}`
+                        }
+                    });
+                    if (!resp.ok) {
+                        const errorData = await resp.json();
+                        throw new Error(errorData.message || "Error al obtener perfil del paciente.");
+                    }
+                    const data = await resp.json();
+                    setStore({ dashboardPatientData: data });
+                    return data;
+                } catch (error) {
+                    console.error("Error al obtener datos del paciente:", error);
+                    throw error;
+                }
+            },
+            logoutPatient: () => {
+                setStore({ tokenpatient: null, currentPatient: null, dashboardPatientData: null });
+                localStorage.removeItem('tokenpatient');
+            },
             ///////////////////START/////////////////////////////////DOCTORS////////////////////////////////////
 
             // SE CREA ACTION PARA VER LISTA DE DOCTOR EN COMPONENTE DOCTORS
@@ -101,7 +186,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     throw error;
                 }
             },
-            
+
 
 
             // UPDATE A DOCTOR
@@ -372,7 +457,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     setStore({ doctorAppointments: [], error: "Error fetching appointments" });
                 }
             },
-            
+
             manageDoctorAppointment: async (appointmentId, action) => {
                 try {
                     const response = await fetch(`${process.env.BACKEND_URL}/api/doctor/appointments/${appointmentId}`, {
@@ -399,34 +484,36 @@ const getState = ({ getStore, getActions, setStore }) => {
             ///////////// BEGIN MEDICAL CENTER /////////////
             getMedicalCenters: async () => {
                 try {
-                  const resp = await fetch(process.env.BACKEND_URL + "/api/medical_centers", {
-                    method: "GET",
-                    headers: {
-                      "Content-Type": "application/json"
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/medical_centers", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    });
+                    if (!resp.ok) {
+                        const errorText = await resp.text();
+                        throw new Error(`Error fetching medical centers: ${resp.status} - ${errorText}`);
                     }
-                  });
-                  if (!resp.ok) {
-                    const errorText = await resp.text();
-                    throw new Error(`Error fetching medical centers: ${resp.status} - ${errorText}`);
-                  }
-                  const data = await resp.json();
-                  console.log("Medical centers obtained:", data);
-                  setStore({ medicalCenters: data, medicalCenterError: null });
-                  return data;
+                    const data = await resp.json();
+                    console.log("Medical centers obtained:", data);
+                    setStore({ medicalCenters: data, medicalCenterError: null });
+                    return data;
                 } catch (error) {
-                  console.log("Error fetching medical centers:", error.message);
-                  setStore({ medicalCenterError: "Error loading medical centers: " + error.message });
+                    console.log("Error fetching medical centers:", error.message);
+                    setStore({ medicalCenterError: "Error loading medical centers: " + error.message });
                 }
-              },
+            },
 
             setMedicalCenterFormData: (data) => {
                 setStore({ medicalCenterFormData: { ...getStore().medicalCenterFormData, ...data } });
             },
 
             setEditingMedicalCenter: (center) => {
-                setStore({ editingMedicalCenter: center, medicalCenterFormData: center || {
-                    name: "", address: "", country: "", city: "", phone: "", email: ""
-                } });
+                setStore({
+                    editingMedicalCenter: center, medicalCenterFormData: center || {
+                        name: "", address: "", country: "", city: "", phone: "", email: ""
+                    }
+                });
             },
 
             clearMedicalCenterFormData: () => {
@@ -471,7 +558,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                 const store = getStore();
                 const formData = store.medicalCenterFormData;
                 const editingCenter = store.editingMedicalCenter;
-                if (!editingCenter) return; 
+                if (!editingCenter) return;
                 try {
                     const resp = await fetch(process.env.BACKEND_URL + `/api/medical_centers/${editingCenter.id}`, {
                         method: "PUT",
@@ -525,9 +612,11 @@ const getState = ({ getStore, getActions, setStore }) => {
 
             // SE CREA ACTION PARA VER LISTA DE ESPECIALIDADES 
             getSpecialties: async () => {
+
                 try {
                     const response = await fetch(process.env.BACKEND_URL + "/api/specialties");
                     const data = await response.json();
+
 
                     if (response.ok) {
                         setStore({ specialties: data.Specialties });
@@ -748,6 +837,49 @@ const getState = ({ getStore, getActions, setStore }) => {
 
             ////////////////////////// END REVIEW  /////////////////////////////////
 
+            ////////////////////////// BEGIN SEARCH PROFESSIONALS  /////////////////////////////////
+            getLocations: async () => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/api/locations`);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.msg || 'Error al obtener ubicaciones');
+                    }
+                    const data = await response.json();
+                    setStore({ locationsOptions: data.locations || [] });
+                } catch (error) {
+                    console.error("Error al obtener las ubicaciones:", error);
+
+                }
+            },
+
+            searchProfessionals: async (searchCriteria) => {
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/professionals/search`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(searchCriteria),
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.msg || 'Error al buscar profesionales');
+                    }
+
+                    const data = await response.json();
+                    setStore({ searchProfessionalsResults: data.professionals || [], searchProfessionalsError: null });
+                    return data.professionals || [];
+                } catch (error) {
+                    console.error("Error al buscar profesionales:", error);
+                    setStore({ searchProfessionalsResults: [], searchProfessionalsError: error.message });
+                    return null;
+                }
+            },
+            ////////////////////////// END SEARCH PROFESSIONALS  /////////////////////////////////
+
+
             // Acción para login de pacientes
             loginPatient: async (email, password) => {
                 try {
@@ -759,10 +891,12 @@ const getState = ({ getStore, getActions, setStore }) => {
                         body: JSON.stringify({ email, password }),
                     });
                     const data = await resp.json();
+                    console.log(data);
+                    
                     if (!resp.ok) throw new Error(data.msg || "Error en el login");
 
-                    // Guardar el tokenpatient y los datos del paciente en el store y localStorage
                     setStore({
+                        tokenpatient: data.tokenpatient,
                         authPatient: true,
                         currentPatient: data.patient,
                         loginPatientError: null,
@@ -776,7 +910,6 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-            // Acción para cargar el dashboard del paciente
             getDashboardPatient: async () => {
                 const store = getStore();
                 const token = store.tokenpatient || localStorage.getItem("tokenpatient");
@@ -816,22 +949,30 @@ const getState = ({ getStore, getActions, setStore }) => {
                 localStorage.removeItem("tokenpatient");
             },
 
+
+            loadTokenPatient: () => {
+                const token = localStorage.getItem("tokenpatient");
+                if (token) {
+                    setStore({ tokenpatient: token });
+                    getActions().getDashboardPatient();
+                }
+            },
             // Acción para cargar el token desde localStorage al iniciar la app
             validateAuthPatient: async () => {
                 console.log("validateAuthPatient")
                 if (localStorage.getItem("tokenpatient")) {
-                    setStore({ authPatient: true})
-                        console.log("usuario logueado")
+                    setStore({ authPatient: true })
+                    console.log("usuario logueado")
                     //getActions().getDashboardPatient(); // Cargar el dashboard si hay token
                 }
-               
+
             },
 
-////////////////////////////////////////////////////////// START///// LOGIN DOCTOR  /////////////////////////////////
+            ////////////////////////////////////////////////////////// START///// LOGIN DOCTOR  /////////////////////////////////
 
-                loginDoctor: async (email, password) => {
+            loginDoctor: async (email, password) => {
                 try {
-                        const resp = await fetch(process.env.BACKEND_URL + "/api/logindoctor", {
+                    const resp = await fetch(process.env.BACKEND_URL + "/api/logindoctor", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -874,7 +1015,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         method: "GET",
                         headers: {
                             "Content-Type": "application/json",
-                                "Authorization": `Bearer ${token}`,
+                            "Authorization": `Bearer ${token}`,
                         },
                     });
                     const data = await resp.json();
@@ -906,15 +1047,15 @@ const getState = ({ getStore, getActions, setStore }) => {
             validateAuthDoctor: async () => {
                 console.log("validateAuthDoctor")
                 if (localStorage.getItem("tokendoctor")) {
-                    setStore({ authDoctor: true})
-                        console.log("Doctor Logueado")
-                    }
+                    setStore({ authDoctor: true })
+                    console.log("Doctor Logueado")
+                }
 
             },
 
-////////////////////////////////////////////////////////// END///// LOGIN DOCTOR  /////////////////////////////////
+            ////////////////////////////////////////////////////////// END///// LOGIN DOCTOR  /////////////////////////////////
 
-///////////////////START/////////////////////////////////MedicalCenterDoctor///////////////////////////
+            ///////////////////START/////////////////////////////////MedicalCenterDoctor///////////////////////////
 
             // SE CREA ACTION PARA VER LISTA DE ESPECIALIDADES_DOCTOR 
             getMedicalCenterDoctor: async () => {
@@ -986,7 +1127,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     throw error;
                 }
             },
-///////////////////END/////////////////////////////////MedicalCenterDoctor///////////////////////////
+            ///////////////////END/////////////////////////////////MedicalCenterDoctor///////////////////////////
 
         }
     };

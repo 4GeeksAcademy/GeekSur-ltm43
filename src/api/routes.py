@@ -3,11 +3,11 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User, MedicalCenter, Patient, Doctors, Specialties, Specialties_doctor, Appointment, Review, MedicalCenterDoctor
-from api.utils import generate_sitemap, APIException
+from api.utils import generate_sitemap, APIException, upload_image, delete_image
 from flask_cors import CORS
 from datetime import datetime
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
-from api.utils import upload_image, delete_image
+from itertools import chain
 import json
 
 api = Blueprint('api', __name__)
@@ -46,12 +46,10 @@ def get_doctors():
 def get_doctor_id(doctor_id):
     doctor_one = Doctors.query.get(doctor_id)
 
-    response_body = {
-        "msg": "GET / Data solo 1 Doctor",
-        "Doctor": doctor_one.serialize() 
-    }
-    return jsonify(response_body), 200
+    if not doctor_one:
+        return jsonify({"msg": "Doctor no encontrado"}), 404
 
+    return jsonify(doctor_one.serialize()), 200
 #-------------------------------------------------POST------------------------------------------------#
 #-------------------------------------POST-----NEW DOCTOR-------------------------------------------------#
 @api.route('/doctors', methods=['POST'])
@@ -304,7 +302,7 @@ def update_patient(id):
     data = request.get_json()
     
     # Campos requeridos (todos deben enviarse)
-    required_fields = ['email', 'first_name', 'last_name', 'gender', 'birth_date', 'phone_number', 'password']
+    required_fields = ['email', 'first_name', 'last_name', 'gender', 'birth_date', 'phone_number']
     for field in required_fields:
         if field not in data:
             raise APIException(f"Missing required field: {field}", status_code=400)
@@ -326,14 +324,16 @@ def update_patient(id):
     if existing_patient and existing_patient.id != id:
         raise APIException("Email already exists", status_code=400)
     
-    # Actualiza los campos del paciente
+    # Actualiza los campos del paciente (excepto password)
     patient.email = data['email']
     patient.first_name = data['first_name']
     patient.last_name = data['last_name']
     patient.gender = data['gender']
     patient.birth_date = birth_date
     patient.phone_number = data['phone_number']
-    patient.password = data['password']
+
+    if 'password' in data:
+        patient.password = data['password']
     
     db.session.commit()
     
@@ -594,8 +594,12 @@ def update_specialty_doctor(specialty_id):
 #-------------------------------------GET-----ALL APPOINTMENTS------------------------------------------------#
 
 @api.route('/appointments', methods=['GET'])
+@jwt_required()
 def get_appointments():
-    list_appointments = Appointment.query.all()
+    # Obtener el ID del paciente del token
+    id_patient = get_jwt_identity()
+# Filtrar las citas por el ID del paciente
+    list_appointments = Appointment.query.filter_by(id_patient=id_patient).all()
     obj_all_appointments = [appointment.serialize() for appointment in list_appointments]
 
     response_body = {
@@ -619,11 +623,16 @@ def get_appointment_id(appointment_id):
 
 #-------------------------------------POST-----NEW APPOINTMENT-------------------------------------------------#
 @api.route('/appointments', methods=['POST'])
+@jwt_required()  # Agrega el decorador para requerir un token válido
 def post_appointment():
     data = request.get_json()
 
-    # Validate required fields
-    required_fields = ['id_patient', 'id_doctor', 'id_center', 'date', 'hour', 'id_specialty', 'confirmation']
+    # Obtener el ID del paciente del token
+    id_patient = get_jwt_identity()
+
+    # Validate required fields (except id_patient)
+    required_fields = ['id_doctor', 'id_center', 'date', 'hour', 'id_specialty']
+    
     for field in required_fields:
         if field not in data:
             raise APIException(f'The field "{field}" is required', status_code=400)
@@ -635,9 +644,7 @@ def post_appointment():
     except ValueError:
         raise APIException("Invalid date or hour format. Use YYYY-MM-DD for date and HH:MM for hour", status_code=400)
 
-    # Validate foreign keys
-    if not Patient.query.get(data["id_patient"]):
-        raise APIException("Patient not found", status_code=404)
+    # Validate foreign keys (except id_patient)
     if not Doctors.query.get(data["id_doctor"]):
         raise APIException("Doctor not found", status_code=404)
     if not MedicalCenter.query.get(data["id_center"]):
@@ -646,17 +653,17 @@ def post_appointment():
         raise APIException("Specialty not found", status_code=404)
 
     # Validate confirmation value
-    if data["confirmation"] not in ["confirmed", "to_be_confirmed"]:
-        raise APIException("Confirmation must be 'confirmed' or 'to_be_confirmed'", status_code=400)
+    # if data["confirmation"] not in ["confirmed", "to_be_confirmed"]:
+    #     raise APIException("Confirmation must be 'confirmed' or 'to_be_confirmed'", status_code=400)
 
     new_appointment = Appointment(
-        id_patient=data["id_patient"],
+        id_patient=id_patient, 
         id_doctor=data["id_doctor"],
         id_center=data["id_center"],
         date=appointment_date,
         hour=appointment_hour,
         id_specialty=data["id_specialty"],
-        confirmation=data["confirmation"]
+        confirmation="confirmed"
     )
 
     db.session.add(new_appointment)
@@ -667,7 +674,6 @@ def post_appointment():
         "new_appointment": new_appointment.serialize()
     }
     return jsonify(response_body), 201
-
 #-------------------------------------DELETE-----APPOINTMENT------------------------------------------------#
 
 @api.route('/appointments/<int:appointment_id>', methods=['DELETE'])
@@ -875,7 +881,101 @@ def update_review(review_id):
         "updated_review": review_one.serialize()
     }), 200
 
-#/////////////////END///////////////////////# REVIEW ///////////////////////////////////////////////
+#////////////////////// END REVIEWS ///////////////////
+
+#////////////////////// BEGIN SEARCH PROFESSIONALS ///////////////////
+@api.route('/specialties', methods=['GET'])
+def get_all_specialties():
+    list_specialties = Specialties.query.all()
+    obj_all_specialties = [specialty.serialize() for specialty in list_specialties]
+
+    response_body = {
+        "msg": "GET / Specialties for search professionals",
+        "Specialties": obj_all_specialties
+        }    
+    return jsonify(response_body), 200
+
+
+@api.route('/professionals/search', methods=['POST'])
+def search_professionals():
+    try:
+        data = request.get_json()
+        logging.debug(f"Received data: {data}")
+
+        name = data.get('name')
+        specialty_id = data.get('specialty')
+        city = data.get('city')
+        country = data.get('country')
+
+        doctors_query = Doctors.query.filter_by(is_active=True)
+
+        if name:
+            search_term = f'%{name.lower()}%'
+            doctors_query = doctors_query.filter(
+                or_(
+                    db.func.lower(Doctors.first_name).like(search_term),
+                    db.func.lower(Doctors.last_name).like(search_term)
+                )
+            )
+
+        if specialty_id:
+            doctors_query = doctors_query.join(Specialties_doctor, Doctors.id == Specialties_doctor.id_doctor).filter(Specialties_doctor.id_specialty == specialty_id)
+
+        if city:
+            doctors_query = doctors_query.join(Appointment, Doctors.id == Appointment.id_doctor).join(MedicalCenter, Appointment.id_center == MedicalCenter.id).filter(db.func.lower(MedicalCenter.city).like(f'%{city.lower()}%'))
+
+        if country:
+            doctors_query = doctors_query.join(Appointment, Doctors.id == Appointment.id_doctor).join(MedicalCenter, Appointment.id_center == MedicalCenter.id).filter(db.func.lower(MedicalCenter.country).like(f'%{country.lower()}%'))
+
+        doctors = doctors_query.all()
+        results = []
+        for doctor in doctors:
+            specialties = [spec.Specialties.serialize() for spec in doctor.specialties]
+            medical_centers = set([MedicalCenter.query.get(apt.id_center).serialize() for apt in doctor.appointments if apt.id_center]) if doctor.appointments else []
+
+            doctor_info = doctor.serialize()
+            doctor_info['name'] = f"{doctor.first_name} {doctor.last_name}"
+            del doctor_info['first_name']
+            del doctor_info['last_name']
+            doctor_info['specialties'] = [spec['name'] for spec in specialties]
+            doctor_info['medical_centers'] = [
+                {'name': mc['name'], 'city': mc['city'], 'country': mc['country']} for mc in medical_centers
+            ]
+            results.append(doctor_info)
+
+        logging.debug(f"Search results: {results}")
+        return jsonify(results), 200
+
+    except Exception as e:
+        logging.error(f"Error in search_professionals: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/search-doctor', methods=['POST'])
+def searchdoctor():
+    data = request.json
+    print(data)
+
+    list_specialties = Specialties.query.all()
+    obj_all_specialties = [specialty.serialize() for specialty in list_specialties]
+
+    filtered_specialties = list(filter(lambda x: data["specialty"].lower() in x['name'].lower(), obj_all_specialties))
+    print(filtered_specialties)
+    if len(filtered_specialties) == 0:
+        return jsonify({"msg": "No specialties found"}), 404
+    if len(filtered_specialties) > 0 and data["name"] == "":
+        return jsonify({"results": filtered_specialties[0]["specialties"]}), 200
+    elif len(filtered_specialties) > 0 and data["name"] != "":
+        filtered_professional = list(filter(lambda x: data["name"].lower() in x["info_doctor"]["first_name"].lower() or data["name"].lower() in x["info_doctor"]["last_name"].lower(), filtered_specialties[0]["specialties"]))
+        return jsonify({"results": filtered_professional}), 200
+    else:
+        map_specialties = list(chain(*map(lambda x: x["specialties"], obj_all_specialties)))
+        filtered_results = list(filter(lambda x: data["name"].lower() in x["info_doctor"]["first_name"].lower() or data["name"].lower() in x["info_doctor"]["last_name"].lower() , map_specialties))
+        return jsonify({"results":filtered_results}), 200
+    
+    
+
+#////////////////////// END SEARCH PROFESSIONALS ///////////////////
+
 
 #/////////////////START///////////////////////# DOCTORLOGIN///////////////////////////////////////////////
 @api.route('/logindoctor', methods=['POST'])

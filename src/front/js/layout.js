@@ -18,6 +18,11 @@ import { LoginDoctor } from "./pages/logindoctor";
 import { DashboardDoctor } from "./pages/dashboarddoctor";
 import { MedicalCenterDoctor } from "./pages/medicalcenterdoctor"; 
 import Reviews from "./pages/Reviews";
+import SearchProfessionals from "./pages/SearchProfessionals";
+import DoctorProfile from "./pages/DoctorProfile";
+import AgendarTurno from "./pages/AgendarTurno";
+import { SignupPatient } from "./pages/SignupPatient"; 
+import MisCitas from './pages/MisCitas';
 import { DoctorAppointment } from "./pages/doctor_appointment";
 import { PatientAppointments } from "./pages/patient_appointments"; 
 import { RateAppointment } from "./pages/rate_appointment"; 
@@ -53,6 +58,11 @@ const Layout = () => {
                         <Route element={<DashboardDoctor />} path="/dashboarddoctor" />
                         <Route element={<MedicalCenterDoctor />} path="/medicalcenterdoctor" />
                         <Route element={<Reviews />} path="/reviews" />
+                        <Route element={<SignupPatient />} path="/signuppatient" />
+                        <Route element={<SearchProfessionals />} path="/search-professionals" />
+                        <Route path="/doctor/:doctorId/:specialtyId" element={<DoctorProfile />} />
+                        <Route path="/agendar-turno/:id_doctor/:specialtyId" element={<AgendarTurno />} />
+                        <Route path="/miscitas" element={<MisCitas />} />
                         <Route element={<DoctorAppointment />} path="/doctor-appointment" />
                         <Route element={<PatientAppointments />} path="/patient-appointments" />
                         <Route element={<RateAppointment />} path="/rate-appointment/:appointmentId" />
