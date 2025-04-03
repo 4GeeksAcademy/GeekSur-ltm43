@@ -1,35 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { Context } from '../store/appContext';
+import { useNavigate, Link } from 'react-router-dom';
 
 function MisCitas() {
+    const { store, actions } = useContext(Context);
+    const navigate = useNavigate();
     const [citas, setCitas] = useState([]);
 
-    const fetchCitas = () => {
+    const fetchCitas = async () => {
         const token = localStorage.getItem('tokenpatient');
 
         if (!token) {
             alert('Debes iniciar sesión para ver tus citas.');
+            navigate('/loginpatient');
             return;
         }
 
-        fetch(process.env.BACKEND_URL + '/api/appointments/', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            setCitas(Array.isArray(data.Appointments) ? data.Appointments : []);
-        })
-        .catch(error => {
+        try {
+            await actions.getPatientAppointments(); // Usa la acción que filtra por paciente logueado
+            setCitas(store.patientAppointments || []);
+        } catch (error) {
             console.error('Error al obtener las citas:', error);
             alert(`Error al obtener las citas: ${error.message}`);
             setCitas([]);
-        });
+        }
     };
 
     useEffect(() => {
@@ -43,6 +37,7 @@ function MisCitas() {
             const token = localStorage.getItem('tokenpatient');
             if (!token) {
                 alert('Tu sesión ha expirado. Por favor, inicia sesión de nuevo.');
+                navigate('/loginpatient');
                 return;
             }
 
@@ -57,17 +52,26 @@ function MisCitas() {
                     return response.json().then(err => {
                         throw new Error(err.message || `Error del servidor: ${response.status}`);
                     }).catch(() => {
-                         throw new Error(`Error al cancelar la cita. Estado: ${response.status}`);
+                        throw new Error(`Error al cancelar la cita. Estado: ${response.status}`);
                     });
                 }
                 alert('Cita cancelada exitosamente.');
-                setCitas(prevCitas => prevCitas.filter(cita => cita.id !== citaId));
+                fetchCitas(); // Refresca la lista tras eliminar
             })
             .catch(error => {
                 console.error('Error al cancelar la cita:', error);
                 alert(`Error al cancelar la cita: ${error.message}`);
             });
         }
+    };
+
+    const handleRate = (appointmentId) => {
+        navigate(`/rate-appointment/${appointmentId}`);
+    };
+
+    const handleLogout = () => {
+        actions.logoutPatient();
+        navigate('/loginpatient');
     };
 
     return (
@@ -110,28 +114,79 @@ function MisCitas() {
                                     <p><strong>Consultorio:</strong> {cita.id_center}</p>
                                     <p><strong>Doctor:</strong> {cita.id_doctor}</p>
                                     <p><strong>Especialidad:</strong> {cita.id_specialty}</p>
+                                    <p><strong>Estado:</strong> {cita.confirmation}</p>
                                 </div>
-
-                                <button
-                                    onClick={() => handleCancelarCita(cita.id)}
-                                    style={{
-                                        marginTop: '15px',
-                                        padding: '8px 15px',
-                                        backgroundColor: 'rgb(93 177 212)',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '5px',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    Cancelar Cita
-                                </button>
+                                <div style={{ marginTop: '15px' }}>
+                                    <button
+                                        onClick={() => handleCancelarCita(cita.id)}
+                                        style={{
+                                            padding: '8px 15px',
+                                            backgroundColor: 'rgb(173 29 29)', // Color rojo para cancelar
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '5px',
+                                            cursor: 'pointer',
+                                            marginRight: '10px'
+                                        }}
+                                    >
+                                        Cancelar Cita
+                                    </button>
+                                    <button
+                                        onClick={() => handleRate(cita.id)}
+                                        style={{
+                                            padding: '8px 15px',
+                                            backgroundColor: 'rgb(93 177 212)', // Color azul para calificar
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '5px',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        Calificar
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
                 ) : (
                     <p style={{ textAlign: 'center' }}>No tienes citas agendadas.</p>
                 )}
+                <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                    <button onClick={handleLogout} style={{
+                        padding: '10px 20px',
+                        backgroundColor: 'rgb(173 29 29)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer'
+                    }}>
+                        Cerrar Sesión
+                    </button>
+                    <Link to="/dashboardpatient" style={{ marginLeft: '10px' }}>
+                        <button style={{
+                            padding: '10px 20px',
+                            backgroundColor: 'rgb(93 177 212)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '5px',
+                            cursor: 'pointer'
+                        }}>
+                            Volver al Dashboard
+                        </button>
+                    </Link>
+                    <Link to="/" style={{ marginLeft: '10px' }}>
+                        <button style={{
+                            padding: '10px 20px',
+                            backgroundColor: 'rgb(93 177 212)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '5px',
+                            cursor: 'pointer'
+                        }}>
+                            Back Home
+                        </button>
+                    </Link>
+                </div>
             </div>
         </div>
     );

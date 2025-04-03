@@ -14,37 +14,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     initial: "white"
                 }
             ],
-            // patients: [],
-            // doctors: [],
-            // specialties: [],
-            // specialties_doctor: [],
-            // medicalCenters: [],
-            // medicalCenterFormData: {
-            //     name: "",
-            //     address: "",
-            //     country: "",
-            //     city: "",
-            //     phone: "",
-            //     email: "",
-            // },
-            // editingMedicalCenter: null,
-            // medicalCenterError: null,
-            // medicalCenterSuccessMessage: null,
-            // appointments: [],
-            // appointmentError: null,
-            // appointmentSuccessMessage: null,
-            // tokenpatient: null,
-            // currentPatient: null,
-            // dashboardPatientData: null,
-            // loginPatientError: null,
-            // reviews: [],
-            // reviewError: null,
-            // reviewSuccessMessage: null,
-            // specialtiesOptions: [],
-            // medicalCoveragesOptions: [],
-            // locationsOptions: [],
-            // searchProfessionalsResults: [],
-            // searchProfessionalsError: null,
+
             patients: [],
             doctors: [],
             specialties: [],
@@ -135,8 +105,14 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
             logoutPatient: () => {
-                setStore({ tokenpatient: null, currentPatient: null, dashboardPatientData: null });
-                localStorage.removeItem('tokenpatient');
+                setStore({
+                    tokenpatient: null,
+                    authPatient: false,          // Asegúrate de limpiar authPatient
+                    currentPatient: null,
+                    dashboardPatientData: null,  // Limpia explícitamente los datos del dashboard
+                    loginPatientError: null,
+                });
+                localStorage.removeItem("tokenpatient");
             },
             ///////////////////START/////////////////////////////////DOCTORS////////////////////////////////////
 
@@ -959,13 +935,17 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
             // Acción para cargar el token desde localStorage al iniciar la app
             validateAuthPatient: async () => {
-                console.log("validateAuthPatient")
-                if (localStorage.getItem("tokenpatient")) {
-                    setStore({ authPatient: true })
-                    console.log("usuario logueado")
-                    //getActions().getDashboardPatient(); // Cargar el dashboard si hay token
+                const token = localStorage.getItem("tokenpatient");
+                if (token) {
+                    setStore({ tokenpatient: token, authPatient: true });
+                    try {
+                        await getActions().getDashboardPatient(); // Verifica el token y carga datos
+                        console.log("Paciente autenticado correctamente");
+                    } catch (error) {
+                        console.error("Token inválido, cerrando sesión:", error);
+                        getActions().logoutPatient(); // Si el token no es válido, cerrar sesión
+                    }
                 }
-
             },
 
             ////////////////////////////////////////////////////////// START///// LOGIN DOCTOR  /////////////////////////////////
@@ -1045,12 +1025,17 @@ const getState = ({ getStore, getActions, setStore }) => {
 
             // Acción para cargar el token desde localStorage al iniciar la app
             validateAuthDoctor: async () => {
-                console.log("validateAuthDoctor")
-                if (localStorage.getItem("tokendoctor")) {
-                    setStore({ authDoctor: true })
-                    console.log("Doctor Logueado")
+                const token = localStorage.getItem("tokendoctor");
+                if (token) {
+                    setStore({ tokendoctor: token, authDoctor: true });
+                    try {
+                        await getActions().getDashboardDoctor(); // Verifica el token y carga datos
+                        console.log("Doctor autenticado correctamente");
+                    } catch (error) {
+                        console.error("Token inválido, cerrando sesión:", error);
+                        getActions().logoutDoctor(); // Si el token no es válido, cerrar sesión
+                    }
                 }
-
             },
 
             ////////////////////////////////////////////////////////// END///// LOGIN DOCTOR  /////////////////////////////////
@@ -1128,7 +1113,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
             ///////////////////END/////////////////////////////////MedicalCenterDoctor///////////////////////////
-
+            
         }
     };
 };

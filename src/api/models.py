@@ -104,12 +104,10 @@ class Specialties_doctor(db.Model):
     id_doctor = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
 
     def serialize(self):
-        doctor_info = Doctors.query.get(self.id_doctor)
-    
         return {
             "id": self.id,
             "id_specialty": self.id_specialty,    
-            "info_doctor": doctor_info.serialize()             
+            "id_doctor": self.id_doctor             
         }
     
 class Appointment(db.Model):

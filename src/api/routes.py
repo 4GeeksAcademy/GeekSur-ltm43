@@ -594,12 +594,8 @@ def update_specialty_doctor(specialty_id):
 #-------------------------------------GET-----ALL APPOINTMENTS------------------------------------------------#
 
 @api.route('/appointments', methods=['GET'])
-@jwt_required()
 def get_appointments():
-    # Obtener el ID del paciente del token
-    id_patient = get_jwt_identity()
-# Filtrar las citas por el ID del paciente
-    list_appointments = Appointment.query.filter_by(id_patient=id_patient).all()
+    list_appointments = Appointment.query.all()
     obj_all_appointments = [appointment.serialize() for appointment in list_appointments]
 
     response_body = {
@@ -623,16 +619,11 @@ def get_appointment_id(appointment_id):
 
 #-------------------------------------POST-----NEW APPOINTMENT-------------------------------------------------#
 @api.route('/appointments', methods=['POST'])
-@jwt_required()  # Agrega el decorador para requerir un token válido
 def post_appointment():
     data = request.get_json()
 
-    # Obtener el ID del paciente del token
-    id_patient = get_jwt_identity()
-
-    # Validate required fields (except id_patient)
-    required_fields = ['id_doctor', 'id_center', 'date', 'hour', 'id_specialty']
-    
+    # Validate required fields
+    required_fields = ['id_patient', 'id_doctor', 'id_center', 'date', 'hour', 'id_specialty', 'confirmation']
     for field in required_fields:
         if field not in data:
             raise APIException(f'The field "{field}" is required', status_code=400)
@@ -644,7 +635,9 @@ def post_appointment():
     except ValueError:
         raise APIException("Invalid date or hour format. Use YYYY-MM-DD for date and HH:MM for hour", status_code=400)
 
-    # Validate foreign keys (except id_patient)
+    # Validate foreign keys
+    if not Patient.query.get(data["id_patient"]):
+        raise APIException("Patient not found", status_code=404)
     if not Doctors.query.get(data["id_doctor"]):
         raise APIException("Doctor not found", status_code=404)
     if not MedicalCenter.query.get(data["id_center"]):
@@ -653,17 +646,17 @@ def post_appointment():
         raise APIException("Specialty not found", status_code=404)
 
     # Validate confirmation value
-    # if data["confirmation"] not in ["confirmed", "to_be_confirmed"]:
-    #     raise APIException("Confirmation must be 'confirmed' or 'to_be_confirmed'", status_code=400)
+    if data["confirmation"] not in ["confirmed", "to_be_confirmed"]:
+        raise APIException("Confirmation must be 'confirmed' or 'to_be_confirmed'", status_code=400)
 
     new_appointment = Appointment(
-        id_patient=id_patient, 
+        id_patient=data["id_patient"],
         id_doctor=data["id_doctor"],
         id_center=data["id_center"],
         date=appointment_date,
         hour=appointment_hour,
         id_specialty=data["id_specialty"],
-        confirmation="confirmed"
+        confirmation=data["confirmation"]
     )
 
     db.session.add(new_appointment)
@@ -674,6 +667,7 @@ def post_appointment():
         "new_appointment": new_appointment.serialize()
     }
     return jsonify(response_body), 201
+
 #-------------------------------------DELETE-----APPOINTMENT------------------------------------------------#
 
 @api.route('/appointments/<int:appointment_id>', methods=['DELETE'])
@@ -747,6 +741,7 @@ def update_appointment(appointment_id):
     }), 200
 
 #//////////////////////////////END //////APPOINTMENT
+
 #///////////////////// BEGIN REVIEWS /////////////////////////////
 @api.route('/reviews', methods=['GET'])
 def get_reviews():
