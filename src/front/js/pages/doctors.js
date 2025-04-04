@@ -74,7 +74,7 @@ export const Doctors = () => {
     };
 
     // CONSOLE LOG PARA VER EN COMPONENTE LISTADO DE DOCTORES
-    console.log("Lista de Doctores en el Store:", store.doctors);
+   // console.log("Lista de Doctores en el Store:", store.doctors);
 
     return (
         <div className="container">

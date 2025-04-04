@@ -18,11 +18,15 @@ import { LoginDoctor } from "./pages/logindoctor";
 import { DashboardDoctor } from "./pages/dashboarddoctor";
 import { MedicalCenterDoctor } from "./pages/medicalcenterdoctor"; 
 import { RegistrationDoctor } from "./pages/registrationdoctor"; 
+import { SpecialtyByDoctor } from "./pages/specialty_by_doctor"; 
+import { CenterOfficeByDoctor } from "./pages/center_office_by_doctor";
+import { DoctorEdit } from "./pages/doctor_edit";
+import { DoctorEditSpecialty } from "./pages/doctor_edit_specialty";
 import Reviews from "./pages/Reviews";
 import injectContext from "./store/appContext";
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
-
+import { PanelDoctor } from "./pages/paneldoctor";
 
 //create your first component
 const Layout = () => {
@@ -52,6 +56,11 @@ const Layout = () => {
                         <Route element={<MedicalCenterDoctor />} path="/medicalcenterdoctor" />
                         <Route element={<RegistrationDoctor />} path="/registrationdoctor" />
                         <Route element={<Reviews />} path="/reviews" />
+                        <Route element={<SpecialtyByDoctor />} path="/specialty_by_doctor" />
+                        <Route element={<CenterOfficeByDoctor />} path="/center_office_by_doctor" />
+                        <Route element={<DoctorEdit />} path="/doctor_edit" />
+                        <Route element={<PanelDoctor />} path="/paneldoctor" />
+                        <Route element={<DoctorEditSpecialty />} path="/doctor_edit_specialty" />
                         <Route element={<h1>Not found!</h1>} path="*" />
                         
                     </Routes>

@@ -66,6 +66,7 @@ class Doctors(db.Model):
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
     specialties = db.relationship('Specialties_doctor', backref='doctor')
     medical_center_doctors = db.relationship('MedicalCenterDoctor', backref='doctor_association', lazy=True)  
+    has_specialties = db.Column(db.Boolean, default=False)  # Campo nuevo
 
    
     def __repr__(self):
