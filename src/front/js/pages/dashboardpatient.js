@@ -15,12 +15,12 @@ export const DashboardPatient = () => {
         phone_number: '',
         gender: '',
         birth_date: '',
-        password: ''
+        password: '',
+        historial_clinico: ''
     });
     const [isSaving, setIsSaving] = useState(false);
     const [updateError, setUpdateError] = useState('');
 
-    // Cargar datos del dashboard solo si está autenticado
     useEffect(() => {
         const token = store.tokenpatient || localStorage.getItem("tokenpatient");
         if (store.authPatient && token && (!store.dashboardPatientData || !isEditing)) {
@@ -28,7 +28,6 @@ export const DashboardPatient = () => {
         }
     }, [store.authPatient, store.tokenpatient, store.dashboardPatientData, isEditing, actions]);
 
-    // Actualizar formulario cuando cambien los datos del dashboard
     useEffect(() => {
         if (store.dashboardPatientData) {
             setFormData({
@@ -37,7 +36,8 @@ export const DashboardPatient = () => {
                 email: store.dashboardPatientData.email || '',
                 phone_number: store.dashboardPatientData.phone_number || '',
                 gender: store.dashboardPatientData.gender || '',
-                birth_date: store.dashboardPatientData.birth_date || ''
+                birth_date: store.dashboardPatientData.birth_date || '',
+                historial_clinico: store.dashboardPatientData.historial_clinico || ''
             });
         }
     }, [store.dashboardPatientData]);
@@ -57,7 +57,8 @@ export const DashboardPatient = () => {
                 email: store.dashboardPatientData.email || '',
                 phone_number: store.dashboardPatientData.phone_number || '',
                 gender: store.dashboardPatientData.gender || '',
-                birth_date: store.dashboardPatientData.birth_date || ''
+                birth_date: store.dashboardPatientData.birth_date || '',
+                historial_clinico: store.dashboardPatientData.historial_clinico || ''
             });
         }
     };
@@ -72,7 +73,8 @@ export const DashboardPatient = () => {
                 email: store.dashboardPatientData.email || '',
                 phone_number: store.dashboardPatientData.phone_number || '',
                 gender: store.dashboardPatientData.gender || '',
-                birth_date: store.dashboardPatientData.birth_date || ''
+                birth_date: store.dashboardPatientData.birth_date || '',
+                historial_clinico: store.dashboardPatientData.historial_clinico || ''
             });
         }
     };
@@ -104,7 +106,6 @@ export const DashboardPatient = () => {
         }
     };
 
-    // Renderizado condicional: solo mostrar el dashboard si está autenticado
     if (!store.authPatient && !localStorage.getItem("tokenpatient")) {
         return <Navigate to="/loginpatient" />;
     }
@@ -139,7 +140,15 @@ export const DashboardPatient = () => {
                             </select>
                             <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="Email" required style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
                             <input type="password" name="password" value={formData.password} onChange={handleInputChange} placeholder="Contraseña" style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
-                            <input type="tel" name="phone_number" value={formData.phone_number} onChange={handleInputChange} placeholder="Teléfono" required style={{ padding: '10px', marginBottom: '20px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
+                            <input type="tel" name="phone_number" value={formData.phone_number} onChange={handleInputChange} placeholder="Teléfono" required style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
+                            <textarea
+                                name="historial_clinico"
+                                value={formData.historial_clinico}
+                                onChange={handleInputChange}
+                                placeholder="Historial Clínico"
+                                style={{ padding: '10px', marginBottom: '20px', border: 'none', borderRadius: '5px', height: '100px' }}
+                                disabled={isSaving}
+                            />
                             {updateError && <p style={{ color: 'red', marginBottom: '10px' }}>{updateError}</p>}
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#344955', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }} disabled={isSaving}>
@@ -155,10 +164,14 @@ export const DashboardPatient = () => {
                             <p style={{ color: 'white' }}><strong>Bienvenido,</strong> {store.dashboardPatientData.first_name} {store.dashboardPatientData.last_name}</p>
                             <p style={{ color: 'white' }}><strong>Email:</strong> {store.dashboardPatientData.email}</p>
                             <p style={{ color: 'white' }}><strong>Teléfono:</strong> {store.dashboardPatientData.phone_number}</p>
+                            <p style={{ color: 'white' }}><strong>Historial Clínico:</strong> {store.dashboardPatientData.historial_clinico || 'No disponible'}</p>
                             <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between' }}>
                                 <button onClick={handleEditClick} style={{ padding: '10px 20px', backgroundColor: 'rgb(93 177 212)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                                     <FaPencilAlt style={{ marginRight: '8px' }} /> 
                                     Editar Mi Perfil
+                                </button>
+                                <button onClick={() => navigate("/ai-consultation")} style={{ padding: '10px 20px', backgroundColor: 'rgb(93 177 212)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+                                    Consultar con IA
                                 </button>
                                 <button onClick={handleLogout} style={{ padding: '10px 20px', backgroundColor: 'rgb(173 29 29)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
                                     Cerrar Sesión

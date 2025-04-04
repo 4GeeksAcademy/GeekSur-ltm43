@@ -238,7 +238,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     throw error;
                 }
             },
-
+            
             updatePatient: async (id, patientData) => {
                 try {
                     const resp = await fetch(process.env.BACKEND_URL + `/api/patients/${id}`, {

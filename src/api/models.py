@@ -18,6 +18,7 @@ class Patient(db.Model):
     birth_date = db.Column(db.Date, nullable=False)
     phone_number = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    historial_clinico = db.Column(db.Text, nullable=True)  # Nuevo campo
 
     def serialize(self):
         return {
@@ -27,7 +28,8 @@ class Patient(db.Model):
             "last_name": self.last_name,
             "gender": self.gender,
             "birth_date": self.birth_date.strftime('%Y-%m-%d'),
-            "phone_number": self.phone_number
+            "phone_number": self.phone_number,
+            "historial_clinico": self.historial_clinico
             # Password excluido por seguridad
         }
 

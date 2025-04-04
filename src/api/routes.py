@@ -5,16 +5,23 @@ from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User, MedicalCenter, Patient, Doctors, Specialties, Specialties_doctor, Appointment, Review, MedicalCenterDoctor
 from api.utils import generate_sitemap, APIException, upload_image, delete_image
 from flask_cors import CORS
-from datetime import datetime
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from itertools import chain
 import json
+from datetime import datetime, timedelta
+import os
+import google.generativeai as genai 
+from google.generativeai import types
 
 api = Blueprint('api', __name__)
 
 # Allow CORS requests to this API
 CORS(api)
 #//////////////////////////////START //////NO BORRAR
+
+# Configurar el cliente de Google Gen AI con la clave desde .env
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+client = genai.GenerativeModel('gemini-1.5-flash')
 
 @api.route('/hello', methods=['POST', 'GET'])
 def handle_hello():
@@ -285,7 +292,8 @@ def create_patient():
         gender=data['gender'],
         birth_date=birth_date,
         phone_number=data['phone_number'],
-        password=data['password']
+        password=data['password'],
+        historial_clinico=data.get('historial_clinico', '')  # Valor por defecto si no se envía
     )
     
     db.session.add(new_patient)
@@ -295,19 +303,15 @@ def create_patient():
 
 @api.route('/patients/<int:id>', methods=['PUT'])
 def update_patient(id):
-    # Busca el paciente por ID
     patient = Patient.query.get_or_404(id)
     
-    # Obtiene los datos del cuerpo de la solicitud
     data = request.get_json()
     
-    # Campos requeridos (todos deben enviarse)
     required_fields = ['email', 'first_name', 'last_name', 'gender', 'birth_date', 'phone_number']
     for field in required_fields:
         if field not in data:
             raise APIException(f"Missing required field: {field}", status_code=400)
     
-    # Validaciones
     if '@' not in data['email']:
         raise APIException("Invalid email format", status_code=400)
     
@@ -319,12 +323,10 @@ def update_patient(id):
     except ValueError:
         raise APIException("Invalid birth_date format, use YYYY-MM-DD", status_code=400)
     
-    # Verifica si el nuevo email ya existe y no pertenece al mismo paciente
     existing_patient = Patient.query.filter_by(email=data['email']).first()
     if existing_patient and existing_patient.id != id:
         raise APIException("Email already exists", status_code=400)
     
-    # Actualiza los campos del paciente (excepto password)
     patient.email = data['email']
     patient.first_name = data['first_name']
     patient.last_name = data['last_name']
@@ -334,7 +336,9 @@ def update_patient(id):
 
     if 'password' in data:
         patient.password = data['password']
-    
+    if 'historial_clinico' in data:
+        patient.historial_clinico = data['historial_clinico']
+
     db.session.commit()
     
     return jsonify(patient.serialize()), 200
@@ -1169,3 +1173,52 @@ def create_patient_review():
         return jsonify({"msg": f"Error al crear la reseña: {str(e)}"}), 500
     
     ################## End patients appointments and patient review##############
+
+######################Beguin services  Google Gen AI###########################
+@api.route('/patient/ai-consultation', methods=['POST'])
+@jwt_required()
+def ai_consultation():
+    try:
+        patient_id = get_jwt_identity()
+        patient = Patient.query.get(patient_id)
+        if not patient:
+            return jsonify({"msg": "Paciente no encontrado"}), 404
+
+        data = request.get_json()
+        if not data or 'symptoms' not in data:
+            return jsonify({"msg": "Se requieren síntomas"}), 400
+
+        symptoms = data['symptoms']
+
+        # Calcular edad aproximada
+        today = datetime.now()
+        birth_date = patient.birth_date
+        age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+
+        # Preparar el prompt con datos del paciente
+        prompt = f"""
+        Eres un asistente de IA diseñado para proporcionar recomendaciones generales de salud basadas en síntomas. No eres un médico, y tus respuestas deben ser informativas y no diagnósticas. Usa esta información del paciente:
+        - Edad: {age} años
+        - Género: {patient.gender}
+        - Historial clínico: {patient.historial_clinico or 'No disponible'}
+        - Síntomas reportados: {symptoms}
+
+        Basándote en esta información, proporciona recomendaciones generales (como descansar, hidratarse, o consultar a un médico) sin hacer diagnósticos médicos. Responde en un tono amigable y claro, pero mantén la respuesta breve (máximo 2-3 frases).
+        """
+
+        # Generar contenido con Google Gen AI, aplicando configuraciones
+        response = client.generate_content(
+            prompt,
+            generation_config=types.GenerationConfig(
+                max_output_tokens=50,  # Limitar la respuesta a 50 tokens (aproximadamente 2-3 frases cortas)
+                temperature=0.3,       # Hacer la respuesta más predecible y menos creativa
+            )
+        )
+
+        # Obtener la respuesta del modelo
+        recommendation = response.text.strip()
+        return jsonify({"recommendation": recommendation}), 200
+
+    except Exception as e:
+        return jsonify({"msg": f"Error al consultar la IA: {str(e)}"}), 500
+    ######################End services  Google Gen AI###########################
