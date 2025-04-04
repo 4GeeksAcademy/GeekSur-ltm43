@@ -13,6 +13,7 @@ export const DashboardDoctor = () => {
             navigate("/logindoctor"); // Redirigir solo si no hay token ni auth
         } else if (!store.dashboardDoctorData) {
             actions.getDashboardDoctor(); // Cargar datos si hay token pero no datos
+            actions.getDoctorPanel(); // Cargar datos si no hay datos del panel
         }
     }, [store.authDoctor, store.dashboardDoctorData]);
 

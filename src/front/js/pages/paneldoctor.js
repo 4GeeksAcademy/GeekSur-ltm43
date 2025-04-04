@@ -6,12 +6,15 @@ import { Link } from "react-router-dom";
 export const PanelDoctor = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
-    
+
+   
     useEffect(() => {
         if (!store.authDoctor && !localStorage.getItem("tokendoctor")) {
             navigate("/logindoctor"); // Redirigir solo si no hay token ni auth
         } else if (!store.doctorPanelData) {
             actions.getDoctorPanel(); // Cargar datos si no hay datos del panel
+
+
         }
     }, [store.authDoctor, store.doctorPanelData]);
 
@@ -20,9 +23,12 @@ export const PanelDoctor = () => {
         navigate("/logindoctor");
     };
 
+
+
     return (
         <>
             {store.authDoctor === true || localStorage.getItem("tokendoctor") ? (
+                
                 <div className="container">
                     <h1>Bienvenido al Panel del Doctor</h1>
 
@@ -81,7 +87,7 @@ export const PanelDoctor = () => {
                    <Link to="/dashboarddoctor">
                         <button type="submit" className="btn btn-primary">Ir a DashBoard</button>
                    </Link>
-
+                
                     <button onClick={handleLogout} className="btn btn-secondary mb-3">
                             Cerrar Sesión
                      </button>

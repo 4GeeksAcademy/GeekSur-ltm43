@@ -55,6 +55,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             doctorPanelData: null,   //oscar
             deleteDoctorSpecialty: null,
             addMedicalCenterDoctor: null,
+            doctorSpecialties: [],
                },
         actions: {
             ///////////////////START/////////////////////////////////DOCTORS////////////////////////////////////
@@ -807,7 +808,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 
             logoutDoctor: () => {
                 setStore({
-                    //tokendoctor: null,
+                    tokendoctor: null,
                     authDoctor: false,
                     currentDoctor: null,
                     dashboardDoctorData: null,
@@ -826,6 +827,25 @@ const getState = ({ getStore, getActions, setStore }) => {
                     }
 
             },
+
+
+
+// Acción para cargar el token desde localStorage al iniciar la app
+validateAuthPatient: async () => {
+    console.log("validateAuthPatient")
+    if (localStorage.getItem("tokenpatient")) {
+        setStore({ authPatient: true})
+            console.log("usuario logueado")
+        //getActions().getDashboardPatient(); // Cargar el dashboard si hay token
+    }
+   
+},
+
+
+
+
+
+
 
 ////////////////////////////////////////////////////////// END///// LOGIN DOCTOR  /////////////////////////////////
 
@@ -869,6 +889,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             
                     if (response.ok) {
                         setStore({ medical_center_doctor: data.data });  // Aquí asignas los datos a tu store
+         
                     } else {
                         console.error("Error al obtener medical_center_doctor:", data.msg);
                     }
@@ -1126,21 +1147,114 @@ getDoctorOffices: async () => {
 
 //////////////////////////////////////////////////////////////////////////
 
-addMedicalCenterDoctor: async (medicalCenterId, office) => {
-    const store = getStore();
+// addMedicalCenterDoctor: async (medicalCenterId, office) => {
+//     const store = getStore();
+//     const token = store.tokendoctor || localStorage.getItem("tokendoctor");
+
+//     if (!token) {
+//         setStore({ loginDoctorError: "No hay token, por favor inicia sesión" });
+//         return;
+//     }
+
+//     // Obtener el id_doctor desde el contexto global o JWT
+//     const doctorId = store.doctorPanelData?.doctor.id;  // Ajusta esto si es necesario
+
+//     if (!doctorId) {
+//         console.error("No se encontró el ID del doctor");
+//         return;
+//     }
+
+//     try {
+//         const response = await fetch(process.env.BACKEND_URL + "/api/medicalcenterdoctor", {
+//             method: "POST",
+//             headers: {
+//                 "Authorization": `Bearer ${token}`,
+//                 "Content-Type": "application/json",
+//             },
+//             body: JSON.stringify({
+//                 id_doctor: doctorId,  // Enviar el id_doctor
+//                 id_medical_center: medicalCenterId,
+//                 office: office,
+//             }),
+//         });
+
+//         const data = await response.json();
+//         if (!response.ok) {
+//             throw new Error(data.msg || "Error al agregar centro médico");
+//         }
+
+//         // Actualizar la lista de centros médicos después de agregar
+//         setStore({ medical_center_doctor: [...store.medical_center_doctor, data.MedicalCenterDoctor] });
+//     } catch (error) {
+//         console.error("Error al agregar centro médico:", error.message);
+//     }
+// },
+
+// addMedicalCenterDoctor: async (medicalCenterId, office) => {
+//     const store = getStore();            
+//     const token = store.tokendoctor || localStorage.getItem("tokendoctor");
+
+//     if (!token) {
+//         setStore({ loginDoctorError: "No hay token, por favor inicia sesión" });
+//         return false; // <-- importante para saber si falló
+//     }
+
+//     const doctorId = store.doctorPanelData?.doctor.id;
+
+//     if (!doctorId) {
+//         console.error("No se encontró el ID del doctor");
+//         return false;
+//     }
+
+//     try {
+//         const response = await fetch(process.env.BACKEND_URL + "/api/medicalcenterdoctor", {
+//             method: "POST",
+//             headers: {
+//                 "Authorization": `Bearer ${token}`,
+//                 "Content-Type": "application/json",
+//             },
+//             body: JSON.stringify({
+//                 id_doctor: doctorId,
+//                 id_medical_center: medicalCenterId,
+//                 office: office
+                
+//             }),
+//         });
+
+//         const data = await response.json();
+
+//         if (!response.ok) {
+//             throw new Error(data.msg || "Error al agregar centro médico");
+//         }
+
+//         // Asegurarse de que el array esté inicializado
+//         const updatedList = Array.isArray(store.medical_center_doctor)
+//             ? [...store.medical_center_doctor, data.MedicalCenterDoctor]
+//             : [data.MedicalCenterDoctor];
+
+//         setStore({ medical_center_doctor: updatedList });
+
+//         return true; // <-- Esto hace que el componente funcione bien
+//     } catch (error) {
+//         console.error("Error al agregar centro médico:", error.message);
+//         return false;
+//     }
+// },
+
+addMedicalCenterDoctor: async (medicalCenterId, office, specialtyId) => {
+    const store = getStore();            
     const token = store.tokendoctor || localStorage.getItem("tokendoctor");
 
     if (!token) {
         setStore({ loginDoctorError: "No hay token, por favor inicia sesión" });
-        return;
+        return false;
     }
 
-    // Obtener el id_doctor desde el contexto global o JWT
-    const doctorId = store.doctorPanelData?.doctor.id;  // Ajusta esto si es necesario
+    const doctorId = store.doctorPanelData?.doctor.id;
 
     if (!doctorId) {
         console.error("No se encontró el ID del doctor");
-        return;
+        return false;
     }
 
     try {
@@ -1151,30 +1265,31 @@ addMedicalCenterDoctor: async (medicalCenterId, office) => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                id_doctor: doctorId,  // Enviar el id_doctor
+                id_doctor: doctorId,
                 id_medical_center: medicalCenterId,
                 office: office,
+                id_specialty: specialtyId  // 🔥 Nueva línea para enviar especialidad
             }),
         });
 
         const data = await response.json();
+
         if (!response.ok) {
             throw new Error(data.msg || "Error al agregar centro médico");
         }
 
-        // Actualizar la lista de centros médicos después de agregar
-        setStore({ medical_center_doctor: [...store.medical_center_doctor, data.MedicalCenterDoctor] });
+        const updatedList = Array.isArray(store.medical_center_doctor)
+            ? [...store.medical_center_doctor, data.MedicalCenterDoctor]
+            : [data.MedicalCenterDoctor];
+
+        setStore({ medical_center_doctor: updatedList });
+
+        return true;
     } catch (error) {
         console.error("Error al agregar centro médico:", error.message);
+        return false;
     }
 },
-
-
-
-
-
-
-
 
 
         }

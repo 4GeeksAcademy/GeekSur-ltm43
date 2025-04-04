@@ -16,7 +16,7 @@ export const LoginDoctor = () => {
         e.preventDefault();
             try {
                 await actions.loginDoctor(email, password);
-                navigate("/paneldoctor"); 
+                navigate("/dashboarddoctor"); 
             } catch (error) {
                 alert("Error al iniciar sesión: " + (store.loginDoctorError || "Inténtalo de nuevo"));
             }

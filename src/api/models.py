@@ -162,6 +162,6 @@ class MedicalCenterDoctor(db.Model):
             "id": self.id,
             "id_medical_center": self.id_medical_center,
             "id_doctor": self.id_doctor,
-            "office": self.office
+            "office": self.office            
         }
     

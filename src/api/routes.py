@@ -937,30 +937,40 @@ def get_get_profile_doctor():
 
 #3333333333333333333333333333333333333333333333333333333333333333333
 
-@api.route('/medicalcenterdoctor', methods=['GET'])
-@jwt_required()  # Asegura que el usuario esté autenticado
+# @api.route('/medicalcenterdoctor', methods=['GET'])
+# @jwt_required()  # Asegura que el usuario esté autenticado
+# def get_medical_center_doctor():
+#     current_user_id = get_jwt_identity()  # Obtener el ID del doctor desde el token JWT
+    
+#     # Obtener todos los centros médicos y oficinas asociados al doctor autenticado
+#     medical_centers_doctors = MedicalCenterDoctor.query.filter_by(id_doctor=current_user_id).all()
+
+#     if not medical_centers_doctors:
+#         return jsonify({"msg": "El doctor no tiene centros médicos asignados."}), 404
+    
+#     # Serializar los resultados, obteniendo el nombre del centro médico y la oficina
+#     result = []
+#     for mcd in medical_centers_doctors:
+#         medical_center = MedicalCenter.query.get(mcd.id_medical_center)
+#         if medical_center:
+#             result.append({
+#                 "id_doctor": mcd.id_doctor,
+#                 "medical_center_name": medical_center.name,
+#                 "office": mcd.office
+#             })
+
+#     return jsonify({"msg": "Centros médicos y oficinas obtenidos correctamente", "data": result}), 200
+
+@api.route("/medicalcenterdoctor", methods=["GET"])
+@jwt_required()
 def get_medical_center_doctor():
-    current_user_id = get_jwt_identity()  # Obtener el ID del doctor desde el token JWT
-    
-    # Obtener todos los centros médicos y oficinas asociados al doctor autenticado
-    medical_centers_doctors = MedicalCenterDoctor.query.filter_by(id_doctor=current_user_id).all()
+    # Lógica para obtener el id del doctor desde el token
+    current_doctor_id = get_jwt_identity()
 
-    if not medical_centers_doctors:
-        return jsonify({"msg": "El doctor no tiene centros médicos asignados."}), 404
-    
-    # Serializar los resultados, obteniendo el nombre del centro médico y la oficina
-    result = []
-    for mcd in medical_centers_doctors:
-        medical_center = MedicalCenter.query.get(mcd.id_medical_center)
-        if medical_center:
-            result.append({
-                "id_doctor": mcd.id_doctor,
-                "medical_center_name": medical_center.name,
-                "office": mcd.office
-            })
+    data = MedicalCenterDoctor.query.filter_by(id_doctor=current_doctor_id).all()
+    result = [item.serialize() for item in data]
 
-    return jsonify({"msg": "Centros médicos y oficinas obtenidos correctamente", "data": result}), 200
-
+    return jsonify({"data": result}), 200
 
 
 
