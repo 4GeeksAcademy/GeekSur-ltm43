@@ -1174,6 +1174,7 @@ def create_patient_review():
     
     ################## End patients appointments and patient review##############
 
+######################Beguin services  Google Gen AI###########################
 @api.route('/patient/ai-consultation', methods=['POST'])
 @jwt_required()
 def ai_consultation():
@@ -1220,3 +1221,4 @@ def ai_consultation():
 
     except Exception as e:
         return jsonify({"msg": f"Error al consultar la IA: {str(e)}"}), 500
+    ######################End services  Google Gen AI###########################
