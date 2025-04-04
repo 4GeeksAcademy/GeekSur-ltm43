@@ -25,7 +25,8 @@ import { SignupPatient } from "./pages/SignupPatient";
 import MisCitas from './pages/MisCitas';
 import { DoctorAppointment } from "./pages/doctor_appointment";
 import { PatientAppointments } from "./pages/patient_appointments"; 
-import { RateAppointment } from "./pages/rate_appointment"; 
+import { RateAppointment } from "./pages/rate_appointment";
+import { AIConsultation } from "./pages/AIConsultation"; 
 import injectContext from "./store/appContext";
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
@@ -66,6 +67,7 @@ const Layout = () => {
                         <Route element={<DoctorAppointment />} path="/doctor-appointment" />
                         <Route element={<PatientAppointments />} path="/patient-appointments" />
                         <Route element={<RateAppointment />} path="/rate-appointment/:appointmentId" />
+                        <Route element={<AIConsultation />} path="/ai-consultation" />
                         <Route element={<h1>Not found!</h1>} path="*" />
                         
                     </Routes>

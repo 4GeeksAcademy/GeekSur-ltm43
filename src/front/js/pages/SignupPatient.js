@@ -12,6 +12,7 @@ export const SignupPatient = () => {
         birth_date: "",
         phone_number: "",
         password: "",
+        historial_clinico: ""  // Nuevo campo
     });
     const navigate = useNavigate();
 
@@ -31,6 +32,7 @@ export const SignupPatient = () => {
                 birth_date: "",
                 phone_number: "",
                 password: "",
+                historial_clinico: ""  // Limpiar el nuevo campo
             });
             alert("Paciente registrado exitosamente");
             navigate("/loginpatient");
@@ -118,7 +120,14 @@ export const SignupPatient = () => {
                         onChange={handleChange}
                         placeholder="Contraseña"
                         required
-                        style={{ padding: '10px', marginBottom: '20px', border: 'none', borderRadius: '5px' }}
+                        style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }}
+                    />
+                    <textarea
+                        name="historial_clinico"
+                        value={formData.historial_clinico}
+                        onChange={handleChange}
+                        placeholder="Historial Clínico (opcional)"
+                        style={{ padding: '10px', marginBottom: '20px', border: 'none', borderRadius: '5px', height: '100px' }}
                     />
                     <button 
                         type="submit" 
@@ -135,7 +144,16 @@ export const SignupPatient = () => {
                     </button>
                 </form>
                 <Link to="/" style={{ marginTop: '20px' }}>
-                
+                    <button style={{ 
+                        padding: '10px 20px', 
+                        backgroundColor: 'rgb(93 177 212)', 
+                        color: 'white', 
+                        border: 'none', 
+                        borderRadius: '5px', 
+                        cursor: 'pointer' 
+                    }}>
+                        Back Home
+                    </button>
                 </Link>
             </div>
         </div>
