@@ -13,8 +13,6 @@ export const PanelDoctor = () => {
             navigate("/logindoctor"); // Redirigir solo si no hay token ni auth
         } else if (!store.doctorPanelData) {
             actions.getDoctorPanel(); // Cargar datos si no hay datos del panel
-
-
         }
     }, [store.authDoctor, store.doctorPanelData]);
 
@@ -22,8 +20,6 @@ export const PanelDoctor = () => {
         actions.logoutDoctor();
         navigate("/logindoctor");
     };
-
-
 
     return (
         <>
@@ -56,15 +52,28 @@ export const PanelDoctor = () => {
                             <h3>Centros Médicos</h3>
                             {store.doctorPanelData.doctor.medical_centers && store.doctorPanelData.doctor.medical_centers.length > 0 ? (
                                 <ul>
-                                    {store.doctorPanelData.doctor.medical_centers.map(center => (
-                                        <li key={center.id}>
-                                            {center.name} - Oficina: {center.office}
-                                        </li>
-                                    ))}
+                                    {store.doctorPanelData.doctor.medical_centers
+                                        .sort((a, b) => {
+                                            // Primero ordenamos por nombre del centro (a.name vs b.name)
+                                            if (a.name < b.name) return -1;
+                                            if (a.name > b.name) return 1;
+
+                                            // Si los nombres son iguales, ordenamos por el número de oficina (a.office vs b.office)
+                                            if (a.office < b.office) return -1;
+                                            if (a.office > b.office) return 1;
+
+                                            return 0; // Si son iguales, no hacemos ningún cambio
+                                        })
+                                        .map(center => (
+                                            <li key={center.id}>
+                                                {center.name} - Oficina: {center.office}
+                                            </li>
+                                        ))}
                                 </ul>
                             ) : (
                                 <p>No tiene centros médicos asignados.</p>
                             )}
+
                         </div>
                     ) : (
                         <p>Cargando datos...</p>
@@ -81,7 +90,7 @@ export const PanelDoctor = () => {
                    </Link>
 
                    <Link to="/center_office_by_doctor">
-                        <button type="submit" className="btn btn-primary">Editar Centros Medicos</button>
+                        <button type="submit" className="btn btn-primary">Centros Medicos</button>
                    </Link>
 
                    <Link to="/dashboarddoctor">
@@ -92,10 +101,6 @@ export const PanelDoctor = () => {
                             Cerrar Sesión
                      </button>
                     </div>
-
-
-
-
 
                 </div>
             ) : (

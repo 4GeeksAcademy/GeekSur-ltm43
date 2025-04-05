@@ -435,19 +435,6 @@ def update_specialty(specialty_id):
 
 #-------------------------------------GET-----ALL SPECIALTIES_DOCTOR-----------------------------------------------#
 
-# @api.route('/specialties_doctor', methods=['GET'])
-# @jwt_required()
-# def get_specialties_doctor():
-    
-#     list_specialties_doctor = Specialties_doctor.query.all()
-#     obj_all_specialties_doctor = [specialties_doctor.serialize() for specialties_doctor in list_specialties_doctor]
-
-#     response_body = {
-#        "msg": "GET / Specialties_doctor from Tabla",
-#        "Specialties_doctor": obj_all_specialties_doctor
-#     }
-#     return jsonify(response_body), 200
-
 @api.route('/specialties_doctor', methods=['GET'])
 @jwt_required()
 def get_doctor_specialties():
@@ -923,43 +910,6 @@ def get_get_profile_doctor():
 #//////////////////////////////START //////MEDICAL CENTER DOCTOR////////////////////////////////////////////////////////
 
 #-------------------------------------GET-----ALL MEDICAL CENTER DOCTOR-----------------------------------------------#
-# sin jwt
-# @api.route('/medicalcenterdoctor', methods=['GET'])
-# def get_medical_center_doctor():
-#     list_medical_center_doctor= MedicalCenterDoctor.query.all()
-#     obj_all_medical_center_doctor = [medical_center_doctor.serialize() for medical_center_doctor in list_medical_center_doctor]
-
-#     response_body = {
-#        "msg": "GET / medical_center_doctor from Tabla",
-#        "MedicalCenterDoctor": obj_all_medical_center_doctor
-#     }
-#     return jsonify(response_body), 200
-
-#3333333333333333333333333333333333333333333333333333333333333333333
-
-# @api.route('/medicalcenterdoctor', methods=['GET'])
-# @jwt_required()  # Asegura que el usuario esté autenticado
-# def get_medical_center_doctor():
-#     current_user_id = get_jwt_identity()  # Obtener el ID del doctor desde el token JWT
-    
-#     # Obtener todos los centros médicos y oficinas asociados al doctor autenticado
-#     medical_centers_doctors = MedicalCenterDoctor.query.filter_by(id_doctor=current_user_id).all()
-
-#     if not medical_centers_doctors:
-#         return jsonify({"msg": "El doctor no tiene centros médicos asignados."}), 404
-    
-#     # Serializar los resultados, obteniendo el nombre del centro médico y la oficina
-#     result = []
-#     for mcd in medical_centers_doctors:
-#         medical_center = MedicalCenter.query.get(mcd.id_medical_center)
-#         if medical_center:
-#             result.append({
-#                 "id_doctor": mcd.id_doctor,
-#                 "medical_center_name": medical_center.name,
-#                 "office": mcd.office
-#             })
-
-#     return jsonify({"msg": "Centros médicos y oficinas obtenidos correctamente", "data": result}), 200
 
 @api.route("/medicalcenterdoctor", methods=["GET"])
 @jwt_required()
@@ -969,80 +919,105 @@ def get_medical_center_doctor():
 
     data = MedicalCenterDoctor.query.filter_by(id_doctor=current_doctor_id).all()
     result = [item.serialize() for item in data]
+    print(result)
 
     return jsonify({"data": result}), 200
-
-
 
 #-------------------------------------------------POST------------------------------------------------#
 #-------------------------------------POST----------------------------------------------------#
 @api.route('/medicalcenterdoctor', methods=['POST'])
 def post_medical_center_doctor():
-    # Obtener los datos del cuerpo de la solicitud
     data = request.get_json()
 
-    # Validar que los datos necesarios estén presentes
+    # Validaciones básicas
     if not data:
-         raise APIException('No se proporcionaron datos', status_code=400)
+        raise APIException('No se proporcionaron datos', status_code=400)
     if 'id_medical_center' not in data or 'id_doctor' not in data:
-         raise APIException('El campo  "id_medical_center" y "id_doctor" es requerido', status_code=400)
-    
-    # siempre tiene que haber data dentro de los corchetes.
+        raise APIException('El campo "id_medical_center" y "id_doctor" es requerido', status_code=400)
+
+    id_medical_center = data["id_medical_center"]
+    id_doctor = data["id_doctor"]
+    office = data.get("office")
+
+    existing_entry = MedicalCenterDoctor.query.filter_by(
+        id_medical_center=id_medical_center,
+        id_doctor=id_doctor,
+        office=office
+    ).first()
+
+    if existing_entry:
+        raise APIException("Ya existe este centro médico con esa oficina asignada para este doctor.", status_code=400)
+
+    # Crear nuevo registro si no existe duplicado
     new_medical_center_doctor = MedicalCenterDoctor(
-    id_medical_center=data["id_medical_center"],
-    id_doctor=data["id_doctor"],
-    office=data["office"],
+        id_medical_center=id_medical_center,
+        id_doctor=id_doctor,
+        office=office,
     )
-    # Guardar el nueva especialidad_doctor en la base de datos
+
     db.session.add(new_medical_center_doctor)
     db.session.commit()
 
-    # Devolver una respuesta con el especialidad_doctor creado
     response_body = {
-        "msg": "Se creo nuevo medical_center_doctor",
-        "new_medical_center_doctor": new_medical_center_doctor.serialize() 
-        }
+        "msg": "Se creó nuevo medical_center_doctor",
+        "new_medical_center_doctor": new_medical_center_doctor.serialize()
+    }
     return jsonify(response_body), 201
+
 
 #-------------------------------------DELETE---MEDICAL CENTER DOCTOR-----------------------------------------------#
 
-@api.route('/medicalcenterdoctor/<int:cmd_id>', methods=['DELETE'])
+@api.route("/medicalcenterdoctor/<int:cmd_id>", methods=["DELETE"])
+@jwt_required()
 def delete_medical_center_doctor(cmd_id):
-    medical_center_doctor_one = MedicalCenterDoctor.query.get(cmd_id)
+    # Obtener el ID del doctor desde el token
+    current_user_id = get_jwt_identity()
 
-    if not medical_center_doctor_one:
-        return jsonify({"msg": "medical_center_doctor no encontrado"}), 404
+    # Buscar la relación por ID
+    medical_center_doctor = MedicalCenterDoctor.query.get(cmd_id)
 
-    db.session.delete(medical_center_doctor_one)
+    if not medical_center_doctor:
+        return jsonify({"msg": "Relación no encontrada"}), 404
+
+    # Verificar que la relación pertenezca al doctor autenticado
+    if medical_center_doctor.id_doctor != int(current_user_id):
+        return jsonify({"msg": "No autorizado"}), 403
+
+    # Eliminar si todo está correcto
+    db.session.delete(medical_center_doctor)
     db.session.commit()
-
-    return jsonify({"msg": "ok"}), 200
+    return jsonify({"msg": "Centro eliminado correctamente"}), 200
 
 #-------------------------------------PUT--MEDICAL CENTER DOCTOR----------------------------------------------#
 
-@api.route('/medicalcenterdoctor/<int:cmd_id>', methods=['PUT'])
+@api.route("/medicalcenterdoctor/<int:cmd_id>", methods=["PUT"])
+@jwt_required()
 def update_medical_center_doctor(cmd_id):
-    # Buscar el medical_center_doctor en la base de datos
-    medical_center_doctor_one = MedicalCenterDoctor.query.get(cmd_id)
+    # Obtener el ID del doctor desde el token
+    current_user_id = get_jwt_identity()
 
-    if not medical_center_doctor_one:
-        return jsonify({"msg": "Especialidad_doctor no encontrado"}), 404
+    # Buscar la relación por ID
+    medical_center_doctor = MedicalCenterDoctor.query.get(cmd_id)
 
+    if not medical_center_doctor:
+        return jsonify({"msg": "Relación no encontrada"}), 404
+
+    # Verificar que la relación pertenezca al doctor autenticado
+    if medical_center_doctor.id_doctor != int(current_user_id):
+        return jsonify({"msg": "No autorizado"}), 403
+
+    # Obtener el nuevo número de oficina desde el cuerpo de la solicitud
     data = request.get_json()
-    if not data:
-        return jsonify({"msg": "No se enviaron datos"}), 400
+    new_office = data.get("office")
 
-    # Actualizar los campos si existen en el JSON recibido
-    medical_center_doctor_one.id_medical_center = data.get("id_medical_center", medical_center_doctor_one.id_medical_center)
-    medical_center_doctor_one.id_doctor = data.get("id_doctor", medical_center_doctor_one.id_doctor)
-    medical_center_doctor_one.office = data.get("office", medical_center_doctor_one.office)
-      
+    if not new_office:
+        return jsonify({"msg": "El número de oficina es requerido"}), 400
+
+    # Actualizar el número de oficina
+    medical_center_doctor.office = new_office
     db.session.commit()
 
-    return jsonify({
-        "msg": "actualizado correctamente",
-        "update_specialty_doctor": medical_center_doctor_one.serialize()
-    }), 200
+    return jsonify({"msg": "Número de oficina actualizado correctamente"}), 200
 
 
 #--START------Nuevo BackEnd para add medical center y doctor desde el usuario Doctor//  REVISAR OSCAR//////////////////
@@ -1105,7 +1080,8 @@ def get_doctor_panel():
     # Obtener centros médicos del doctor
     medical_centers = [
         {
-            "id": m.id_medical_center,
+            "id": m.id,
+            "id_medical_center": m.id_medical_center,
             "name": MedicalCenter.query.get(m.id_medical_center).name,
             "office": m.office
         }
@@ -1189,3 +1165,5 @@ def add_medical_center_doctor():
     except Exception as e:
         db.session.rollback()
         return jsonify({"msg": "Error al agregar centro médico", "error": str(e)}), 500
+
+

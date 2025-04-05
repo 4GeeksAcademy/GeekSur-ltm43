@@ -6,7 +6,6 @@ import { Link } from "react-router-dom";
 export const DashboardDoctor = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
-    console.log("se cargó dashboard Doctor");
 
     useEffect(() => {
         if (!store.authDoctor && !localStorage.getItem("tokendoctor")) {
@@ -14,6 +13,7 @@ export const DashboardDoctor = () => {
         } else if (!store.dashboardDoctorData) {
             actions.getDashboardDoctor(); // Cargar datos si hay token pero no datos
             actions.getDoctorPanel(); // Cargar datos si no hay datos del panel
+           
         }
     }, [store.authDoctor, store.dashboardDoctorData]);
 
@@ -27,7 +27,8 @@ export const DashboardDoctor = () => {
                 <div className="container">
                     
                     <h3>DASHBOARD</h3>
-                    <h2>Hola Doctor: {store.dashboardDoctorData?.first_name || "Usuario"}</h2>
+                    
+                    <h2>Hola Doctor: {store.doctorPanelData.doctor?.first_name}</h2>
                     <h4>¿Que desea hacer?</h4>
                     <Link to="/paneldoctor">
                     <button className="btn btn-success">Edite sus datos</button>

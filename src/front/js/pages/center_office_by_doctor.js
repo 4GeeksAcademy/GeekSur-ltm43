@@ -17,82 +17,62 @@ export const CenterOfficeByDoctor = () => {
             actions.getMedicalCenterDoctor();
             actions.getMedicalCenters();
             actions.getDoctorPanel();
-            actions.getSpecialties(); // Cargar todas las especialidades disponibles
-            actions.getDoctorSpecialties(); // Cargar las especialidades del doctor
         }
     }, [store.authDoctor]);
 
     const handleAddCenter = async (e) => {
         e.preventDefault();
-
+    
         if (!selectedCenter || !office) {
             setError("Por favor, selecciona un centro médico y agrega la oficina.");
             return;
         }
-
-        try {
-            const result = await actions.addMedicalCenterDoctor(selectedCenter, office);
-            if (result !== false) {
-                setSelectedCenter(null);
-                setOffice("");
-                setError("");
-                setSuccess("Centro médico y oficina agregados correctamente");
-
-                // Actualizar el estado del store con el nuevo centro médico y oficina
-                const newMedicalCenter = store.medicalCenters.find(center => center.id === selectedCenter);
-                if (newMedicalCenter) {
-                    newMedicalCenter.office = office;  // Asignar la nueva oficina
-                    setStore({
-                        medical_center_doctor: [...store.medical_center_doctor, newMedicalCenter],
-                    });
-                }
-
-                setTimeout(() => {
-                    setSuccess("");
-                }, 3000);
-            }
-        } catch (error) {
-            setError("Error al agregar centro médico");
+    
+        const result = await actions.addMedicalCenterDoctor(selectedCenter, office);
+    
+        if (!result.success) {
+            setError(result.msg);  // Mostramos el mensaje del backend
+            setTimeout(() => setError(""), 3000);
+            return;
         }
+    
+        // Si fue exitoso
+        setSelectedCenter(null);
+        setOffice("");
+        setError("");
+        setSuccess("Centro médico y oficina agregados correctamente");
+    
+        actions.getDoctorPanel();
+    
+        setTimeout(() => setSuccess(""), 3000);
     };
 
     const handleGoToPanel = () => {
         navigate("/paneldoctor");
     };
 
-    const [selectedSpecialty, setSelectedSpecialty] = useState(null);
+    const handleGoToCMEdit = () => {
+        navigate("/center_office_by_doctor_edit");
+    };
+
+    const handleDeleteCenter = async (centerId) => {
+        const confirmDelete = window.confirm("¿Estás seguro que quieres eliminar este centro?");
+        if (!confirmDelete) return;
+
+        const result = await actions.deleteMedicalCenterDoctor(centerId);
+
+        if (result) {
+            setSuccess("Centro eliminado correctamente.");
+            actions.getDoctorPanel(); // recargar la lista actualizada
+            setTimeout(() => setSuccess(""), 3000);
+        } else {
+            setError("Error al eliminar el centro.");
+            setTimeout(() => setError(""), 3000);
+        }
+    };
 
     return (
         <div className="container">
-
-            <h3>Especialidades del Doctor</h3>
-
-            {store.doctorSpecialties && store.doctorSpecialties.length > 0 ? (
-                <ul>
-                    {store.doctorSpecialties.map((specialty) => (
-                        <li key={specialty.id}>
-                            {specialty.name}
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                <p>No tiene especialidades asignadas.</p>
-            )}
-
-
-            <h3>Centros Médicos</h3>
-            {store.doctorPanelData.doctor.medical_centers && store.doctorPanelData.doctor.medical_centers.length > 0 ? (
-                <ul>
-                    {store.doctorPanelData.doctor.medical_centers.map(center => (
-                        <li key={center.id}>
-                            {center.name} - Oficina: {center.office}
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                <p>No tiene centros médicos asignados.</p>
-            )}
-
             <h4 className="mt-4">Agregar Nueva Oficina</h4>
 
             {error && <div className="alert alert-danger">{error}</div>}
@@ -128,36 +108,52 @@ export const CenterOfficeByDoctor = () => {
                         placeholder="Ingrese el número de oficina"
                     />
                 </div>
-
-                <div className="form-group mt-3">
-                    <label htmlFor="specialtySelector">Selecciona una Especialidad</label>
-                    <select
-                        id="specialtySelector"
-                        className="form-control"
-                        value={selectedSpecialty || ""}
-                        onChange={(e) => setSelectedSpecialty(e.target.value)}
-                    >
-                        <option value="">Seleccione una especialidad</option>
-                        {store.specialties &&
-                            store.specialties.map((specialty) => (
-                                <option key={specialty.id} value={specialty.id}>
-                                    {specialty.name}
-                                </option>
-                            ))}
-                    </select>
-                </div>
-                            
-
-
-
-
                 <button type="submit" className="btn btn-success mt-3">
                     Agregar Oficina
                 </button>
 
+                <button onClick={handleGoToCMEdit} className="btn btn-primary mb-3 mt-3">
+                    Modificar Oficina
+                </button>
+
+                <h3>Centros Médicos del Doctor</h3>
+
+                {store.doctorPanelData.doctor.medical_centers && store.doctorPanelData.doctor.medical_centers.length > 0 ? (
+                    <ul>
+                        {store.doctorPanelData.doctor.medical_centers
+                            .sort((a, b) => {
+                                // Primero ordenamos por nombre del centro (a.name vs b.name)
+                                if (a.name < b.name) return -1;
+                                if (a.name > b.name) return 1;
+
+                                // Si los nombres son iguales, ordenamos por el número de oficina (a.office vs b.office)
+                                if (a.office < b.office) return -1;
+                                if (a.office > b.office) return 1;
+
+                                return 0; // Si son iguales, no hacemos ningún cambio
+                            })
+                            .map(center => (
+                                <li key={center.id}>
+                                    {center.name} - Oficina: {center.office}
+                                    <button
+                                        className="btn btn-sm btn-danger ms-2"
+                                        onClick={() => handleDeleteCenter(center.id)}
+                                    >
+                                        Eliminar
+                                    </button>
+                                </li>
+                            ))}
+                    </ul>
+                ) : (
+                    <p>No tiene centros médicos asignados.</p>
+                )}
+              
                 <button onClick={handleGoToPanel} className="btn btn-primary mb-3 mt-3">
                     Ir al Panel
                 </button>
+
+
+                
             </form>
         </div>
     );
