@@ -27,7 +27,7 @@ export const DashboardDoctor = () => {
         <div className="container text-center mt-5">
           <h3>DASHBOARD</h3>
           <h2>
-            Hola Doctor: {store.dashboardDoctorData?.first_name || "Usuario"}
+            Hola Doctor: {store.doctorPanelData.doctor?.first_name}
           </h2>
           <h4>¿Qué desea hacer?</h4>
 
