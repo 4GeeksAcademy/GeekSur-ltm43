@@ -435,19 +435,6 @@ def update_specialty(specialty_id):
 
 #-------------------------------------GET-----ALL SPECIALTIES_DOCTOR-----------------------------------------------#
 
-# @api.route('/specialties_doctor', methods=['GET'])
-# @jwt_required()
-# def get_specialties_doctor():
-    
-#     list_specialties_doctor = Specialties_doctor.query.all()
-#     obj_all_specialties_doctor = [specialties_doctor.serialize() for specialties_doctor in list_specialties_doctor]
-
-#     response_body = {
-#        "msg": "GET / Specialties_doctor from Tabla",
-#        "Specialties_doctor": obj_all_specialties_doctor
-#     }
-#     return jsonify(response_body), 200
-
 @api.route('/specialties_doctor', methods=['GET'])
 @jwt_required()
 def get_doctor_specialties():
@@ -483,30 +470,26 @@ def get_specialty_doctor_id(specialty_id):
 #-------------------------------------------------POST------------------------------------------------#
 #-------------------------------------POST-----NEW SPECIALTIES_DOCTOR-------------------------------------------------#
 @api.route('/specialties_doctor', methods=['POST'])
+@jwt_required()
 def post_specialties_doctor():
-    # Obtener los datos del cuerpo de la solicitud
+    current_doctor_id = get_jwt_identity()  # Obtener ID del doctor desde el token
     data = request.get_json()
-
-    # Validar que los datos necesarios estén presentes
     if not data:
-         raise APIException('No se proporcionaron datos', status_code=400)
-    if 'id_specialty' not in data or 'id_doctor' not in data:
-         raise APIException('El campo  "id_specialty" y "id_doctor" es requerido', status_code=400)
-    
-    # siempre tiene que haber data dentro de los corchetes.
+        raise APIException('No se proporcionaron datos', status_code=400)
+    if 'id_specialty' not in data:
+        raise APIException('El campo "id_specialty" es requerido', status_code=400)
+
     new_specialty_doctor = Specialties_doctor(
-    id_specialty=data["id_specialty"],
-    id_doctor=data["id_doctor"]
+        id_specialty=data["id_specialty"],
+        id_doctor=current_doctor_id  # Usar el ID del token
     )
-    # Guardar el nueva especialidad_doctor en la base de datos
     db.session.add(new_specialty_doctor)
     db.session.commit()
 
-    # Devolver una respuesta con el especialidad_doctor creado
     response_body = {
-        "msg": "Se creo nueva especialidad",
-        "new_Specialty_doctor": new_specialty_doctor.serialize() 
-        }
+        "msg": "Se creó nueva especialidad",
+        "new_Specialty_doctor": new_specialty_doctor.serialize()
+    }
     return jsonify(response_body), 201
 
 #-------------------------------------DELETE----SPECIALTIES_DOCTOR-----------------------------------------------#
