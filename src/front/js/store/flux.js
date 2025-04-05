@@ -942,85 +942,97 @@ validateAuthPatient: async () => {
                 },
 ///////////////////END/////////////////////////////////Tener las especialidades escogidas.///////////////////////////
 
-addSpecialtyToDoctor_1: async (id_specialty) => {
-    const store = getStore();
-    const token = store.tokendoctor || localStorage.getItem("tokendoctor");
-    if (!token) {
-        setStore({ loginDoctorError: "No hay token, por favor inicia sesión" });
-        return;
-    }
-
-    try {
-        const resp = await fetch(process.env.BACKEND_URL + "/api/specialties_doctor", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                id_specialty,
-                id_doctor: store.dashboardDoctorData.id, // Enviar ID del doctor
-            }),
-        });
-        const data = await resp.json();
-        if (!resp.ok) throw new Error(data.msg || "Error al agregar especialidad");
-
-        return data;
-    } catch (error) {
-        console.log("Error al agregar especialidad:", error.message);
-        setStore({ loginDoctorError: error.message });
-        throw error;
-    }
-},
-addSpecialtyToDoctor: async (specialtyId) => {
-    try {
-        console.log("Enviando especialidad al backend, ID:", specialtyId); // 🛠️ Debug
-
-        const response = await fetch(process.env.BACKEND_URL + "/api/add_specialty_to_doctor", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + localStorage.getItem("tokendoctor"),
-            },
-            body: JSON.stringify({ specialty_id: specialtyId }),
-        });
-
-        const data = await response.json();
-        console.log("Respuesta del backend:", data); // 🛠️ Debug
-
-        if (!response.ok) throw new Error(data.error || "Error al agregar especialidad");
-
-        return data;
-    } catch (error) {
-        console.error("Error en addSpecialtyToDoctor:", error);
-        throw error;
-    }
-},
-
+// Obtener especialidades del doctor
 getDoctorSpecialties: async () => {
     try {
-        const token = localStorage.getItem("tokendoctor");
-        if (!token) return;
-
-        const response = await fetch(process.env.BACKEND_URL + "/api/specialties_doctor", {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error("Error al obtener las especialidades del doctor");
-        }
-
+      const token = localStorage.getItem("tokendoctor");
+      console.log("Token enviado:", token); // Verifica que el token existe
+      if (!token) throw new Error("No hay token disponible");
+      const response = await fetch(process.env.BACKEND_URL + "/api/specialties_doctor", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      console.log("Respuesta del backend:", response.status); // Verifica el código de estado
+      if (!response.ok) {
         const data = await response.json();
-        console.log("Especialidades del doctor:", data.specialties); 
-
-        setStore({ doctorSpecialties: data.specialties });
-    } catch (error) {
-        console.error("Error al obtener especialidades del doctor:", error);
-    }
+        console.log("Datos del error:", data); // Muestra el mensaje del backend
+        if (response.status === 404) {
+            setStore({ doctorSpecialties: [] }); // Doctor sin especialidades
+            return;
+        }
+            throw new Error("Error al obtener las especialidades");
+      }
+      const data = await response.json();
+    setStore({ doctorSpecialties: data.specialties || [] });
+  } catch (error) {
+    console.error("Error al obtener especialidades:", error);
+  }
 },
+  
+  // Agregar especialidad al doctor
+  addSpecialtyToDoctor: async (specialtyId) => {
+    const store = getStore()
+    try {
+      const token = localStorage.getItem("tokendoctor");
+      if (!token) throw new Error("No hay token disponible");
+  
+      // Obtener el ID del doctor desde el store (ajusta según tu estructura)
+      const doctorId = store.dashboardDoctorData?.id || store.doctorPanelData?.doctor?.id;
+      if (!doctorId) throw new Error("No se encontró el ID del doctor");
+  
+      const response = await fetch(process.env.BACKEND_URL + "/api/specialties_doctor", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id_specialty: specialtyId,
+          id_doctor: doctorId,
+        }),
+      });
+  
+      if (!response.ok) {
+        const data = await response.json();
+        console.log("Error del backend:", data); // Depura el mensaje exacto
+        throw new Error(data.msg || "Error al agregar especialidad");
+      }
+  
+      return true;
+    } catch (error) {
+      console.error("Error al agregar especialidad:", error);
+      throw error;
+    }
+  },
+  
+  // Eliminar especialidad del doctor
+  deleteDoctorSpecialty: async (specialtyId) => {
+    try {
+      const token = localStorage.getItem("tokendoctor");
+      if (!token) throw new Error("No hay token disponible");
+  
+      const response = await fetch(`${process.env.BACKEND_URL}/api/specialties_doctor/${specialtyId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.msg || "Error al eliminar especialidad");
+      }
+  
+      return true; // Indicar éxito
+    } catch (error) {
+      console.error("Error al eliminar especialidad:", error);
+      throw error;
+    }
+  },
 
 //----------------------oscar
 

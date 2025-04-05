@@ -28,6 +28,7 @@ import injectContext from "./store/appContext";
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
 import { PanelDoctor } from "./pages/paneldoctor";
+//import { DoctorAppointment } from "./pages/doctor_appointment";
 
 //create your first component
 const Layout = () => {
@@ -61,6 +62,7 @@ const Layout = () => {
                         <Route element={<CenterOfficeByDoctor />} path="/center_office_by_doctor" />
                         <Route element={<DoctorEdit />} path="/doctor_edit" />
                         <Route element={<PanelDoctor />} path="/paneldoctor" />
+                        
                         <Route element={<DoctorEditSpecialty />} path="/doctor_edit_specialty" />
 
                         <Route element={<CenterOfficeByDoctorEdit />} path="/center_office_by_doctor_edit" />
