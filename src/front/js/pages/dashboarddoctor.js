@@ -32,10 +32,11 @@ export const DashboardDoctor = () => {
           <h4>¿Qué desea hacer?</h4>
 
           <div className="d-flex flex-column gap-3 mt-4" style={{ maxWidth: "300px", margin: "0 auto" }}>
+            
             {/* Botón 1: Ver citas asignadas */}
-            <Link to="/doctor_appointment">
+            {/* <Link to="/doctor_appointment">
               <button className="btn btn-primary w-100">Ver Mis Citas</button>
-            </Link>
+            </Link> */}
 
             {/* Botón 2: Editar especialidades */}
             <Link to="/doctor_edit_specialty">
@@ -57,7 +58,7 @@ export const DashboardDoctor = () => {
               Cerrar Sesión
             </button>
           </div>
-        </div>
+         </div>
       ) : (
         <Navigate to="/logindoctor" />
       )}

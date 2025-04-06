@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 
 export const LoginDoctor = () => {
 
-	const { store, actions } = useContext(Context);
+    const { store, actions } = useContext(Context);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
