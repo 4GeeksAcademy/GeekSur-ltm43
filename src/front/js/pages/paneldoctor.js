@@ -12,7 +12,7 @@ export const PanelDoctor = () => {
         if (!store.authDoctor && !localStorage.getItem("tokendoctor")) {
             navigate("/logindoctor"); // Redirigir solo si no hay token ni auth
         } else if (!store.doctorPanelData) {
-            actions.getDoctorPanel(); // Cargar datos si no hay datos del panel
+            actions.getDoctorPanel(); 
         }
     }, [store.authDoctor, store.doctorPanelData]);
 
@@ -92,6 +92,10 @@ export const PanelDoctor = () => {
                    <Link to="/center_office_by_doctor">
                         <button type="submit" className="btn btn-primary">Centros Medicos</button>
                    </Link>
+                          
+                    <Link to="/doctor-appointment">
+                        <button className="btn btn-primary w-100">Ver Mis Citas</button>
+                    </Link>
 
                    <Link to="/dashboarddoctor">
                         <button type="submit" className="btn btn-primary">Ir a DashBoard</button>

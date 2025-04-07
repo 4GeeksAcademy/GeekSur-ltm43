@@ -33,15 +33,16 @@ export const DashboardDoctor = () => {
 
           <div className="d-flex flex-column gap-3 mt-4" style={{ maxWidth: "300px", margin: "0 auto" }}>
             
-            {/* Botón 1: Ver citas asignadas */}
-            {/* <Link to="/doctor_appointment">
+            {/* Botón 1: Ver citas*/}
+            <Link to="/doctor-appointment">
               <button className="btn btn-primary w-100">Ver Mis Citas</button>
-            </Link> */}
+            </Link>
 
-            {/* Botón 2: Editar especialidades */}
-            <Link to="/doctor_edit_specialty">
+           {/* Botón 2: Editar especialidades */}
+             <Link to="/doctor_edit_specialty">
               <button className="btn btn-primary w-100">Mis Especialidades</button>
             </Link>
+
 
             {/* Botón 3: Editar oficinas */}
             <Link to="/center_office_by_doctor">

@@ -98,14 +98,6 @@ export const Specialties = () => {
         <Link to="/">
         <button className="btn btn-primary">Back home</button>
         </Link>
-
-
-
-
       </div>
   );
-
-
-
-
 }

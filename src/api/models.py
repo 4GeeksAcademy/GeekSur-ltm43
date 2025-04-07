@@ -18,6 +18,7 @@ class Patient(db.Model):
     birth_date = db.Column(db.Date, nullable=False)
     phone_number = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    historial_clinico = db.Column(db.Text, nullable=True)  # Nuevo campo
 
     def serialize(self):
         return {
@@ -27,7 +28,8 @@ class Patient(db.Model):
             "last_name": self.last_name,
             "gender": self.gender,
             "birth_date": self.birth_date.strftime('%Y-%m-%d'),
-            "phone_number": self.phone_number
+            "phone_number": self.phone_number,
+            "historial_clinico": self.historial_clinico
             # Password excluido por seguridad
         }
 
@@ -64,22 +66,23 @@ class Doctors(db.Model):
     phone_number = db.Column(db.String(80), unique=False, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
     is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+    url = db.Column(db.String(255), nullable=True)  # Nuevo campo para la URL
     specialties = db.relationship('Specialties_doctor', backref='doctor')
     medical_center_doctors = db.relationship('MedicalCenterDoctor', backref='doctor_association', lazy=True)  
     has_specialties = db.Column(db.Boolean, default=False)  # Campo nuevo
 
-   
     def __repr__(self):
         return f'<User {self.email}>'
 
     def serialize(self):
+        print(self.specialties)
         return {
             "id": self.id,
             "email": self.email,
             "first_name": self.first_name,
             "last_name": self.last_name,
-            "phone_number":self.phone_number
-                 
+            "phone_number": self.phone_number,
+            "url": self.url
         } 
     
 class Specialties(db.Model):
@@ -94,7 +97,8 @@ class Specialties(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "name": self.name                 
+            "name": self.name ,
+            "specialties": [{**specialties_doctor.serialize(),"specialty_name": self.name} for specialties_doctor in self.relation_specialties]          
         } 
 
 class Specialties_doctor(db.Model):
