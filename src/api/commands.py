@@ -138,7 +138,8 @@ def setup_commands(app):
                 "last_name": "Smith",
                 "phone_number": "5551234567",
                 "password": "1234",
-                "is_active": True
+                "is_active": True,
+                "has_specialties": False
             },
             {
                 
@@ -147,7 +148,8 @@ def setup_commands(app):
                 "last_name": "Jones",
                 "phone_number": "5559876543",
                 "password": "1234",
-                "is_active": True
+                "is_active": True,
+                "has_specialties": False
             },
             {
                 
@@ -156,7 +158,8 @@ def setup_commands(app):
                 "last_name": "Jones",
                 "phone_number": "5559876543",
                 "password": "1234",
-                "is_active": True
+                "is_active": True,
+                "has_specialties": False
             },
             {
                 
@@ -165,7 +168,8 @@ def setup_commands(app):
                 "last_name": "Brown",
                 "phone_number": "5554567890",
                 "password": "1234",
-                "is_active": True
+                "is_active": True,
+                "has_specialties": False
             }
         ]
 
@@ -177,7 +181,9 @@ def setup_commands(app):
                     last_name=doctor_data["last_name"],
                     phone_number=doctor_data["phone_number"],
                     password=doctor_data["password"],
-                    is_active=doctor_data["is_active"]
+                    is_active=doctor_data["is_active"],
+                    has_specialties=doctor_data["has_specialties"]
+                
                 )
                 db.session.add(doctor)
             db.session.commit()

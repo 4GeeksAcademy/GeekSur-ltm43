@@ -17,6 +17,12 @@ import { DashboardPatient } from "./pages/dashboardpatient";
 import { LoginDoctor } from "./pages/logindoctor"; 
 import { DashboardDoctor } from "./pages/dashboarddoctor";
 import { MedicalCenterDoctor } from "./pages/medicalcenterdoctor"; 
+import { RegistrationDoctor } from "./pages/registrationdoctor"; 
+import { SpecialtyByDoctor } from "./pages/specialty_by_doctor"; 
+import { CenterOfficeByDoctor } from "./pages/center_office_by_doctor";
+import { DoctorEdit } from "./pages/doctor_edit";
+import { DoctorEditSpecialty } from "./pages/doctor_edit_specialty";
+import { CenterOfficeByDoctorEdit } from "./pages/center_office_by_doctor_edit";
 import Reviews from "./pages/Reviews";
 import SearchProfessionals from "./pages/SearchProfessionals";
 import DoctorProfile from "./pages/DoctorProfile";
@@ -30,7 +36,7 @@ import { AIConsultation } from "./pages/AIConsultation";
 import injectContext from "./store/appContext";
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
-
+import { PanelDoctor } from "./pages/paneldoctor";
 
 //create your first component
 const Layout = () => {
@@ -53,12 +59,21 @@ const Layout = () => {
                         <Route element={<Doctors />} path="/doctors" />
                         <Route element={<Specialties />} path="/specialties" />
                         <Route element={<Specialties_doctor />} path="/specialties_doctor" />
+                        <Route element={<LoginPatient />} path="/loginpatient" /> 
+                        <Route element={<DashboardPatient />} path="/dashboardpatient" /> 
                         <Route element={<LoginPatient />} path="/loginpatient" />
                         <Route element={<DashboardPatient />} path="/dashboardpatient" />
                         <Route element={<LoginDoctor />} path="/logindoctor" />
                         <Route element={<DashboardDoctor />} path="/dashboarddoctor" />
                         <Route element={<MedicalCenterDoctor />} path="/medicalcenterdoctor" />
+                        <Route element={<RegistrationDoctor />} path="/registrationdoctor" />
                         <Route element={<Reviews />} path="/reviews" />
+                        <Route element={<SpecialtyByDoctor />} path="/specialty_by_doctor" />
+                        <Route element={<CenterOfficeByDoctor />} path="/center_office_by_doctor" />
+                        <Route element={<DoctorEdit />} path="/doctor_edit" />
+                        <Route element={<PanelDoctor />} path="/paneldoctor" />
+                        <Route element={<DoctorEditSpecialty />} path="/doctor_edit_specialty" />
+                        <Route element={<CenterOfficeByDoctorEdit />} path="/center_office_by_doctor_edit" />
                         <Route element={<SignupPatient />} path="/signuppatient" />
                         <Route element={<SearchProfessionals />} path="/search-professionals" />
                         <Route path="/doctor/:doctorId/:specialtyId" element={<DoctorProfile />} />

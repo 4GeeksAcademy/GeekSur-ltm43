@@ -55,9 +55,12 @@ export const DoctorAppointment = () => {
             )}
 
             <br />
+            
             <Link to="/dashboarddoctor">
-                <button className="btn btn-primary">Volver al Dashboard</button>
+                <button type="submit" className="btn btn-primary">Ir a DashBoard</button>
             </Link>
+
+
             
             <Link to="/">
                 <button className="btn btn-primary">Back home</button>

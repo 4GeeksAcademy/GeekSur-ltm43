@@ -108,7 +108,7 @@ export const DashboardPatient = () => {
 
     if (!store.authPatient && !localStorage.getItem("tokenpatient")) {
         return <Navigate to="/loginpatient" />;
-    }
+    };
 
     return (
         <div className="container" style={{ 
@@ -182,6 +182,7 @@ export const DashboardPatient = () => {
                                     Back Home
                                 </button>
                             </Link>
+
                         </div>
                     )}
                 </div>

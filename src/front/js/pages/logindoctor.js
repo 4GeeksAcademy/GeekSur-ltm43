@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 
 export const LoginDoctor = () => {
 
-	const { store, actions } = useContext(Context);
+    const { store, actions } = useContext(Context);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
@@ -16,7 +16,7 @@ export const LoginDoctor = () => {
         e.preventDefault();
             try {
                 await actions.loginDoctor(email, password);
-                navigate("/dashboarddoctor"); // Redirigir al dashboard tras login exitoso
+                navigate("/dashboarddoctor"); 
             } catch (error) {
                 alert("Error al iniciar sesión: " + (store.loginDoctorError || "Inténtalo de nuevo"));
             }
@@ -54,8 +54,13 @@ export const LoginDoctor = () => {
         <Link to="/">
         <button className="btn btn-primary">Back home</button>
         </Link>
+
+        <Link to="/registrationdoctor">
+        <button className="btn btn-success">Registrate</button>
+        </Link>
+
         </div>
+
+
     );
 };
-
-

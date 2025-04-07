@@ -69,6 +69,7 @@ class Doctors(db.Model):
     url = db.Column(db.String(255), nullable=True)  # Nuevo campo para la URL
     specialties = db.relationship('Specialties_doctor', backref='doctor')
     medical_center_doctors = db.relationship('MedicalCenterDoctor', backref='doctor_association', lazy=True)  
+    has_specialties = db.Column(db.Boolean, default=False)  # Campo nuevo
 
     def __repr__(self):
         return f'<User {self.email}>'
@@ -165,6 +166,6 @@ class MedicalCenterDoctor(db.Model):
             "id": self.id,
             "id_medical_center": self.id_medical_center,
             "id_doctor": self.id_doctor,
-            "office": self.office
+            "office": self.office            
         }
     

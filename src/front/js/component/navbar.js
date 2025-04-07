@@ -78,6 +78,10 @@ export const Navbar = () => {
                         <button className="btn btn-primary">Medical Center Doctor</button>
                     </Link>
 
+					<Link to="/registrationdoctor">
+                        <button className="btn btn-success">Registro Doctor</button>
+                    </Link>
+
 				</div>
 			</div>
 		</nav>
