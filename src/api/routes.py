@@ -3,13 +3,13 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User, MedicalCenter, Patient, Doctors, Specialties, Specialties_doctor, Appointment, Review, MedicalCenterDoctor
-from api.utils import generate_sitemap, APIException, upload_image, delete_image
+from api.utils import generate_sitemap, APIException, upload_image, delete_image, upload_medical_center_image
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from itertools import chain
 import json
 from datetime import datetime, timedelta
-import os
+import os, logging
 import google.generativeai as genai 
 from google.generativeai import types
 
@@ -203,57 +203,128 @@ def manage_doctor_appointment(appointment_id):
 
 #//////////////////////////////Beguin //////Medical Center
 
-@api.route('/medical_centers', methods=['GET'])
-def get_centers():
-    try:
-        centers = MedicalCenter.query.all()
-        return jsonify([center.serialize() for center in centers])
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+@api.route("/medical_centers", methods=["GET"])
+def get_medical_centers():
+    medical_centers = MedicalCenter.query.all()
+    return jsonify([center.serialize() for center in medical_centers]), 200
 
 # Agregar un nuevo centro médico
-@api.route('/medical_centers', methods=['POST'])
-def add_center():
-    data = request.json
-    new_center = MedicalCenter(**data)
-    db.session.add(new_center)
-    db.session.commit()
-    return jsonify({
-        'id': new_center.id,
-        'name': new_center.name,
-        'address': new_center.address,
-        'country': new_center.country,
-        'city': new_center.city,
-        'phone': new_center.phone,
-        'email': new_center.email,
-        'latitude': new_center.latitude, 
-        'longitude': new_center.longitude
-    }), 201
+@api.route("/medical_centers", methods=["POST"])
+def create_medical_center():
+    try:
+        print("Solicitud recibida en POST /api/medical_centers")
+        print("Contenido de request.files:", request.files)
+        print("Contenido de request.form:", request.form)
+
+        # Verificar si se envió un archivo
+        file = request.files.get("image")
+        image_url = None
+        if file:
+            print("Subiendo imagen a Cloudinary...")
+            image_url = upload_medical_center_image(file)
+            print(f"Imagen subida, URL: {image_url}")
+        else:
+            print("No se envió ninguna imagen")
+
+        # Obtener los datos del formulario
+        data = request.form
+        name = data.get("name")
+        address = data.get("address")
+        country = data.get("country")
+        city = data.get("city")
+        phone = data.get("phone")
+        email = data.get("email")
+        latitude = data.get("latitude")
+        longitude = data.get("longitude")
+
+        print(f"Datos del formulario: name={name}, address={address}, country={country}, city={city}, phone={phone}, email={email}, latitude={latitude}, longitude={longitude}")
+
+        if not all([name, address, country, city, phone, email]):
+            print("Faltan campos requeridos")
+            return jsonify({"msg": "Missing required fields"}), 400
+
+        try:
+            latitude = float(latitude) if latitude else None
+            longitude = float(longitude) if longitude else None
+        except (ValueError, TypeError) as e:
+            print(f"Error al convertir latitud/longitud: {str(e)}")
+            return jsonify({"msg": "Invalid latitude or longitude"}), 400
+
+        new_center = MedicalCenter(
+            name=name,
+            address=address,
+            country=country,
+            city=city,
+            phone=phone,
+            email=email,
+            latitude=latitude,
+            longitude=longitude,
+            image_url=image_url
+        )
+        print("Guardando centro médico en la base de datos...")
+        db.session.add(new_center)
+        db.session.commit()
+        print("Centro médico creado exitosamente")
+        return jsonify(new_center.serialize()), 201
+
+    except Exception as e:
+        print(f"Error en create_medical_center: {str(e)}")
+        db.session.rollback()
+        return jsonify({"msg": f"Error creating medical center: {str(e)}"}), 500
 
 # Actualizar un centro médico
-@api.route('/medical_centers/<int:id>', methods=['PUT'])
-def update_center(id):
+@api.route("/medical_centers/<int:id>", methods=["PUT"])
+def update_medical_center(id):
     center = MedicalCenter.query.get(id)
     if not center:
-        return jsonify({'message': 'Medical Center not found'}), 404
+        return jsonify({"msg": "Medical center not found"}), 404
 
-    data = request.json
-    for key, value in data.items():
-        setattr(center, key, value)
+    # Verificar si se quiere eliminar la imagen
+    remove_image = request.form.get("remove_image") == "true"
+    if remove_image and center.image_url:
+        delete_image(center.image_url)
+        center.image_url = None
+
+    # Verificar si se subió una nueva imagen
+    file = request.files.get("image")
+    if file:
+        if center.image_url:  # Eliminar la imagen anterior si existe
+            delete_image(center.image_url)
+        center.image_url = upload_medical_center_image(file)
+
+    # Actualizar los datos del formulario
+    data = request.form
+    center.name = data.get("name", center.name)
+    center.address = data.get("address", center.address)
+    center.country = data.get("country", center.country)
+    center.city = data.get("city", center.city)
+    center.phone = data.get("phone", center.phone)
+    center.email = data.get("email", center.email)
+
+    latitude = data.get("latitude")
+    longitude = data.get("longitude")
+    try:
+        center.latitude = float(latitude) if latitude else center.latitude
+        center.longitude = float(longitude) if longitude else center.longitude
+    except (ValueError, TypeError):
+        return jsonify({"msg": "Invalid latitude or longitude"}), 400
 
     db.session.commit()
-    return jsonify({'message': 'Medical Center updated!'})
+    return jsonify(center.serialize()), 200
 
-# Eliminar un centro médico
-@api.route('/medical_centers/<int:id>', methods=['DELETE'])
-def delete_center(id):
+@api.route("/medical_centers/<int:id>", methods=["DELETE"])
+def delete_medical_center(id):
     center = MedicalCenter.query.get(id)
     if not center:
-        return jsonify({'message': 'Medical Center not found'}), 404
+        return jsonify({"msg": "Medical center not found"}), 404
+
+    # Eliminar la imagen de Cloudinary si existe
+    if center.image_url:
+        delete_image(center.image_url)
 
     db.session.delete(center)
     db.session.commit()
-    return jsonify({'message': 'Medical Center deleted!'})
+    return jsonify({"msg": "Medical center deleted"}), 200
 #//////////////////////////////END //////Medical Center
 
 ########## Beguin patients services###############
@@ -1056,11 +1127,15 @@ def get_get_profile_doctor():
         "first_name": doctor.first_name,
         "last_name": doctor.last_name,
         "phone_number": doctor.phone_number,
-        "specialties": specialties,  # Lista de especialidades
-        "medical_centers": medical_centers  # Lista de centros médicos con oficinas
+        "url": doctor.url,  # Agregar el campo url
+        "specialties": specialties,
+        "medical_centers": medical_centers
     }
 
-    return jsonify(doctor_data), 200
+    return jsonify({
+        "has_specialties": doctor.has_specialties,
+        "doctor": doctor_data  # Envolver los datos del doctor en un objeto
+    }), 200
 
 #--------------------------------------TRaigo el API del Doctor con token para DashboardDoctor----------------------#
 
@@ -1256,6 +1331,7 @@ def get_doctor_panel():
             "first_name": doctor.first_name,
             "last_name": doctor.last_name,
             "phone_number": doctor.phone_number,
+            "url": doctor.url,  # Agregar el campo url
             "has_specialties": bool(specialties),  # Indicar si tiene especialidades
             "has_medical_centers": bool(medical_centers),  # Indicar si tiene centros médicos
             "specialties": specialties,

@@ -44,6 +44,7 @@ class MedicalCenter(db.Model):
     medical_center_doctors = db.relationship('MedicalCenterDoctor', backref='medical_center_association', lazy=True)  #relationship with doctors
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
+    image_url = db.Column(db.String(255), nullable=True)
 
     def serialize(self):
         return {
@@ -55,7 +56,8 @@ class MedicalCenter(db.Model):
             "phone": self.phone,
             "email": self.email,
             "latitude": self.latitude,
-            "longitude": self.longitude
+            "longitude": self.longitude,
+            "image_url": self.image_url
         }
     
 class Doctors(db.Model):

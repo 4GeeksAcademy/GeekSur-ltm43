@@ -7,14 +7,14 @@ export const DashboardDoctor = () => {
   const { store, actions } = useContext(Context);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!store.authDoctor && !localStorage.getItem("tokendoctor")) {
-      navigate("/logindoctor"); // Redirigir si no hay token ni auth
-    } else if (!store.dashboardDoctorData) {
-      actions.getDashboardDoctor(); // Cargar datos del dashboard
-      actions.getDoctorPanel(); // Cargar datos del panel
-    }
-  }, [store.authDoctor, store.dashboardDoctorData]);
+      // de panel doctor ejemplo
+      useEffect(() => {
+          if (!store.authDoctor && !localStorage.getItem("tokendoctor")) {
+              navigate("/logindoctor"); // Redirigir solo si no hay token ni auth
+          } else if (!store.doctorPanelData) {
+              actions.getDoctorPanel(); 
+          }
+      }, [store.authDoctor, store.doctorPanelData]);
 
   const handleLogout = () => {
     actions.logoutDoctor();
@@ -26,10 +26,7 @@ export const DashboardDoctor = () => {
       {store.authDoctor || localStorage.getItem("tokendoctor") ? (
         <div className="container text-center mt-5">
           <h3>DASHBOARD</h3>
-          <h2>
-            Hola Doctor: {store.doctorPanelData.doctor?.first_name}
-          </h2>
-          <h4>¿Qué desea hacer?</h4>
+           <h4>¿Qué desea hacer?</h4>
 
           <div className="d-flex flex-column gap-3 mt-4" style={{ maxWidth: "300px", margin: "0 auto" }}>
             
