@@ -217,7 +217,6 @@ const getState = ({ getStore, getActions, setStore }) => {
                         }
                     });
             
-                    // Opcional: recargar los datos del panel para confirmar desde el backend
                     await getActions().getDoctorPanel();
             
                     return data;
