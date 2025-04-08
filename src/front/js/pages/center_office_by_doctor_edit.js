@@ -64,29 +64,28 @@ export const CenterOfficeByDoctorEdit = () => {
     // Función para actualizar el número de oficina
     const handleUpdateOffice = async (e) => {
         e.preventDefault();
-
+    
         if (!office) {
             setError("Por favor, ingresa un número de oficina válido.");
             return;
         }
-
+    
         try {
-            const result = await actions.updateMedicalCenterDoctor(selectedCenter, office); // Llamada al PUT
+            const result = await actions.updateMedicalCenterDoctor(selectedCenter, office);
             if (result !== false) {
                 setSelectedCenter(null);
                 setOffice("");
                 setError("");
                 setSuccess("Número de oficina actualizado correctamente");
-
-                actions.getDoctorPanel(); // Actualizar los datos del doctor
-
+                actions.getDoctorPanel();
                 setTimeout(() => {
                     setSuccess("");
-                    setEditing(false); // Desactivar el modo de edición
+                    setEditing(false);
                 }, 3000);
             }
         } catch (error) {
-            setError("Error al actualizar la oficina");
+            setError(error.message || "Error al actualizar la oficina");
+            setTimeout(() => setError(""), 3000);
         }
     };
 

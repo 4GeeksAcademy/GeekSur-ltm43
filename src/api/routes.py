@@ -116,36 +116,28 @@ def delete_doctor(doctor_id):
 #-------------------------------------PUT----Doctor----------------------------------------------------#
 
 @api.route('/doctors/<int:doctor_id>', methods=['PUT'])
+@jwt_required()
 def update_doctor(doctor_id):
-    doctor_one = Doctors.query.get(doctor_id)
+    current_doctor_id = get_jwt_identity()  # Obtener el ID del doctor desde el token
+    if int(current_doctor_id) != doctor_id:  # Asegurarse de que el doctor solo edite sus propios datos
+        return jsonify({"msg": "No autorizado"}), 403
 
+    doctor_one = Doctors.query.get(doctor_id)
     if not doctor_one:
         return jsonify({"msg": "Doctor no encontrado"}), 404
 
-    # Obtener los datos del formulario
-    email = request.form.get("email")
-    first_name = request.form.get("first_name")
-    last_name = request.form.get("last_name")
-    phone_number = request.form.get("phone_number")
-    file = request.files.get("photo")  # Obtener el archivo de imagen
-    remove_image = request.form.get("remove_image") == "true"
+    # Obtener los datos del cuerpo JSON
+    data = request.get_json()
+    if not data:
+        return jsonify({"msg": "No se proporcionaron datos"}), 400
 
-    # Actualizar los campos si se proporcionaron
-    doctor_one.email = email if email else doctor_one.email
-    doctor_one.first_name = first_name if first_name else doctor_one.first_name
-    doctor_one.last_name = last_name if last_name else doctor_one.last_name
-    doctor_one.phone_number = phone_number if phone_number else doctor_one.phone_number
-
-    # Manejar la imagen
-    if remove_image and doctor_one.url:  # Si se solicita eliminar la imagen
-        delete_image(doctor_one.url)  # Eliminar la imagen de Cloudinary
-        doctor_one.url = None  # Establecer el campo url como null
-    elif file:  # Si se proporciona una nueva imagen
-        # Si ya había una imagen, eliminarla primero
-        if doctor_one.url:
-            delete_image(doctor_one.url)
-        image_url = upload_image(file)
-        doctor_one.url = image_url
+    # Actualizar los campos si se proporcionaron en el JSON
+    doctor_one.email = data.get("email", doctor_one.email)
+    doctor_one.first_name = data.get("first_name", doctor_one.first_name)
+    doctor_one.last_name = data.get("last_name", doctor_one.last_name)
+    doctor_one.phone_number = data.get("phone_number", doctor_one.phone_number)
+    if "password" in data and data["password"]:  # Solo actualizar la contraseña si se proporciona
+        doctor_one.password = data["password"]  # Aquí podrías agregar hashing si es necesario
 
     db.session.commit()
 

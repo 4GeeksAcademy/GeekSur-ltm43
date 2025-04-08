@@ -159,12 +159,22 @@ const getState = ({ getStore, getActions, setStore }) => {
             // ACTION PARA CREAR DOCTOR
             createDoctor: async (formData) => {
                 try {
+                    // Mostrar los datos enviados
+                    for (let [key, value] of formData.entries()) {
+                        console.log(`${key}: ${value}`);
+                    }
+            
                     const resp = await fetch(process.env.BACKEND_URL + "/api/doctors", {
                         method: "POST",
                         body: formData,
                     });
-                    if (!resp.ok) throw new Error("Error creating...");
+            
                     const data = await resp.json();
+                    if (!resp.ok) {
+                        console.log("Respuesta del backend:", data); // Mostrar mensaje del backend
+                        throw new Error(data.msg || "Error creating...");
+                    }
+            
                     getActions().getDoctors();
                     return data;
                 } catch (error) {
@@ -176,15 +186,39 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 
             // UPDATE A DOCTOR
-            updateDoctor: async (id, formData) => {
+            updateDoctor: async (id, doctorData) => {
                 try {
+                    const token = localStorage.getItem("tokendoctor");
+                    if (!token) throw new Error("No hay token disponible");
+            
+                    console.log("Datos enviados al backend:", doctorData);
+            
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/doctors/${id}`, {
                         method: "PUT",
-                        body: formData,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
+                        },
+                        body: JSON.stringify(doctorData),
                     });
-                    if (!resp.ok) throw new Error("Error updating Doctor");
+            
                     const data = await resp.json();
-                    getActions().getDoctors();
+                    console.log("Respuesta completa del backend:", data);
+            
+                    if (!resp.ok) {
+                        throw new Error(data.msg || "Error updating Doctor");
+                    }
+            
+                    // Actualizar el store directamente con los datos devueltos
+                    setStore({
+                        doctorPanelData: {
+                            ...getStore().doctorPanelData,
+                            doctor: data.updated_doctor
+                        }
+                    });
+            
+                    await getActions().getDoctorPanel();
+            
                     return data;
                 } catch (error) {
                     console.log("Error updating doctor:", error);
@@ -974,17 +1008,18 @@ const getState = ({ getStore, getActions, setStore }) => {
                     });
                     const data = await resp.json();
                     if (!resp.ok) throw new Error(data.msg || "Revise el error en el login...");
-
-                    // Guardar el tokendoctor y sus datos en el store y localStorage
-
+            
                     setStore({
-
                         tokendoctor: data.tokendoctor,
                         authDoctor: true,
                         currentDoctor: data.doctor,
                         loginDoctorError: null,
                     });
                     localStorage.setItem("tokendoctor", data.tokendoctor);
+            
+                    // Cargar los datos del doctor inmediatamente después de iniciar sesión
+                    await getActions().getDoctorPanel();
+            
                     return data;
                 } catch (error) {
                     console.log("Error en el login:", error.message);
@@ -1037,8 +1072,8 @@ const getState = ({ getStore, getActions, setStore }) => {
                     authDoctor: false,
                     currentDoctor: null,
                     dashboardDoctorData: null,
+                    doctorPanelData: null, // Asegúrate de limpiar esto
                     loginDoctorError: null,
-                    paneldoctor:null
                 });
                 localStorage.removeItem("tokendoctor");
             },
@@ -1132,22 +1167,70 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
 
             // UPDATE MedicalCenterDoctor
-            updateMedicalCenterDoctor: async (id, specialtyData) => {
+            updateMedicalCenterDoctor: async (id, office) => {
                 try {
+                    const token = localStorage.getItem("tokendoctor");
+                    if (!token) throw new Error("No hay token disponible");
+            
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/medicalcenterdoctor/${id}`, {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
                         },
-                        body: JSON.stringify(specialtyData),
+                        body: JSON.stringify({ office }), // Enviar solo el número de oficina
                     });
-                    if (!resp.ok) throw new Error("Error updating MedicalCenterDoctor");
+            
+                    if (!resp.ok) {
+                        const data = await resp.json();
+                        throw new Error(data.msg || "Error updating MedicalCenterDoctor");
+                    }
+            
                     const data = await resp.json();
-                    getActions().getMedicalCenterDoctor();
                     return data;
                 } catch (error) {
                     console.log("Error updating MedicalCenterDoctor:", error);
                     throw error;
+                }
+            },
+
+            addMedicalCenterDoctor: async (centerId, office) => {
+                try {
+                    const token = localStorage.getItem("tokendoctor");
+                    if (!token) throw new Error("No hay token disponible");
+            
+                    const store = getStore();
+                    const doctorId = store.doctorPanelData?.doctor?.id;
+                    if (!doctorId) throw new Error("No se encontró el ID del doctor en el store");
+            
+                    const body = {
+                        id_medical_center: centerId,
+                        office: office,
+                        id_doctor: doctorId, // Agregar el ID del doctor
+                    };
+                    console.log("Datos enviados al backend:", body); // Depuración
+            
+                    const response = await fetch(process.env.BACKEND_URL + "/api/medicalcenterdoctor", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
+                        },
+                        body: JSON.stringify(body),
+                    });
+            
+                    const data = await response.json();
+                    if (!response.ok) {
+                        console.log("Respuesta del backend:", data); // Mostrar mensaje del backend
+                        return { success: false, msg: data.msg || "Error al agregar el centro médico" };
+                    }
+            
+                    // Actualizar el panel del doctor después de agregar la oficina
+                    getActions().getDoctorPanel();
+                    return { success: true, data };
+                } catch (error) {
+                    console.error("Error al agregar centro médico:", error);
+                    return { success: false, msg: error.message };
                 }
             },
 ///////////////////END/////////////////////////////////MedicalCenterDoctor///////////////////////////
@@ -1273,13 +1356,12 @@ getDoctorPanel: async () => {
         });
 
         const data = await resp.json();
-        console.log("🚀 Datos recibidos del Panel del Doctor:", data);
+        console.log("Datos completos recibidos en getDoctorPanel:", data); // Mostrar todo el contenido
 
         if (!resp.ok) throw new Error(data.error || "Error al cargar los datos del panel del doctor");
 
-        // Actualizamos el estado con los datos recibidos
         setStore({
-            doctorPanelData: data, // Aquí almacenamos los datos recibidos en doctorPanelData
+            doctorPanelData: data,
         });
 
         return data;
