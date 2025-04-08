@@ -18,17 +18,16 @@ export const DoctorEdit = () => {
 
     useEffect(() => {
         if (!store.authDoctor && !localStorage.getItem("tokendoctor")) {
-            navigate("/logindoctor"); // Redirigir solo si no hay token ni auth
+            navigate("/logindoctor");
         } else if (!store.doctorPanelData) {
-            actions.getDoctorPanel(); // Cargar datos si no hay datos del panel
+            actions.getDoctorPanel();
         } else {
-            // Rellenar los datos cuando los datos del doctor estén disponibles
             setFormData({
                 first_name: store.doctorPanelData.doctor.first_name,
                 last_name: store.doctorPanelData.doctor.last_name,
                 email: store.doctorPanelData.doctor.email,
                 phone_number: store.doctorPanelData.doctor.phone_number,
-                password: "",  // Dejar vacío para no cambiar la contraseña a menos que el usuario lo desee
+                password: "",
             });
         }
     }, [store.authDoctor, store.doctorPanelData]);
@@ -41,16 +40,22 @@ export const DoctorEdit = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
-
+    
         try {
-            // Llamada a la acción para actualizar los datos del doctor
-            await actions.updateDoctor(store.doctorPanelData.doctor.id, formData);
+            // Filtrar la contraseña si está vacía para no enviarla
+            const updatedData = { ...formData };
+            if (!updatedData.password) {
+                delete updatedData.password; // No enviar contraseña si no se cambió
+            }
+    
+            await actions.updateDoctor(store.doctorPanelData.doctor.id, updatedData);
             setSuccessMessage("Datos actualizados correctamente");
-            setTimeout(() => setSuccessMessage(null), 3000);  // Mostrar mensaje de éxito temporal
-            setEditMode(false);  // Desactivar el modo de edición
-            await actions.getDoctorPanel();  // Actualizar el panel con los nuevos datos
+            setTimeout(() => setSuccessMessage(null), 3000);
+            setEditMode(false);
+            await actions.getDoctorPanel(); // Asegurar que los datos se recargan
         } catch (error) {
             setError(error.message || "Error al actualizar los datos");
+            setTimeout(() => setError(null), 3000); // Limpiar el error después de 3 segundos
         }
     };
 

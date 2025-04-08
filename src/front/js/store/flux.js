@@ -186,15 +186,40 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 
             // UPDATE A DOCTOR
-            updateDoctor: async (id, formData) => {
+            updateDoctor: async (id, doctorData) => {
                 try {
+                    const token = localStorage.getItem("tokendoctor");
+                    if (!token) throw new Error("No hay token disponible");
+            
+                    console.log("Datos enviados al backend:", doctorData);
+            
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/doctors/${id}`, {
                         method: "PUT",
-                        body: formData,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
+                        },
+                        body: JSON.stringify(doctorData),
                     });
-                    if (!resp.ok) throw new Error("Error updating Doctor");
+            
                     const data = await resp.json();
-                    getActions().getDoctors();
+                    console.log("Respuesta completa del backend:", data);
+            
+                    if (!resp.ok) {
+                        throw new Error(data.msg || "Error updating Doctor");
+                    }
+            
+                    // Actualizar el store directamente con los datos devueltos
+                    setStore({
+                        doctorPanelData: {
+                            ...getStore().doctorPanelData,
+                            doctor: data.updated_doctor
+                        }
+                    });
+            
+                    // Opcional: recargar los datos del panel para confirmar desde el backend
+                    await getActions().getDoctorPanel();
+            
                     return data;
                 } catch (error) {
                     console.log("Error updating doctor:", error);
@@ -1332,13 +1357,12 @@ getDoctorPanel: async () => {
         });
 
         const data = await resp.json();
-        console.log("🚀 Datos recibidos del Panel del Doctor:", data);
+        console.log("Datos completos recibidos en getDoctorPanel:", data); // Mostrar todo el contenido
 
         if (!resp.ok) throw new Error(data.error || "Error al cargar los datos del panel del doctor");
 
-        // Actualizamos el estado con los datos recibidos
         setStore({
-            doctorPanelData: data, // Aquí almacenamos los datos recibidos en doctorPanelData
+            doctorPanelData: data,
         });
 
         return data;
