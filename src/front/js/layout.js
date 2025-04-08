@@ -83,6 +83,7 @@ const Layout = () => {
                         <Route element={<PatientAppointments />} path="/patient-appointments" />
                         <Route element={<RateAppointment />} path="/rate-appointment/:appointmentId" />
                         <Route element={<AIConsultation />} path="/ai-consultation" />
+
                         <Route element={<h1>Not found!</h1>} path="*" />
                         
                     </Routes>

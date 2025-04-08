@@ -1323,7 +1323,7 @@ deleteDoctorSpecialty: async (specialtyId) => {
     }
 },
 
-///////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
 
 getDoctorOffices: async () => {
     const token = localStorage.getItem("tokendoctor");
@@ -1422,6 +1422,76 @@ updateMedicalCenter: async (formData) => {
     }
   },
 ///////////////////END/////////////////////////////////MedicalCenterDoctor///////////////////////////
+
+//// falto codigo
+
+addMedicalCenterDoctor: async (medicalCenterId, office, specialtyId) => {
+    const store = getStore();            
+    const token = store.tokendoctor || localStorage.getItem("tokendoctor");
+
+    if (!token) {
+        setStore({ loginDoctorError: "No hay token, por favor inicia sesión" });
+        return { success: false, msg: "No hay token, por favor inicia sesión" };
+    }
+
+    const doctorId = store.doctorPanelData?.doctor.id;
+
+    if (!doctorId) {
+        return { success: false, msg: "No se encontró el ID del doctor" };
+    }
+
+    try {
+        const response = await fetch(process.env.BACKEND_URL + "/api/medicalcenterdoctor", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                id_doctor: doctorId,
+                id_medical_center: medicalCenterId,
+                office: office,
+                id_specialty: specialtyId
+            }),
+        });
+
+        const data = await response.json();
+        console.log("Respuesta del backend:", data);
+        if (!response.ok) {
+            return { success: false, msg: data.msg || "Error, Valide Informacion centro médico con esa oficina." };
+        }
+
+        const updatedList = Array.isArray(store.medical_center_doctor)
+            ? [...store.medical_center_doctor, data.new_medical_center_doctor]
+            : [data.new_medical_center_doctor];
+
+        setStore({ medical_center_doctor: updatedList });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error, Valide Informacion centro médico con esa oficina:", error.message);
+        return { success: false, msg: "Error al conectar con el servidor" };
+    }
+},
+
+
+
+////////////////////////////se agregar buscar Location Medical Center - 07-04-2025
+
+getMedicalCenterLocations: async () => {
+    try {
+        const resp = await fetch(process.env.BACKEND_URL + "/api/medical_centers/locations");
+        if (!resp.ok) throw new Error("Error al obtener ubicaciones de centros médicos");
+        const data = await resp.json();
+        setStore({ medicalCenterLocations: data });
+    } catch (error) {
+        console.error("Error cargando ubicaciones únicas:", error);
+    }
+},
+
+
+
+
             
         }
     };

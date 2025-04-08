@@ -1523,3 +1523,95 @@ def ai_consultation():
     except Exception as e:
         return jsonify({"msg": f"Error al consultar la IA: {str(e)}"}), 500
     ######################End services  Google Gen AI###########################
+
+
+######################### GET TO LOCATION MEDICAL CENTER #########oscar 07-04-2025 ############
+@api.route("/medical_centers/locations", methods=["GET"])
+def get_medical_center_locations():
+    centers = MedicalCenter.query.with_entities(
+    MedicalCenter.city, MedicalCenter.address, MedicalCenter.country
+).distinct().all()
+
+    # Eliminar duplicados manualmente si es necesario
+    unique_locations = []
+    seen = set()
+
+    for center in centers:
+        key = (center.city, center.address, center.country)
+        if key not in seen:
+            seen.add(key)
+            unique_locations.append({
+                "city": center.city,
+                "address": center.address,
+                "country": center.country
+            })
+
+    return jsonify(unique_locations), 200
+
+######################### GET TO DATOS DOCTOR ######### oscar 07-04-2025 ############
+
+@api.route('/professionals/search', methods=['GET'])
+def get_doctors_panel():
+    country = request.args.get('country')
+    specialty_name = request.args.get('specialty')
+    city = request.args.get('city')
+
+    doctors = Doctors.query.all()
+    if not doctors:
+        return jsonify({"error": "No se encontraron doctores"}), 404
+
+    doctor_data = []
+
+    for doctor in doctors:
+        specialties = [
+            {"id": s.id_specialty, "name": Specialties.query.get(s.id_specialty).name}
+            for s in doctor.specialties
+        ]
+
+        if specialty_name and not any(s['name'].lower() == specialty_name.lower() for s in specialties):
+            continue
+
+        # Agrupar centros médicos únicos por id_medical_center
+        unique_centers = {}
+        for mcd in doctor.medical_center_doctors:
+            mc = MedicalCenter.query.get(mcd.id_medical_center)
+            if not mc:
+                continue
+            if mc.id not in unique_centers:
+                unique_centers[mc.id] = {
+                    "id": mcd.id,
+                    "id_medical_center": mc.id,
+                    "name": mc.name,
+                    "address": mc.address,
+                    "city": mc.city,
+                    "country": mc.country,
+                    "office": mcd.office
+                }
+
+        medical_centers = list(unique_centers.values())
+
+        if country and not any(mc['country'].lower() == country.lower() for mc in medical_centers):
+            continue
+
+        if city and not any(mc['city'].lower() == city.lower() for mc in medical_centers):
+            continue
+
+        doctor_info = {
+            "id": doctor.id,
+            "email": doctor.email,
+            "first_name": doctor.first_name,
+            "last_name": doctor.last_name,
+            "phone_number": doctor.phone_number,
+            "url": doctor.url,
+            "has_specialties": bool(specialties),
+            "has_medical_centers": bool(medical_centers),
+            "specialties": specialties,
+            "medical_centers": medical_centers
+        }
+
+        doctor_data.append(doctor_info)
+
+    return jsonify({"doctors": doctor_data}), 200
+
+
+
