@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Context } from "../store/appContext";
 import { FaSearch } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { GoogleMap, LoadScript, Autocomplete, Marker } from "@react-google-maps/api";
 
 function SearchProfessionals() {
   const { store, actions } = useContext(Context);
