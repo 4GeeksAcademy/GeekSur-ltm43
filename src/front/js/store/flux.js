@@ -186,39 +186,39 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 
             // UPDATE A DOCTOR
-            updateDoctor: async (id, doctorData) => {
+            updateDoctor: async (doctorData) => {  // Quitamos el parámetro "id"
                 try {
                     const token = localStorage.getItem("tokendoctor");
                     if (!token) throw new Error("No hay token disponible");
-            
-                    console.log("Datos enviados al backend:", doctorData);
-            
-                    const resp = await fetch(`${process.env.BACKEND_URL}/api/doctors/${id}`, {
+
+                    console.log("Datos enviados al backend:");
+                    for (let [key, value] of doctorData.entries()) {
+                        console.log(`${key}: ${value}`);
+                    }
+
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/doctor/profile`, {
                         method: "PUT",
                         headers: {
-                            "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`,
                         },
-                        body: JSON.stringify(doctorData),
+                        body: doctorData, // Enviar FormData directamente
                     });
-            
+
                     const data = await resp.json();
                     console.log("Respuesta completa del backend:", data);
-            
+
                     if (!resp.ok) {
                         throw new Error(data.msg || "Error updating Doctor");
                     }
-            
-                    // Actualizar el store directamente con los datos devueltos
+
                     setStore({
                         doctorPanelData: {
                             ...getStore().doctorPanelData,
-                            doctor: data.updated_doctor
-                        }
+                            doctor: data.updated_doctor,
+                        },
                     });
-            
+
                     await getActions().getDoctorPanel();
-            
                     return data;
                 } catch (error) {
                     console.log("Error updating doctor:", error);
@@ -1356,7 +1356,7 @@ getDoctorPanel: async () => {
         });
 
         const data = await resp.json();
-        console.log("Datos completos recibidos en getDoctorPanel:", data); // Mostrar todo el contenido
+        //console.log("Datos completos recibidos en getDoctorPanel:", data);
 
         if (!resp.ok) throw new Error(data.error || "Error al cargar los datos del panel del doctor");
 

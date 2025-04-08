@@ -10,8 +10,10 @@ export const DoctorEdit = () => {
         last_name: "",
         email: "",
         phone_number: "",
-        password: ""  // Para cambiar la contraseña si se desea
+        password: "",
     });
+    const [photo, setPhoto] = useState(null);
+    const [removePhoto, setRemovePhoto] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
@@ -29,6 +31,8 @@ export const DoctorEdit = () => {
                 phone_number: store.doctorPanelData.doctor.phone_number,
                 password: "",
             });
+            setPhoto(null);
+            setRemovePhoto(false);
         }
     }, [store.authDoctor, store.doctorPanelData]);
 
@@ -37,25 +41,42 @@ export const DoctorEdit = () => {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handleFileChange = (e) => {
+        setPhoto(e.target.files[0]);
+        setRemovePhoto(false);
+    };
+
+    const handleRemovePhoto = () => {
+        setRemovePhoto(true);
+        setPhoto(null);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
-    
+
         try {
-            // Filtrar la contraseña si está vacía para no enviarla
-            const updatedData = { ...formData };
-            if (!updatedData.password) {
-                delete updatedData.password; // No enviar contraseña si no se cambió
+            const data = new FormData();
+            data.append("first_name", formData.first_name);
+            data.append("last_name", formData.last_name);
+            data.append("email", formData.email);
+            data.append("phone_number", formData.phone_number);
+            if (formData.password) {
+                data.append("password", formData.password);
             }
-    
-            await actions.updateDoctor(store.doctorPanelData.doctor.id, updatedData);
+            if (photo) {
+                data.append("photo", photo);
+            }
+            data.append("remove_photo", removePhoto);
+
+            await actions.updateDoctor(data);  // Quitamos el ID aquí
             setSuccessMessage("Datos actualizados correctamente");
             setTimeout(() => setSuccessMessage(null), 3000);
             setEditMode(false);
-            await actions.getDoctorPanel(); // Asegurar que los datos se recargan
+            await actions.getDoctorPanel();
         } catch (error) {
             setError(error.message || "Error al actualizar los datos");
-            setTimeout(() => setError(null), 3000); // Limpiar el error después de 3 segundos
+            setTimeout(() => setError(null), 3000);
         }
     };
 
@@ -70,7 +91,7 @@ export const DoctorEdit = () => {
 
     return (
         <>
-            {store.authDoctor === true || localStorage.getItem("tokendoctor") ? (
+            {store.authDoctor || localStorage.getItem("tokendoctor") ? (
                 <div className="container">
                     <h1>Bienvenido al Panel del Doctor</h1>
 
@@ -81,7 +102,7 @@ export const DoctorEdit = () => {
                         <div>
                             <h3>Sus Datos Son Doctor</h3>
                             {editMode ? (
-                                <form onSubmit={handleSubmit} className="card p-3 mt-3">
+                                <form onSubmit={handleSubmit} className="card p-3 mt-3" encType="multipart/form-data">
                                     <div className="mb-3">
                                         <label className="form-label">Nombre:</label>
                                         <input
@@ -137,6 +158,33 @@ export const DoctorEdit = () => {
                                             placeholder="Dejar en blanco para no cambiar"
                                         />
                                     </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Foto de perfil:</label>
+                                        {store.doctorPanelData.doctor.url && !removePhoto && (
+                                            <div>
+                                                <img
+                                                    src={store.doctorPanelData.doctor.url}
+                                                    alt="Foto actual"
+                                                    style={{ width: "100px", height: "100px", borderRadius: "50%" }}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={handleRemovePhoto}
+                                                    className="btn btn-danger btn-sm ms-2"
+                                                >
+                                                    Eliminar Foto
+                                                </button>
+                                            </div>
+                                        )}
+                                        <input
+                                            type="file"
+                                            name="photo"
+                                            onChange={handleFileChange}
+                                            className="form-control mt-2"
+                                            accept="image/*"
+                                            disabled={removePhoto}
+                                        />
+                                    </div>
                                     <button type="submit" className="btn btn-primary">
                                         Guardar Cambios
                                     </button>
@@ -150,6 +198,13 @@ export const DoctorEdit = () => {
                                 </form>
                             ) : (
                                 <div>
+                                    {store.doctorPanelData.doctor.url && (
+                                        <img
+                                            src={store.doctorPanelData.doctor.url}
+                                            alt="Foto de perfil"
+                                            style={{ width: "100px", height: "100px", borderRadius: "50%" }}
+                                        />
+                                    )}
                                     <p><strong>Nombre:</strong> {store.doctorPanelData.doctor.first_name}</p>
                                     <p><strong>Apellido:</strong> {store.doctorPanelData.doctor.last_name}</p>
                                     <p><strong>Email:</strong> {store.doctorPanelData.doctor.email}</p>
@@ -170,7 +225,6 @@ export const DoctorEdit = () => {
                     <button onClick={handleLogout} className="btn btn-secondary mb-3 mt-3">
                         Cerrar Sesión
                     </button>
-
                     <button onClick={handleGoToPanel} className="btn btn-primary mb-3 mt-3">
                         Ir al Panel
                     </button>
