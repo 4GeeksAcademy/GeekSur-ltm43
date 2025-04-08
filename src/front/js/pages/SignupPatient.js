@@ -154,6 +154,8 @@ export const SignupPatient = () => {
                     }}>
                         Back Home
                     </button>
+                    <br></br>
+                    <Link to="/loginpatient" href="#" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>¿Ya tienes una cuenta? Inicia Sesión</Link>
                 </Link>
             </div>
         </div>
