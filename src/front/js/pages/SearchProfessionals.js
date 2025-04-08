@@ -16,7 +16,7 @@ function SearchProfessionals() {
 
   useEffect(() => {
     actions.getMedicalCenterLocations();
-    actions.getSpecialties();  // Asegúrate de cargar las especialidades desde el backend si es necesario
+    actions.getSpecialties();
   }, [actions]);
 
   const handleSearch = async () => {
