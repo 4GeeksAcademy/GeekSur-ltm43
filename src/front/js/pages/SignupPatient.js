@@ -45,7 +45,7 @@ export const SignupPatient = () => {
 
     return (
         
-            <div className="container" style={{
+            <div className="container_register" style={{
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
