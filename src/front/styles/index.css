@@ -1,3 +1,5 @@
-/* 
-    General Styles used on every website (Don't Repeat Yourself)
-*/
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}

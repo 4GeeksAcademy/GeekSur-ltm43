@@ -53,21 +53,25 @@ def generate_sitemap(app):
         <ul style="text-align: left;">"""+links_html+"</ul></div>"
 
 # Función para subir imágenes a Cloudinary
-def upload_image(file):
+def upload_image(file, folder="doctors_photos"):
     try:
-        response = cloudinary.uploader.upload(file, folder="doctors_photos")
+        response = cloudinary.uploader.upload(file, folder=folder)
         return response["secure_url"]
     except Exception as e:
         raise Exception(f"Error uploading image to Cloudinary: {str(e)}")
 
-# Función para eliminar imágenes de Cloudinary
+def upload_medical_center_image(file):
+    return upload_image(file, folder="medical_centers_photos")
+
 def delete_image(image_url):
     try:
         if not image_url:
             return
-        # Extraer el public_id de la URL de la imagen
-        public_id = image_url.split("/")[-1].split(".")[0]
-        public_id = f"doctors_photos/{public_id}"
+        # Extraer el public_id de la URL
+        # Ejemplo de URL: https://res.cloudinary.com/dyzwgv2gx/image/upload/v1234567890/doctors_photos/abc123.jpg
+        parts = image_url.split("/")
+        folder_and_filename = parts[-2] + "/" + parts[-1].split(".")[0]  # Ejemplo: doctors_photos/abc123
+        public_id = folder_and_filename
         cloudinary.uploader.destroy(public_id)
     except Exception as e:
         raise Exception(f"Error deleting image from Cloudinary: {str(e)}")

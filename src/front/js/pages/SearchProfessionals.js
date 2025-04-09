@@ -1,184 +1,209 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Context } from '../store/appContext';
-import { useNavigate } from 'react-router-dom';
-import { FaSearch } from 'react-icons/fa';
+import React, { useState, useEffect, useContext } from "react";
+import { Context } from "../store/appContext";
+import { FaSearch } from "react-icons/fa";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { GoogleMap, LoadScript, Autocomplete, Marker } from "@react-google-maps/api";
 
 function SearchProfessionals() {
-    const { store, actions } = useContext(Context);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedSpecialty, setSelectedSpecialty] = useState('');
-    const [selectedLocation, setSelectedLocation] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [isMounted, setIsMounted] = useState(true);
-    const navigate = useNavigate();
+  const { store, actions } = useContext(Context);
+  const { medicalCenterLocations, specialties } = store;
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [selectedSpecialty, setSelectedSpecialty] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-    useEffect(() => {
-        async function fetchSpecialties() {
-            try {
-                await actions.getSpecialties();
-                if (isMounted) {
-                    console.log("Especialidades cargadas:", store.specialties);
-                }
-            } catch (err) {
-                if (isMounted) {
-                    console.error("Error cargando especialidades:", err);
-                    setError("Error al cargar las especialidades.");
-                }
-            }
-        }
+  useEffect(() => {
+    actions.getMedicalCenterLocations();
+    actions.getSpecialties();
+  }, [actions]);
 
-        fetchSpecialties();
+  const handleSearch = async () => {
+    setLoading(true);
+    setError(null);
 
-        return () => {
-            setIsMounted(false);
-        };
-    }, []);
+    try {
+      let url = `${process.env.BACKEND_URL}/api/professionals/search?country=${selectedLocation}`;
 
-    const handleSearch = async () => {
-        setLoading(true);
-        setError(null);
+      if (selectedSpecialty) {
+        url += `&specialty=${selectedSpecialty}`;
+      }
 
-        const searchCriteria = {
-            name: searchTerm,
-            specialty: selectedSpecialty,
-            city: selectedLocation,
-            country: 'Argentina'
-        };
+      if (selectedCity) {
+        url += `&city=${selectedCity}`;
+      }
 
-        try {
-            const response = await fetch(process.env.BACKEND_URL + '/api/search-doctor', {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(searchCriteria),
-            });
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-            console.log("Criterios de búsqueda:", searchCriteria);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+      if (!response.ok) {
+        throw new Error("Error de red");
+      }
 
-            const data = await response.json();
+      const data = await response.json();
+      if (response.status === 200) {
+        setSearchResults(data.doctors);
+      }
+    } catch (err) {
+      setError("Hubo un error al buscar los resultados.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            if (response.status === 200) {
-                console.log("Resultados de la búsqueda:", data);
-                setSearchResults(data.results);
-            }
-        } catch (err) {
-            console.log(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const handleLocationChange = (e) => {
+    setSelectedLocation(e.target.value);
+  };
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        switch (name) {
-            case 'searchTerm':
-                setSearchTerm(value);
-                break;
-            case 'specialty':
-                setSelectedSpecialty(value);
-                break;
-            case 'location':
-                setSelectedLocation(value);
-                break;
-            default:
-                break;
-        }
-    };
+  const handleSpecialtyChange = (e) => {
+    setSelectedSpecialty(e.target.value);
+  };
 
-    const handleViewProfile = (doctorId, specialtyId) => {
-        if (doctorId && specialtyId) {
-            navigate(`/doctor/${doctorId}/${specialtyId}`);
-        } else {
-            console.error("doctorId o specialtyId no están disponibles");
-        }
-    };
+  const handleCityChange = (e) => {
+    setSelectedCity(e.target.value);
+  };
 
-    return (
-        <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            minHeight: '100vh', 
-            backgroundColor: 'rgb(225 250 255)' 
-        }}>
-            <div style={{ 
-                backgroundColor: 'rgb(152 210 237)', 
-                padding: '40px', 
-                borderRadius: '10px', 
-                width: '90%', 
-                maxWidth: '100%', 
-                textAlign: 'left' 
-            }}>
-                <h1 style={{ color: 'white', marginBottom: '30px', textAlign: 'center' }}>Buscar Profesional</h1>
-                <section style={{ marginBottom: '20px', padding: '20px', border: '1px solid #eee', borderRadius: '5px', backgroundColor: '#f9f9f9' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <input
-                            type="text"
-                            name="searchTerm"
-                            placeholder="Nombre del profesional o especialidad"
-                            value={searchTerm}
-                            onChange={handleInputChange}
-                            style={{ padding: '10px', marginRight: '10px', border: 'none', borderRadius: '5px', flex: '1' }}
-                        />
-                        <select name="specialty" value={selectedSpecialty} onChange={handleInputChange} style={{ padding: '10px', marginRight: '10px', border: 'none', borderRadius: '5px', flex: '1' }}>
-                            <option value="">Especialidades</option>
-                            {store.specialties && store.specialties.map((specialty, index) => (
-                                <option key={index} value={specialty.name}>{specialty.name}</option>
-                            ))}
-                        </select>
-                        <select name="location" value={selectedLocation} onChange={handleInputChange} style={{ padding: '10px', marginRight: '10px', border: 'none', borderRadius: '5px', flex: '1' }}>
-                            <option value="">Ubicación</option>
-                            <option value="buenos-aires">Buenos Aires</option>
-                            <option value="cordoba">Córdoba</option>
-                        </select>
-                        <button 
-                            onClick={handleSearch} 
-                            disabled={loading} 
-                            style={{ 
-                                padding: '10px 20px', 
-                                backgroundColor: 'rgb(93 177 212)', 
-                                color: 'white', 
-                                border: 'none', 
-                                borderRadius: '5px', 
-                                cursor: 'pointer', 
-                                flex: '0.5',
-                                display: 'flex', // Para alinear el icono y el texto
-                                alignItems: 'center', // Centrar verticalmente
-                                justifyContent: 'center' // Centrar horizontalmente
-                            }}
-                        >
-                            {loading ? <span style={{ marginRight: '8px' }}>Buscando...</span> : <FaSearch />}
-                        </button>
-                    </div>
-                </section>
+  // Eliminar duplicados de países
+  const uniqueCountries = medicalCenterLocations ? [...new Set(medicalCenterLocations.map(location => location.country))] : [];
 
-                <section>
-                    <h2 style={{ color: 'white', marginBottom: '20px' }}>Resultados de la Búsqueda</h2>
-                    {error && <div style={{ color: 'red' }}>{error}</div>}
-                    {loading && !error && <div style={{ fontStyle: 'italic', color: 'white' }}>Cargando...</div>}
-                    {searchResults.length > 0 ? (
-                        <div>
-                            {searchResults.map((professional) => (
-                                <div key={professional.id} style={{ backgroundColor: '#f0f0f0', padding: '15px', borderRadius: '5px', marginBottom: '10px' }}>
-                                    <h3 style={{ color: '#333' }}>{professional.info_doctor.first_name}</h3>
-                                    <p style={{ color: '#555' }}>Especialidades: {professional.specialty_name}</p>
-                                    <button onClick={() => handleViewProfile(professional.info_doctor.id, professional.id_specialty)} style={{ padding: '8px 16px', backgroundColor: 'rgb(93 177 212)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Ver Perfil</button>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        !loading && <p style={{ color: 'white' }}>Sin resultados encontrados.</p>
-                    )}
-                </section>
-            </div>
+  const uniqueCities = selectedLocation
+  ? [...new Set(
+      medicalCenterLocations
+        .filter((location) => location.country === selectedLocation)
+        .map((location) => location.city)
+    )]
+  : [];
+
+  return (
+    <div className="container mt-4">
+
+      <h1 className="text-center mb-4">Buscar Profesionales</h1>
+
+      <div className="row">
+        
+        <div className="col-md-4">
+          <select
+            className="form-control"
+            value={selectedLocation}
+            onChange={handleLocationChange}
+          >
+            <option value="">Selecciona un País</option>
+            {uniqueCountries.length > 0 ? (
+              uniqueCountries.map((country, index) => (
+                <option key={index} value={country}>
+                  {country}
+                </option>
+              ))
+            ) : (
+              <option value="">Cargando países...</option>
+            )}
+          </select>
         </div>
-    );
+
+        <div className="col-md-4">
+          <select
+            className="form-control"
+            value={selectedSpecialty}
+            onChange={handleSpecialtyChange}
+          >
+            <option value="">Selecciona una Especialidad</option>
+
+            {specialties && specialties.length > 0 ? (
+              specialties.map((specialty, index) => (
+                <option key={index} value={specialty.name}>
+                  {specialty.name}
+                </option>
+              ))
+            ) : (
+              <option value="">Cargando especialidades...</option>
+            )}
+          </select>
+
+        </div>
+
+        <div className="col-md-4">
+                <select
+                    className="form-control"
+                    value={selectedCity}
+                    onChange={handleCityChange}
+                    disabled={!selectedLocation}
+                >
+                    <option value="">Selecciona una Ciudad</option>
+                    {uniqueCities.length > 0 ? (
+                    uniqueCities.map((city, index) => (
+                        <option key={index} value={city}>
+                        {city}
+                        </option>
+                    ))
+                    ) : (
+                    <option value="">No hay ciudades disponibles</option>
+                    )}
+                </select>
+                </div>
+
+
+
+      </div>
+
+
+
+
+      <div className="text-center mt-3">
+        <button
+          className="btn btn-primary"
+          onClick={handleSearch}
+          disabled={loading}
+        >
+          {loading ? <span>Buscando...</span> : <FaSearch />} Buscar
+        </button>
+      </div>
+
+      {error && <div className="alert alert-danger mt-3">{error}</div>}
+
+      <div className="table-responsive mt-4">
+        <table className="table table-striped table-bordered">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Especialidad</th>
+              <th>Centro Médico</th>
+              <th>Ciudad</th>
+              <th>País</th>
+              <th>Teléfono</th>
+              <th>Email</th>
+            </tr>
+          </thead>
+          <tbody>
+            {searchResults.length > 0 ? (
+              searchResults.map((doctor) => (
+                <tr key={doctor.id}>
+                  <td>{doctor.first_name} {doctor.last_name}</td>
+                  <td>{doctor.specialties.map((spec) => spec.name).join(", ")}</td>
+                  <td>{doctor.medical_centers.map((center) => center.name).join(", ")}</td>
+                  <td>{doctor.medical_centers.map((center) => center.city).join(", ")}</td>
+                  <td>{doctor.medical_centers.map((center) => center.country).join(", ")}</td>
+                  <td>{doctor.phone_number}</td>
+                  <td>{doctor.email}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="text-center">
+                  No se encontraron resultados
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 }
 
 export default SearchProfessionals;

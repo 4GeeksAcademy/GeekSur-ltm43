@@ -3,13 +3,13 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User, MedicalCenter, Patient, Doctors, Specialties, Specialties_doctor, Appointment, Review, MedicalCenterDoctor
-from api.utils import generate_sitemap, APIException, upload_image, delete_image
+from api.utils import generate_sitemap, APIException, upload_image, delete_image, upload_medical_center_image
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from itertools import chain
-import json
+import json, cloudinary
 from datetime import datetime, timedelta
-import os
+import os, logging
 import google.generativeai as genai 
 from google.generativeai import types
 
@@ -61,42 +61,51 @@ def get_doctor_id(doctor_id):
 #-------------------------------------POST-----NEW DOCTOR-------------------------------------------------#
 @api.route('/doctors', methods=['POST'])
 def post_doctor():
-    # Obtener los datos del formulario (multipart/form-data)
-    email = request.form.get("email")
-    first_name = request.form.get("first_name")
-    last_name = request.form.get("last_name")
-    phone_number = request.form.get("phone_number")
-    password = request.form.get("password")
-    file = request.files.get("photo")
+    try:
+        # Obtener los datos del formulario (multipart/form-data)
+        email = request.form.get("email")
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
+        phone_number = request.form.get("phone_number")
+        password = request.form.get("password")
+        file = request.files.get("photo")
 
-    # Validar los campos requeridos
-    if not email:
-        raise APIException('El campo "email" es requerido', status_code=400)
-    if not first_name:
-        raise APIException('El campo "first_name" es requerido', status_code=400)
+        # Validar los campos requeridos
+        if not email:
+            raise APIException('El campo "email" es requerido', status_code=400)
+        if not first_name:
+            raise APIException('El campo "first_name" es requerido', status_code=400)
 
-    # Subir la imagen a Cloudinary si se proporcionó
-    image_url = None
-    if file:
-        image_url = upload_image(file)
+        # Subir la imagen a Cloudinary si se proporcionó
+        image_url = None
+        if file:
+            try:
+                image_url = upload_image(file)
+            except Exception as e:
+                raise APIException(f"Error al subir la imagen a Cloudinary: {str(e)}", status_code=500)
 
-    new_doctor = Doctors(
-        email=email,
-        first_name=first_name,
-        last_name=last_name,
-        phone_number=phone_number,
-        password=password,
-        url=image_url,
-        is_active=True  
-    )
-    db.session.add(new_doctor)
-    db.session.commit()
+        new_doctor = Doctors(
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            phone_number=phone_number,
+            password=password,
+            url=image_url,
+            is_active=True  
+        )
+        db.session.add(new_doctor)
+        db.session.commit()
 
-    response_body = {
-        "msg": f"El nuevo Doctor creado es: {new_doctor.first_name}",
-        "new_Doctor": new_doctor.serialize() 
-    }
-    return jsonify(response_body), 201
+        response_body = {
+            "msg": f"El nuevo Doctor creado es: {new_doctor.first_name}",
+            "new_Doctor": new_doctor.serialize() 
+        }
+        return jsonify(response_body), 201
+
+    except APIException as e:
+        return jsonify({"msg": e.message}), e.status_code
+    except Exception as e:
+        return jsonify({"msg": f"Error interno del servidor: {str(e)}"}), 500
 
 
 #-------------------------------------DELETE-----Doctor------------------------------------------------#
@@ -115,44 +124,61 @@ def delete_doctor(doctor_id):
 
 #-------------------------------------PUT----Doctor----------------------------------------------------#
 
-@api.route('/doctors/<int:doctor_id>', methods=['PUT'])
-def update_doctor(doctor_id):
-    doctor_one = Doctors.query.get(doctor_id)
+@api.route('/doctors/<int:id>', methods=['PUT'])
+@jwt_required()
+def update_doctor(id):
+    current_doctor_id = get_jwt_identity()
+    doctor = Doctors.query.get(id)
 
-    if not doctor_one:
-        return jsonify({"msg": "Doctor no encontrado"}), 404
+    if not doctor or doctor.id != current_doctor_id:
+        raise APIException('Doctor no encontrado o no autorizado', status_code=404)
 
-    # Obtener los datos del formulario
-    email = request.form.get("email")
-    first_name = request.form.get("first_name")
-    last_name = request.form.get("last_name")
-    phone_number = request.form.get("phone_number")
-    file = request.files.get("photo")  # Obtener el archivo de imagen
-    remove_image = request.form.get("remove_image") == "true"
+    try:
+        # Obtener datos del formulario
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
+        email = request.form.get("email")
+        phone_number = request.form.get("phone_number")
+        password = request.form.get("password")
+        file = request.files.get("photo")
+        remove_photo = request.form.get("remove_photo") == "true"  # Convertir a booleano
 
-    # Actualizar los campos si se proporcionaron
-    doctor_one.email = email if email else doctor_one.email
-    doctor_one.first_name = first_name if first_name else doctor_one.first_name
-    doctor_one.last_name = last_name if last_name else doctor_one.last_name
-    doctor_one.phone_number = phone_number if phone_number else doctor_one.phone_number
+        # Validar campos requeridos
+        if not first_name:
+            raise APIException('El campo "first_name" es requerido', status_code=400)
+        if not email:
+            raise APIException('El campo "email" es requerido', status_code=400)
 
-    # Manejar la imagen
-    if remove_image and doctor_one.url:  # Si se solicita eliminar la imagen
-        delete_image(doctor_one.url)  # Eliminar la imagen de Cloudinary
-        doctor_one.url = None  # Establecer el campo url como null
-    elif file:  # Si se proporciona una nueva imagen
-        # Si ya había una imagen, eliminarla primero
-        if doctor_one.url:
-            delete_image(doctor_one.url)
-        image_url = upload_image(file)
-        doctor_one.url = image_url
+        # Actualizar los campos básicos
+        doctor.first_name = first_name
+        doctor.last_name = last_name
+        doctor.email = email
+        doctor.phone_number = phone_number
+        if password:
+            doctor.password = password  # Asumiendo que tienes un método para hashear la contraseña
 
-    db.session.commit()
+        # Manejar la foto de perfil
+        if remove_photo:
+            doctor.url = None  # Eliminar la foto estableciendo la URL como null
+        elif file:
+            # Subir la nueva foto a Cloudinary
+            try:
+                image_url = upload_image(file)
+                doctor.url = image_url
+            except Exception as e:
+                raise APIException(f"Error al subir la imagen a Cloudinary: {str(e)}", status_code=500)
 
-    return jsonify({
-        "msg": f"Doctor con ID {doctor_id} actualizado correctamente",
-        "updated_doctor": doctor_one.serialize()
-    }), 200
+        db.session.commit()
+
+        return jsonify({
+            "msg": "Doctor actualizado exitosamente",
+            "updated_doctor": doctor.serialize()
+        }), 200
+
+    except APIException as e:
+        return jsonify({"msg": e.message}), e.status_code
+    except Exception as e:
+        return jsonify({"msg": f"Error interno del servidor: {str(e)}"}), 500
 
 #//////////////////////////////END //////DOCTOR
 
@@ -203,57 +229,128 @@ def manage_doctor_appointment(appointment_id):
 
 #//////////////////////////////Beguin //////Medical Center
 
-@api.route('/medical_centers', methods=['GET'])
-def get_centers():
-    try:
-        centers = MedicalCenter.query.all()
-        return jsonify([center.serialize() for center in centers])
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+@api.route("/medical_centers", methods=["GET"])
+def get_medical_centers():
+    medical_centers = MedicalCenter.query.all()
+    return jsonify([center.serialize() for center in medical_centers]), 200
 
 # Agregar un nuevo centro médico
-@api.route('/medical_centers', methods=['POST'])
-def add_center():
-    data = request.json
-    new_center = MedicalCenter(**data)
-    db.session.add(new_center)
-    db.session.commit()
-    return jsonify({
-        'id': new_center.id,
-        'name': new_center.name,
-        'address': new_center.address,
-        'country': new_center.country,
-        'city': new_center.city,
-        'phone': new_center.phone,
-        'email': new_center.email,
-        'latitude': new_center.latitude, 
-        'longitude': new_center.longitude
-    }), 201
+@api.route("/medical_centers", methods=["POST"])
+def create_medical_center():
+    try:
+        print("Solicitud recibida en POST /api/medical_centers")
+        print("Contenido de request.files:", request.files)
+        print("Contenido de request.form:", request.form)
+
+        # Verificar si se envió un archivo
+        file = request.files.get("image")
+        image_url = None
+        if file:
+            print("Subiendo imagen a Cloudinary...")
+            image_url = upload_medical_center_image(file)
+            print(f"Imagen subida, URL: {image_url}")
+        else:
+            print("No se envió ninguna imagen")
+
+        # Obtener los datos del formulario
+        data = request.form
+        name = data.get("name")
+        address = data.get("address")
+        country = data.get("country")
+        city = data.get("city")
+        phone = data.get("phone")
+        email = data.get("email")
+        latitude = data.get("latitude")
+        longitude = data.get("longitude")
+
+        print(f"Datos del formulario: name={name}, address={address}, country={country}, city={city}, phone={phone}, email={email}, latitude={latitude}, longitude={longitude}")
+
+        if not all([name, address, country, city, phone, email]):
+            print("Faltan campos requeridos")
+            return jsonify({"msg": "Missing required fields"}), 400
+
+        try:
+            latitude = float(latitude) if latitude else None
+            longitude = float(longitude) if longitude else None
+        except (ValueError, TypeError) as e:
+            print(f"Error al convertir latitud/longitud: {str(e)}")
+            return jsonify({"msg": "Invalid latitude or longitude"}), 400
+
+        new_center = MedicalCenter(
+            name=name,
+            address=address,
+            country=country,
+            city=city,
+            phone=phone,
+            email=email,
+            latitude=latitude,
+            longitude=longitude,
+            image_url=image_url
+        )
+        print("Guardando centro médico en la base de datos...")
+        db.session.add(new_center)
+        db.session.commit()
+        print("Centro médico creado exitosamente")
+        return jsonify(new_center.serialize()), 201
+
+    except Exception as e:
+        print(f"Error en create_medical_center: {str(e)}")
+        db.session.rollback()
+        return jsonify({"msg": f"Error creating medical center: {str(e)}"}), 500
 
 # Actualizar un centro médico
-@api.route('/medical_centers/<int:id>', methods=['PUT'])
-def update_center(id):
+@api.route("/medical_centers/<int:id>", methods=["PUT"])
+def update_medical_center(id):
     center = MedicalCenter.query.get(id)
     if not center:
-        return jsonify({'message': 'Medical Center not found'}), 404
+        return jsonify({"msg": "Medical center not found"}), 404
 
-    data = request.json
-    for key, value in data.items():
-        setattr(center, key, value)
+    # Verificar si se quiere eliminar la imagen
+    remove_image = request.form.get("remove_image") == "true"
+    if remove_image and center.image_url:
+        delete_image(center.image_url)
+        center.image_url = None
+
+    # Verificar si se subió una nueva imagen
+    file = request.files.get("image")
+    if file:
+        if center.image_url:  # Eliminar la imagen anterior si existe
+            delete_image(center.image_url)
+        center.image_url = upload_medical_center_image(file)
+
+    # Actualizar los datos del formulario
+    data = request.form
+    center.name = data.get("name", center.name)
+    center.address = data.get("address", center.address)
+    center.country = data.get("country", center.country)
+    center.city = data.get("city", center.city)
+    center.phone = data.get("phone", center.phone)
+    center.email = data.get("email", center.email)
+
+    latitude = data.get("latitude")
+    longitude = data.get("longitude")
+    try:
+        center.latitude = float(latitude) if latitude else center.latitude
+        center.longitude = float(longitude) if longitude else center.longitude
+    except (ValueError, TypeError):
+        return jsonify({"msg": "Invalid latitude or longitude"}), 400
 
     db.session.commit()
-    return jsonify({'message': 'Medical Center updated!'})
+    return jsonify(center.serialize()), 200
 
-# Eliminar un centro médico
-@api.route('/medical_centers/<int:id>', methods=['DELETE'])
-def delete_center(id):
+@api.route("/medical_centers/<int:id>", methods=["DELETE"])
+def delete_medical_center(id):
     center = MedicalCenter.query.get(id)
     if not center:
-        return jsonify({'message': 'Medical Center not found'}), 404
+        return jsonify({"msg": "Medical center not found"}), 404
+
+    # Eliminar la imagen de Cloudinary si existe
+    if center.image_url:
+        delete_image(center.image_url)
 
     db.session.delete(center)
     db.session.commit()
-    return jsonify({'message': 'Medical Center deleted!'})
+    return jsonify({"msg": "Medical center deleted"}), 200
 #//////////////////////////////END //////Medical Center
 
 ########## Beguin patients services###############
@@ -1056,11 +1153,15 @@ def get_get_profile_doctor():
         "first_name": doctor.first_name,
         "last_name": doctor.last_name,
         "phone_number": doctor.phone_number,
-        "specialties": specialties,  # Lista de especialidades
-        "medical_centers": medical_centers  # Lista de centros médicos con oficinas
+        "url": doctor.url,  # Agregar el campo url
+        "specialties": specialties,
+        "medical_centers": medical_centers
     }
 
-    return jsonify(doctor_data), 200
+    return jsonify({
+        "has_specialties": doctor.has_specialties,
+        "doctor": doctor_data  # Envolver los datos del doctor en un objeto
+    }), 200
 
 #--------------------------------------TRaigo el API del Doctor con token para DashboardDoctor----------------------#
 
@@ -1225,8 +1326,7 @@ def add_medical_centers():
 @jwt_required()
 def get_doctor_panel():
     doctor_id = get_jwt_identity()  # Obtener ID del doctor desde el JWT
-
-    doctor = Doctors.query.get(doctor_id)  # Buscar al doctor en la base de datos
+    doctor = Doctors.query.get(doctor_id)  # Usar "Doctors" en lugar de "Doctor"
 
     if not doctor:
         return jsonify({"error": "Doctor no encontrado"}), 404
@@ -1256,8 +1356,9 @@ def get_doctor_panel():
             "first_name": doctor.first_name,
             "last_name": doctor.last_name,
             "phone_number": doctor.phone_number,
-            "has_specialties": bool(specialties),  # Indicar si tiene especialidades
-            "has_medical_centers": bool(medical_centers),  # Indicar si tiene centros médicos
+            "url": doctor.url,
+            "has_specialties": bool(specialties),
+            "has_medical_centers": bool(medical_centers),
             "specialties": specialties,
             "medical_centers": medical_centers
         }
@@ -1447,3 +1548,133 @@ def ai_consultation():
     except Exception as e:
         return jsonify({"msg": f"Error al consultar la IA: {str(e)}"}), 500
     ######################End services  Google Gen AI###########################
+
+
+######################### GET TO LOCATION MEDICAL CENTER #########oscar 07-04-2025 ############
+@api.route("/medical_centers/locations", methods=["GET"])
+def get_medical_center_locations():
+    centers = MedicalCenter.query.with_entities(
+    MedicalCenter.city, MedicalCenter.address, MedicalCenter.country
+).distinct().all()
+
+    # Eliminar duplicados manualmente si es necesario
+    unique_locations = []
+    seen = set()
+
+    for center in centers:
+        key = (center.city, center.address, center.country)
+        if key not in seen:
+            seen.add(key)
+            unique_locations.append({
+                "city": center.city,
+                "address": center.address,
+                "country": center.country
+            })
+
+    return jsonify(unique_locations), 200
+
+######################### GET TO DATOS DOCTOR ######### oscar 07-04-2025 ############
+
+@api.route('/professionals/search', methods=['GET'])
+def get_doctors_panel():
+    country = request.args.get('country')
+    specialty_name = request.args.get('specialty')
+    city = request.args.get('city')
+
+    doctors = Doctors.query.all()
+    if not doctors:
+        return jsonify({"error": "No se encontraron doctores"}), 404
+
+    doctor_data = []
+
+    for doctor in doctors:
+        specialties = [
+            {"id": s.id_specialty, "name": Specialties.query.get(s.id_specialty).name}
+            for s in doctor.specialties
+        ]
+
+        if specialty_name and not any(s['name'].lower() == specialty_name.lower() for s in specialties):
+            continue
+
+        # Agrupar centros médicos únicos por id_medical_center
+        unique_centers = {}
+        for mcd in doctor.medical_center_doctors:
+            mc = MedicalCenter.query.get(mcd.id_medical_center)
+            if not mc:
+                continue
+            if mc.id not in unique_centers:
+                unique_centers[mc.id] = {
+                    "id": mcd.id,
+                    "id_medical_center": mc.id,
+                    "name": mc.name,
+                    "address": mc.address,
+                    "city": mc.city,
+                    "country": mc.country,
+                    "office": mcd.office
+                }
+
+        medical_centers = list(unique_centers.values())
+
+        if country and not any(mc['country'].lower() == country.lower() for mc in medical_centers):
+            continue
+
+        if city and not any(mc['city'].lower() == city.lower() for mc in medical_centers):
+            continue
+
+        doctor_info = {
+            "id": doctor.id,
+            "email": doctor.email,
+            "first_name": doctor.first_name,
+            "last_name": doctor.last_name,
+            "phone_number": doctor.phone_number,
+            "url": doctor.url,
+            "has_specialties": bool(specialties),
+            "has_medical_centers": bool(medical_centers),
+            "specialties": specialties,
+            "medical_centers": medical_centers
+        }
+
+        doctor_data.append(doctor_info)
+
+    return jsonify({"doctors": doctor_data}), 200
+
+
+
+@api.route('/doctor/profile', methods=['PUT'])
+@jwt_required()
+def update_doctor_profile():
+    doctor_id = get_jwt_identity()  # Obtener el ID del doctor desde el token JWT
+    doctor = Doctors.query.get(doctor_id)  # Usar "Doctors" en lugar de "Doctor"
+
+    if not doctor:
+        return jsonify({"msg": "Doctor no encontrado"}), 404
+
+    data = request.form  # Usar request.form para manejar FormData
+
+    # Actualizar los campos si están presentes en el formulario
+    doctor.first_name = data.get('first_name', doctor.first_name)
+    doctor.last_name = data.get('last_name', doctor.last_name)
+    doctor.email = data.get('email', doctor.email)
+    doctor.phone_number = data.get('phone_number', doctor.phone_number)
+
+    # Actualizar contraseña si se proporciona
+    if 'password' in data and data['password']:
+        doctor.password = data['password']  # Nota: Deberías hashear la contraseña aquí si es necesario
+
+    # Manejar la foto de perfil
+    if 'photo' in request.files:
+        photo = request.files['photo']
+        if photo:
+            upload_result = cloudinary.uploader.upload(photo)
+            doctor.url = upload_result['secure_url']
+    elif data.get('remove_photo') == 'true' and doctor.url:
+        doctor.url = None  # Eliminar la foto si se solicita
+
+    try:
+        db.session.commit()
+        return jsonify({"updated_doctor": doctor.serialize()}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": "Error al actualizar el perfil: " + str(e)}), 500
+
+
