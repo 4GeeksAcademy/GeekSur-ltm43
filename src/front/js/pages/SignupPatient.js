@@ -44,7 +44,7 @@ export const SignupPatient = () => {
     };
 
     return (
-        <div className="container">
+        <div className="container_register">
 
             <div className="left">
                 <div className="signup-info">

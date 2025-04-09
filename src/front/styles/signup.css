@@ -1,5 +1,5 @@
 /* Contenedor principal en dos columnas */
-.container {
+.container_register {
     display: flex;
     width: 100%;
   }

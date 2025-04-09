@@ -75,7 +75,7 @@ export const CenterOfficeByDoctor = () => {
     const location = doctor?.city ? `${doctor.city}, ${doctor.country || 'CA'}` : "San Francisco, CA";
 
     return (
-        <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#b7f4ff" }}>
+        <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f0faff" }}>
             {/* Sidebar */}
             <div
                 className="d-flex flex-column flex-shrink-0 p-3 text-white"
@@ -132,7 +132,7 @@ export const CenterOfficeByDoctor = () => {
             </div>
 
             {/* Contenido principal */}
-            <div className="flex-grow-1 p-4" style={{ backgroundColor: "#b7f4ff", color: "#000" }}>
+            <div className="flex-grow-1 p-4" style={{ backgroundColor: "#f0faff", color: "#000" }}>
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <h2>Hello, {doctorName}</h2>
