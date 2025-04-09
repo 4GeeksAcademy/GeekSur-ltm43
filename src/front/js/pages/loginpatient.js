@@ -1,106 +1,100 @@
-import React, { useState, useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Context } from "../store/appContext";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import "../../styles/login.css";
+import { useNavigate, Link } from "react-router-dom";
+import logo from "../../img/meedgeeknegro.png";
 
 export const LoginPatient = () => {
-    const { actions, store } = useContext(Context);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const navigate = useNavigate();
+  const { store, actions } = useContext(Context);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            await actions.loginPatient(email, password);
-            navigate("/dashboardpatient");
-        } catch (error) {
-            alert("Error al iniciar sesión: " + (store.loginPatientError || "Inténtalo de nuevo"));
-        }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await actions.loginPatient(email, password);
+      navigate("/dashboardpatient");
+    } catch (error) {
+      alert("Error al iniciar sesión: " + (store.loginPatientError || "Inténtalo de nuevo"));
+    }
+  };
 
-    return (
-        <div className="container" style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            height: '100vh', 
-            backgroundColor: 'rgb(225 250 255)'
-        }}>
-            <div style={{ 
-                backgroundColor: 'rgb(152 210 237)',
-                padding: '40px', 
-                borderRadius: '10px', 
-                width: '500px', 
-                textAlign: 'center' 
-            }}>
-                <h1 style={{ color: 'white', marginBottom: '30px' }}>¡Bienvenido!</h1>
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Usuario"
-                        required
-                        style={{ 
-                            padding: '10px', 
-                            marginBottom: '20px', 
-                            border: 'none', 
-                            borderRadius: '5px' 
-                        }}
-                    />
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Contraseña"
-                        required
-                        style={{ 
-                            padding: '10px', 
-                            marginBottom: '20px', 
-                            border: 'none', 
-                            borderRadius: '5px' 
-                        }}
-                    />
-                    <button 
-                        type="submit" 
-                        style={{ 
-                            padding: '10px 20px', 
-                            backgroundColor: 'rgb(93 177 212)', 
-                            color: 'white', 
-                            border: 'none', 
-                            borderRadius: '5px', 
-                            cursor: 'pointer' 
-                        }}
-                    >
-                        Login
-                    </button>
-                </form>
-                <div style={{ marginTop: '20px', color: 'white' }}>
-                    <a 
-                        href="#" 
-                        onClick={() => navigate("/signuppatient")}
-                        style={{ color: 'white', textDecoration: 'none', cursor: 'pointer' }}
-                    >
-                        ¿No tienes cuenta? Regístrate aquí
-                    </a>
-                </div>
-                <button 
-                    onClick={() => navigate(-1)} 
-                    style={{ 
-                        marginTop: '30px', 
-                        padding: '10px 20px', 
-                        backgroundColor: 'rgb(93 177 212)', 
-                        color: 'white', 
-                        border: 'none', 
-                        borderRadius: '5px', 
-                        cursor: 'pointer' 
-                    }}
-                >
-                    Volver
-                </button>
-                {store.loginPatientError && <p style={{ color: "red", marginTop: '10px' }}>{store.loginPatientError}</p>}
-            </div>
+  return (
+    <div className="login-container">
+      <div className="login-info">
+        
+        <div className="logo-container">
+                <img src={logo} alt="MedGeek Logo" className="logo" />
         </div>
-    );
+
+        <div className="info-box">
+          <h1>Portal MedGeek para Pacientes</h1>
+          <h3>Cada mes, miles de pacientes agendan su cita medica usando MedGeek.</h3>
+          <ul>
+            <li>Agenda tus citas médicas</li>
+            <li>Buscador de Profesionales</li>
+            <li>Consulta con nuestra Inteligencia Artificial</li>
+            <li>Consulta tu historial médico</li>
+            <li>Y más...</li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="login-form">
+
+
+
+        <div className="logo-container"> 
+  
+
+  
+
+    
+    </div>
+
+        <h1>
+          Mi <strong>Portal: Pacientes</strong>
+        </h1>
+        <p>Ingresa tu Email y Clave para iniciar sesión</p>
+
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label>Email:</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label>Contraseña:</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit">Login</button>
+        </form>
+
+        {store.loginPatientError && <p className="error">{store.loginPatientError}</p>}
+
+        <div className="login-buttons">
+          <p className="register-message">¿No tiene cuenta? Favor haga clic en registrarse</p>
+
+          <div className="button-group">
+            <Link to="/signuppatient">
+              <button className="btn">Registrarse</button>
+            </Link>
+            <Link to="/">
+              <button className="btn">Volver</button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };

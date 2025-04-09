@@ -1,0 +1,154 @@
+.login-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #b7f4ff; /* Fondo actualizado */
+    color: #000;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.login-info {
+    width: 50%;
+    padding: 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #e0faff; /* Un poco más claro para diferenciar */
+}
+
+.info-box h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    color: #000;
+}
+
+.info-box ul {
+    list-style: none;
+    padding: 0;
+}
+
+.info-box li {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.info-box li::before {
+    content: "✔";
+    position: absolute;
+    left: 0;
+    color: #0099aa;
+}
+
+.login-form {
+    width: 50%;
+    padding: 4rem;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-left: 2px solid #7bf5f5; /* Línea de separación gris entre los dos lados */
+}
+
+.login-form h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: #000;
+}
+
+.login-form p {
+    margin-bottom: 2rem;
+    color: #333;
+}
+
+.login-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+    
+}
+
+.login-form input {
+    padding: 0.75rem;
+    font-size: 1rem;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    color: #000;
+    border: 1px solid #5be4e4bd;
+}
+
+.login-form button[type="submit"] {
+    background-color: #97dbe7; /* Botón actualizado */
+    color: #000;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+}
+
+.login-form .error {
+    color: red;
+    margin-top: 1rem;
+}
+
+.login-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    width: 100%;
+}
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.button-group .btn {
+    padding: 0.75rem 1.5rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    background-color: #97dbe7;
+    color: #000;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: auto; 
+    text-align: center;
+   }
+
+.button-group .btn:hover {
+    background-color: #7fcad8;
+}
+
+.register-message {
+    font-size: 0.95rem;
+    color: #333;
+    margin: 0;
+}
+
+
+.btn:hover {
+    background-color: #7fcad8;
+}
+
+/* Estilo para colocar la imagen en la esquina superior izquierda */
+.logo-container {
+ 
+    top: 20px;
+    left: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Estilo para definir el tamaño de la imagen */
+  .logo {
+    width: 200px;  /* Establecer el tamaño de la imagen */
+    height: 200px; /* Establecer el tamaño de la imagen */
+  }
