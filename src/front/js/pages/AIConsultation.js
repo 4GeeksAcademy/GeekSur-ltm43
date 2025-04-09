@@ -1,6 +1,8 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate } from "react-router-dom";
+import { FaSearch } from 'react-icons/fa';
+
 
 export const AIConsultation = () => {
     const { store, actions } = useContext(Context);
@@ -38,19 +40,19 @@ export const AIConsultation = () => {
     };
 
     return (
-        <div className="container" style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            height: '100vh', 
-            backgroundColor: 'rgb(225 250 255)' 
+        <div className="container" style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
+            backgroundColor: 'rgb(225 250 255)'
         }}>
-            <div style={{ 
-                backgroundColor: 'rgb(152 210 237)', 
-                padding: '40px', 
-                borderRadius: '10px', 
-                width: '500px', 
-                textAlign: 'center' 
+            <div style={{
+                backgroundColor: 'rgb(152 210 237)',
+                padding: '40px',
+                borderRadius: '10px',
+                width: '500px',
+                textAlign: 'center'
             }}>
                 <h1 style={{ color: 'white', marginBottom: '30px' }}>Consulta con IA</h1>
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
@@ -62,32 +64,27 @@ export const AIConsultation = () => {
                         required
                         style={{ padding: '10px', marginBottom: '20px', border: 'none', borderRadius: '5px', height: '100px' }}
                     />
-                    <button 
-                        type="submit" 
-                        style={{ 
-                            padding: '10px 20px', 
-                            backgroundColor: 'rgb(93 177 212)', 
-                            color: 'white', 
-                            border: 'none', 
-                            borderRadius: '5px', 
-                            cursor: 'pointer' 
-                        }}
+                    <button
+                        type="submit"
+                        className="btn btn-primary d-flex align-items-center gap-2 justify-content-center w-100"
                     >
-                        Obtener Recomendación
+                        <FaSearch /> Obtener Recomendación
                     </button>
+
                 </form>
                 {recommendation && <p style={{ color: 'white', marginTop: '20px' }}>{recommendation}</p>}
                 {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
-                <button 
-                    onClick={() => navigate("/dashboardpatient")} 
-                    style={{ 
-                        marginTop: '30px', 
-                        padding: '10px 20px', 
-                        backgroundColor: 'rgb(93 177 212)', 
-                        color: 'white', 
-                        border: 'none', 
-                        borderRadius: '5px', 
-                        cursor: 'pointer' 
+                <button
+                    onClick={() => navigate("/dashboardpatient")}
+                    style={{
+                        marginTop: '30px',
+                        padding: '10px 20px',
+                        backgroundColor: 'rgb(93 177 212)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        width: 'auto',
+                        cursor: 'pointer'
                     }}
                 >
                     Volver al Dashboard

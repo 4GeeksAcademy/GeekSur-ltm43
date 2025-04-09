@@ -880,7 +880,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         body: JSON.stringify({ email, password }),
                     });
                     const data = await resp.json();
-                    console.log(data);
+
                     
                     if (!resp.ok) throw new Error(data.msg || "Error en el login");
 
