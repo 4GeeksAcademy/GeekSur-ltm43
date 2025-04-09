@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Context } from "../store/appContext";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate, Link } from "react-router-dom";
+import logo from "../../img/logo.png";
 
 export const DoctorEdit = () => {
     const { store, actions } = useContext(Context);
@@ -17,6 +18,17 @@ export const DoctorEdit = () => {
     const [editMode, setEditMode] = useState(false);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
+    const [currentTime, setCurrentTime] = useState(
+        new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
+
+    // Actualizar la hora cada minuto
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+        }, 60000);
+        return () => clearInterval(interval);
+    }, []);
 
     useEffect(() => {
         if (!store.authDoctor && !localStorage.getItem("tokendoctor")) {
@@ -34,7 +46,7 @@ export const DoctorEdit = () => {
             setPhoto(null);
             setRemovePhoto(false);
         }
-    }, [store.authDoctor, store.doctorPanelData]);
+    }, [store.authDoctor, store.doctorPanelData, actions, navigate]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -69,7 +81,7 @@ export const DoctorEdit = () => {
             }
             data.append("remove_photo", removePhoto);
 
-            await actions.updateDoctor(data);  // Quitamos el ID aquí
+            await actions.updateDoctor(data);
             setSuccessMessage("Datos actualizados correctamente");
             setTimeout(() => setSuccessMessage(null), 3000);
             setEditMode(false);
@@ -85,149 +97,385 @@ export const DoctorEdit = () => {
         navigate("/logindoctor");
     };
 
-    const handleGoToPanel = () => {
-        navigate("/paneldoctor");
-    };
+    const doctor = store.doctorPanelData?.doctor;
+    const doctorName = doctor ? `${doctor.first_name} ${doctor.last_name}` : "Doctor";
+    const location = doctor?.city ? `${doctor.city}, ${doctor.country || 'CA'}` : "San Francisco, CA";
 
     return (
         <>
             {store.authDoctor || localStorage.getItem("tokendoctor") ? (
-                <div className="container">
-                    <h1>Bienvenido al Panel del Doctor</h1>
+                <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#b7f4ff" }}>
+                    {/* Sidebar */}
+                    <div
+                        className="d-flex flex-column flex-shrink-0 p-3 text-white shadow-sm"
+                        style={{ width: "280px", backgroundColor: "rgb(100, 191, 208)" }}
+                    >
+                        <a
+                            href="/dashboarddoctor"
+                            className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none"
+                        >
+                            <img src={logo} alt="Logo" style={{ height: "100px", width: "100%" }} />
+                        </a>
+                        <hr />
+                        <ul className="nav nav-pills flex-column mb-auto">
+                            <li className="nav-item">
+                                <Link
+                                    to="/dashboarddoctor"
+                                    className="nav-link text-white d-flex align-items-center py-3"
+                                    style={{ borderRadius: "8px" }}
+                                >
+                                    <i className="bi bi-house-door me-3" style={{ fontSize: "1.2rem" }}></i>
+                                    Dashboard
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/doctor-appointment"
+                                    className="nav-link text-white d-flex align-items-center py-3"
+                                    style={{ borderRadius: "8px" }}
+                                >
+                                    <i className="bi bi-calendar-check me-3" style={{ fontSize: "1.2rem" }}></i>
+                                    Ver Mis Citas
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/doctor_edit_specialty"
+                                    className="nav-link text-white d-flex align-items-center py-3"
+                                    style={{ borderRadius: "8px" }}
+                                >
+                                    <i className="bi bi-book me-3" style={{ fontSize: "1.2rem" }}></i>
+                                    Mis Especialidades
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/center_office_by_doctor"
+                                    className="nav-link text-white d-flex align-items-center py-3"
+                                    style={{ borderRadius: "8px" }}
+                                >
+                                    <i className="bi bi-building me-3" style={{ fontSize: "1.2rem" }}></i>
+                                    Mis Oficinas
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/paneldoctor"
+                                    className="nav-link active text-white d-flex align-items-center py-3"
+                                    style={{ borderRadius: "8px", backgroundColor: "#97dbe7", color: "#000" }}
+                                >
+                                    <i className="bi bi-person me-3" style={{ fontSize: "1.2rem" }}></i>
+                                    Mi Perfil
+                                </Link>
+                            </li>
+                        </ul>
+                        <hr />
+                        <button
+                            onClick={handleLogout}
+                            className="btn btn-light text-dark d-flex align-items-center py-2"
+                            style={{ backgroundColor: "#97dbe7", border: "none", borderRadius: "8px" }}
+                        >
+                            <i className="bi bi-box-arrow-right me-2"></i>
+                            Cerrar Sesión
+                        </button>
+                    </div>
 
-                    {error && <div className="alert alert-danger">{error}</div>}
-                    {successMessage && <div className="alert alert-success">{successMessage}</div>}
+                    {/* Contenido principal */}
+                    <div className="flex-grow-1">
+                        {/* Header */}
+                        <header
+                            className="d-flex justify-content-between align-items-center p-4 shadow-sm"
+                            style={{ backgroundColor: "#fff", borderBottom: "1px solid #e9ecef" }}
+                        >
+                            <div>
+                                <h2 className="mb-0" style={{ color: "#000" }}>
+                                    Editar Perfil
+                                </h2>
+                                <p className="text-muted mb-0">Actualiza tu información personal aquí.</p>
+                            </div>
+                            <div className="d-flex align-items-center">
+                                <span className="text-dark me-3" style={{ opacity: 0.8 }}>
+                                    <i className="bi bi-geo-alt me-1"></i>
+                                    {location} - {currentTime}
+                                </span>
+                                {doctor?.url && (
+                                    <img
+                                        src={doctor.url}
+                                        alt="Foto de perfil"
+                                        style={{
+                                            width: "40px",
+                                            height: "40px",
+                                            borderRadius: "50%",
+                                            border: "2px solid #97dbe7",
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        </header>
 
-                    {store.doctorPanelData ? (
-                        <div>
-                            <h3>Sus Datos Son Doctor</h3>
-                            {editMode ? (
-                                <form onSubmit={handleSubmit} className="card p-3 mt-3" encType="multipart/form-data">
-                                    <div className="mb-3">
-                                        <label className="form-label">Nombre:</label>
-                                        <input
-                                            type="text"
-                                            name="first_name"
-                                            value={formData.first_name}
-                                            onChange={handleInputChange}
-                                            className="form-control"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Apellido:</label>
-                                        <input
-                                            type="text"
-                                            name="last_name"
-                                            value={formData.last_name}
-                                            onChange={handleInputChange}
-                                            className="form-control"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Email:</label>
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            value={formData.email}
-                                            onChange={handleInputChange}
-                                            className="form-control"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Teléfono:</label>
-                                        <input
-                                            type="text"
-                                            name="phone_number"
-                                            value={formData.phone_number}
-                                            onChange={handleInputChange}
-                                            className="form-control"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Contraseña (opcional):</label>
-                                        <input
-                                            type="password"
-                                            name="password"
-                                            value={formData.password}
-                                            onChange={handleInputChange}
-                                            className="form-control"
-                                            placeholder="Dejar en blanco para no cambiar"
-                                        />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Foto de perfil:</label>
-                                        {store.doctorPanelData.doctor.url && !removePhoto && (
-                                            <div>
-                                                <img
-                                                    src={store.doctorPanelData.doctor.url}
-                                                    alt="Foto actual"
-                                                    style={{ width: "100px", height: "100px", borderRadius: "50%" }}
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={handleRemovePhoto}
-                                                    className="btn btn-danger btn-sm ms-2"
-                                                >
-                                                    Eliminar Foto
-                                                </button>
-                                            </div>
-                                        )}
-                                        <input
-                                            type="file"
-                                            name="photo"
-                                            onChange={handleFileChange}
-                                            className="form-control mt-2"
-                                            accept="image/*"
-                                            disabled={removePhoto}
-                                        />
-                                    </div>
-                                    <button type="submit" className="btn btn-primary">
-                                        Guardar Cambios
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setEditMode(false)}
-                                        className="btn btn-outline-secondary ms-2"
-                                    >
-                                        Cancelar
-                                    </button>
-                                </form>
-                            ) : (
-                                <div>
-                                    {store.doctorPanelData.doctor.url && (
-                                        <img
-                                            src={store.doctorPanelData.doctor.url}
-                                            alt="Foto de perfil"
-                                            style={{ width: "100px", height: "100px", borderRadius: "50%" }}
-                                        />
-                                    )}
-                                    <p><strong>Nombre:</strong> {store.doctorPanelData.doctor.first_name}</p>
-                                    <p><strong>Apellido:</strong> {store.doctorPanelData.doctor.last_name}</p>
-                                    <p><strong>Email:</strong> {store.doctorPanelData.doctor.email}</p>
-                                    <p><strong>Teléfono:</strong> {store.doctorPanelData.doctor.phone_number}</p>
-                                    <button
-                                        onClick={() => setEditMode(true)}
-                                        className="btn btn-primary mt-3"
-                                    >
-                                        Editar Datos
-                                    </button>
+                        {/* Contenido */}
+                        <div className="p-4" style={{ backgroundColor: "#b7f4ff", minHeight: "calc(100vh - 80px)" }}>
+                            {error && (
+                                <div className="alert alert-danger" role="alert">
+                                    {error}
                                 </div>
                             )}
-                        </div>
-                    ) : (
-                        <p>Cargando datos...</p>
-                    )}
+                            {successMessage && (
+                                <div className="alert alert-success" role="alert">
+                                    {successMessage}
+                                </div>
+                            )}
 
-                    <button onClick={handleLogout} className="btn btn-secondary mb-3 mt-3">
-                        Cerrar Sesión
-                    </button>
-                    <button onClick={handleGoToPanel} className="btn btn-primary mb-3 mt-3">
-                        Ir al Panel
-                    </button>
+                            {store.doctorPanelData ? (
+                                <div className="row g-4">
+                                    {/* Formulario de edición */}
+                                    <div className="col-md-6">
+                                        <div
+                                            className="card shadow-sm"
+                                            style={{
+                                                backgroundColor: "#f8f9fa",
+                                                border: "none",
+                                                borderRadius: "12px",
+                                            }}
+                                        >
+                                            <div className="card-body">
+                                                {editMode ? (
+                                                    <form onSubmit={handleSubmit} encType="multipart/form-data">
+                                                        <div className="mb-3">
+                                                            <label className="form-label" style={{ color: "#000" }}>
+                                                                Nombre:
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                name="first_name"
+                                                                value={formData.first_name}
+                                                                onChange={handleInputChange}
+                                                                className="form-control"
+                                                                required
+                                                                style={{ borderRadius: "8px" }}
+                                                            />
+                                                        </div>
+                                                        <div className="mb-3">
+                                                            <label className="form-label" style={{ color: "#000" }}>
+                                                                Apellido:
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                name="last_name"
+                                                                value={formData.last_name}
+                                                                onChange={handleInputChange}
+                                                                className="form-control"
+                                                                required
+                                                                style={{ borderRadius: "8px" }}
+                                                            />
+                                                        </div>
+                                                        <div className="mb-3">
+                                                            <label className="form-label" style={{ color: "#000" }}>
+                                                                Email:
+                                                            </label>
+                                                            <input
+                                                                type="email"
+                                                                name="email"
+                                                                value={formData.email}
+                                                                onChange={handleInputChange}
+                                                                className="form-control"
+                                                                required
+                                                                style={{ borderRadius: "8px" }}
+                                                            />
+                                                        </div>
+                                                        <div className="mb-3">
+                                                            <label className="form-label" style={{ color: "#000" }}>
+                                                                Teléfono:
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                name="phone_number"
+                                                                value={formData.phone_number}
+                                                                onChange={handleInputChange}
+                                                                className="form-control"
+                                                                required
+                                                                style={{ borderRadius: "8px" }}
+                                                            />
+                                                        </div>
+                                                        <div className="mb-3">
+                                                            <label className="form-label" style={{ color: "#000" }}>
+                                                                Contraseña (opcional):
+                                                            </label>
+                                                            <input
+                                                                type="password"
+                                                                name="password"
+                                                                value={formData.password}
+                                                                onChange={handleInputChange}
+                                                                className="form-control"
+                                                                placeholder="Dejar en blanco para no cambiar"
+                                                                style={{ borderRadius: "8px" }}
+                                                            />
+                                                        </div>
+                                                        <div className="mb-3">
+                                                            <label className="form-label" style={{ color: "#000" }}>
+                                                                Foto de perfil:
+                                                            </label>
+                                                            {store.doctorPanelData.doctor.url && !removePhoto && (
+                                                                <div className="mb-2">
+                                                                    <img
+                                                                        src={store.doctorPanelData.doctor.url}
+                                                                        alt="Foto actual"
+                                                                        style={{
+                                                                            width: "100px",
+                                                                            height: "100px",
+                                                                            borderRadius: "50%",
+                                                                        }}
+                                                                    />
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={handleRemovePhoto}
+                                                                        className="btn btn-sm ms-2"
+                                                                        style={{
+                                                                            backgroundColor: "rgb(173 29 29)",
+                                                                            color: "white",
+                                                                            borderRadius: "8px",
+                                                                        }}
+                                                                    >
+                                                                        Eliminar Foto
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                            <input
+                                                                type="file"
+                                                                name="photo"
+                                                                onChange={handleFileChange}
+                                                                className="form-control"
+                                                                accept="image/*"
+                                                                disabled={removePhoto}
+                                                                style={{ borderRadius: "8px" }}
+                                                            />
+                                                        </div>
+                                                        <div className="d-flex gap-2">
+                                                            <button
+                                                                type="submit"
+                                                                className="btn"
+                                                                style={{
+                                                                    backgroundColor: "#97dbe7",
+                                                                    color: "#000",
+                                                                    borderRadius: "8px",
+                                                                }}
+                                                            >
+                                                                Guardar Cambios
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setEditMode(false)}
+                                                                className="btn"
+                                                                style={{
+                                                                    backgroundColor: "#e9ecef",
+                                                                    color: "#000",
+                                                                    borderRadius: "8px",
+                                                                }}
+                                                            >
+                                                                Cancelar
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                ) : (
+                                                    <div>
+                                                        {store.doctorPanelData.doctor.url && (
+                                                            <div className="text-center mb-3">
+                                                                <img
+                                                                    src={store.doctorPanelData.doctor.url}
+                                                                    alt="Foto de perfil"
+                                                                    style={{
+                                                                        width: "150px",
+                                                                        height: "150px",
+                                                                        borderRadius: "50%",
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        )}
+                                                        <h6 style={{ color: "#000" }}>{doctorName}</h6>
+                                                        <p className="card-text" style={{ color: "#000" }}>
+                                                            <strong>Email:</strong>{" "}
+                                                            {store.doctorPanelData.doctor.email}
+                                                            <br />
+                                                            <strong>Teléfono:</strong>{" "}
+                                                            {store.doctorPanelData.doctor.phone_number}
+                                                        </p>
+                                                        <button
+                                                            onClick={() => setEditMode(true)}
+                                                            className="btn"
+                                                            style={{
+                                                                backgroundColor: "#97dbe7",
+                                                                color: "#000",
+                                                                borderRadius: "8px",
+                                                            }}
+                                                        >
+                                                            Editar Datos
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Sección de resumen */}
+                                    <div className="col-md-6">
+                                        <div
+                                            className="card shadow-sm"
+                                            style={{
+                                                backgroundColor: "#f8f9fa",
+                                                border: "none",
+                                                borderRadius: "12px",
+                                            }}
+                                        >
+                                            <div className="card-body">
+                                                <h5 className="card-title" style={{ color: "#000" }}>
+                                                    Resumen del Perfil
+                                                </h5>
+                                                <p className="card-text" style={{ color: "#000" }}>
+                                                    <strong>Nombre:</strong> {doctorName}
+                                                    <br />
+                                                    <strong>Ubicación:</strong> {location}
+                                                    <br />
+                                                    <strong>Especialidades:</strong>{" "}
+                                                    {store.doctorPanelData?.specialties?.length > 0
+                                                        ? store.doctorPanelData.specialties.join(", ")
+                                                        : "No especificadas"}
+                                                    <br />
+                                                    <strong>Oficinas:</strong>{" "}
+                                                    {store.doctorPanelData?.offices?.length > 0
+                                                        ? store.doctorPanelData.offices.join(", ")
+                                                        : "No especificadas"}
+                                                </p>
+                                                <div className="mt-3">
+                                                    <p style={{ color: "#000", fontStyle: "italic" }}>
+                                                        "Tu perfil es tu carta de presentación. ¡Asegúrate de
+                                                        mantenerlo actualizado!"
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p>Cargando datos...</p>
+                            )}
+
+                            {/* Botón "Volver al Panel" */}
+                            <div className="mt-4">
+                                <Link to="/paneldoctor">
+                                    <button
+                                        className="btn"
+                                        style={{
+                                            backgroundColor: "#97dbe7",
+                                            color: "#000",
+                                            borderRadius: "8px",
+                                        }}
+                                    >
+                                        Volver al Panel
+                                    </button>
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             ) : (
                 <Navigate to="/logindoctor" />

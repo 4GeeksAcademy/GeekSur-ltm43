@@ -1356,8 +1356,6 @@ getDoctorPanel: async () => {
         });
 
         const data = await resp.json();
-        //console.log("Datos completos recibidos en getDoctorPanel:", data);
-
         if (!resp.ok) throw new Error(data.error || "Error al cargar los datos del panel del doctor");
 
         setStore({
