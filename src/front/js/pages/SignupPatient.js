@@ -129,9 +129,7 @@ export const SignupPatient = () => {
 
                         <div className="button-container">
                             <button type="submit" className="signup-form-button">Guardar</button>
-                            <Link to="/">
-                                <button className="signup-form-button">Home</button>
-                            </Link>
+
                         </div>
 
 

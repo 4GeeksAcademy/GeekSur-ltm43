@@ -32,7 +32,7 @@ import MisCitas from './pages/MisCitas';
 import { DoctorAppointment } from "./pages/doctor_appointment";
 import { PatientAppointments } from "./pages/patient_appointments"; 
 import { RateAppointment } from "./pages/rate_appointment";
-import { AIConsultation } from "./pages/AIConsultation"; 
+import  AIConsultation  from "./pages/AIConsultation"; 
 import injectContext from "./store/appContext";
 import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";

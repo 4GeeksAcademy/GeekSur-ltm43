@@ -40,7 +40,7 @@ export const DoctorAppointment = () => {
     const location = doctor?.city ? `${doctor.city}, ${doctor.country || 'CA'}` : "San Francisco, CA";
 
     return (
-        <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#b7f4ff" }}>
+        <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f0faff" }}>
             {/* Sidebar */}
             <div
                 className="d-flex flex-column flex-shrink-0 p-3 text-white shadow-sm"

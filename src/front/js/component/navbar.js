@@ -1,89 +1,28 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import logo from '../../img/logo.png';
 
-export const Navbar = () => {
-	return (
-		<nav className="navbar navbar-light bg-light">
-			<div className="container">
-				<Link to="/">
-					<span className="navbar-brand mb-0 h1">React Boilerplate</span>
-				</Link>
-				<div className="ml-auto">
-					<Link to="/demo">
-						<button className="btn btn-primary">Check the Context in action</button>
-					</Link>
+ export const Navbar = () => {
+    return (
+        <nav style={{ backgroundColor: 'rgb(100 191 208)', color: 'white', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <img src={logo} alt="Logo de Mi Sitio" style={{ height: '90px', width: '10%', margin: '0 50px' }} /> 
+            <ul style={{ listStyle: 'none', display: 'flex', margin: 0, margin: '20px 60px', padding: 0 }}>
+           
+           
+             <li style={{ margin: '0 15px' }}>
+                    <Link to="/" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>Home</Link>
+                </li>
+           
+                <li style={{ margin: '0 15px' }}>
+                    <Link to="/loginpatient" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>¿Eres un Paciente?</Link>
+                </li>
 
-					<Link to="/patients">
-            			<button className="btn btn-primary">Manage Patients</button>
-					</Link>
-					
-					<Link to="/medical-centers">
-						<button className="btn btn-primary">Medical Centers</button>
-					</Link>
+                <li style={{ margin: '0 15px' }}>
+                <Link to="/logindoctor" href="#" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>¿Eres un doctor?</Link>
+                </li>
 
-					<Link to="/doctors">
-						<button className="btn btn-primary">Doctors</button>
-					</Link>
-
-					<Link to="/specialties">
-						<button className="btn btn-primary">Specialties</button>
-					</Link>
-
-					<Link to="/specialties_doctor">
-						<button className="btn btn-primary">Specialties_doctor</button>
-					</Link>
-
-					<Link to="/appointments">
-						<button className="btn btn-primary">schedule appointment</button>
-					</Link>
-
-					<Link to="/loginpatient">
-                        <button className="btn btn-primary">Login Patient</button>
-                    </Link>
-                    
-					<Link to="/dashboardpatient">
-                        <button className="btn btn-primary">Dashboard Patient</button>
-                    </Link>
-
-					<Link to="/patient-appointments">
-                        <button className="btn btn-primary">My Appointments</button>
-                    </Link>
-
-					<Link to="/reviews">
-						<button className="btn btn-primary">Reviews</button>
-					</Link>
-					<Link to="/search-professionals">
-                        <button className="btn btn-primary">Buscar Profesional</button>
-                    </Link>
-					<Link to="/signuppatient">
-						<button className="btn btn-primary">INGRESO AQUI</button>
-					</Link>
-					<Link to="/miscitas">
-						<button className="btn btn-primary">mis citas</button>
-					</Link>
-
-					<Link to="/logindoctor">
-                        <button className="btn btn-primary">Login Doctor</button>
-                    </Link>
-                    
-					<Link to="/dashboarddoctor">
-                        <button className="btn btn-primary">Dashboard Doctor</button>
-                    </Link>
-
-					<Link to="/doctor-appointment">
-                        <button className="btn btn-primary">My Doctor Appointments</button>
-                    </Link>
-
-					<Link to="/medicalcenterdoctor">
-                        <button className="btn btn-primary">Medical Center Doctor</button>
-                    </Link>
-
-					<Link to="/registrationdoctor">
-                        <button className="btn btn-success">Registro Doctor</button>
-                    </Link>
-
-				</div>
-			</div>
-		</nav>
-  );
+            </ul>
+        </nav>
+    );
 };
+

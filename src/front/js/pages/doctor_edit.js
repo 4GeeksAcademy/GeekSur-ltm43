@@ -35,7 +35,7 @@ export const DoctorEdit = () => {
             navigate("/logindoctor");
         } else if (!store.doctorPanelData) {
             actions.getDoctorPanel();
-        } else {
+        } else if (!formData.first_name) { // Solo inicializa si formData está vacío
             setFormData({
                 first_name: store.doctorPanelData.doctor.first_name,
                 last_name: store.doctorPanelData.doctor.last_name,
@@ -104,7 +104,7 @@ export const DoctorEdit = () => {
     return (
         <>
             {store.authDoctor || localStorage.getItem("tokendoctor") ? (
-                <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#b7f4ff" }}>
+                <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f0faff" }}>
                     {/* Sidebar */}
                     <div
                         className="d-flex flex-column flex-shrink-0 p-3 text-white shadow-sm"
@@ -214,7 +214,7 @@ export const DoctorEdit = () => {
                         </header>
 
                         {/* Contenido */}
-                        <div className="p-4" style={{ backgroundColor: "#b7f4ff", minHeight: "calc(100vh - 80px)" }}>
+                        <div className="p-4" style={{ backgroundColor: "#f0faff", minHeight: "calc(100vh - 80px)" }}>
                             {error && (
                                 <div className="alert alert-danger" role="alert">
                                     {error}

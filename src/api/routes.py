@@ -1678,3 +1678,5 @@ def update_doctor_profile():
         return jsonify({"msg": "Error al actualizar el perfil: " + str(e)}), 500
 
 
+
+
