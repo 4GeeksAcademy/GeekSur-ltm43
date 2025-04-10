@@ -1,17 +1,18 @@
-import React from 'react';
+import React, { useContext } from 'react'; // Importa useContext desde react
 import { Link } from 'react-router-dom';
 import logo from '../../img/logo.png';
 
- export const Navbar = () => {
+export const Navbar = () => {
+
     return (
         <nav style={{ backgroundColor: 'rgb(100 191 208)', color: 'white', padding: '10px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <img src={logo} alt="Logo de Mi Sitio" style={{ height: '60px', width: '10%', margin: '0 50px' }} /> 
+            <img src={logo} alt="Logo de Mi Sitio" style={{ height: '60px', width: '10%', margin: '0 50px' }} />
             <ul style={{ listStyle: 'none', display: 'flex', margin: 0, margin: '20px 60px', padding: 0 }}>
-            <li style={{ margin: '0 15px' }}>
+                <li style={{ margin: '0 15px' }}>
                     <Link to="/signuppatient" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>Regístrate</Link>
                 </li>
                 <li style={{ margin: '0 15px' }}>
-                <Link to="/logindoctor" href="#" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>¿Eres un doctor?</Link>
+                    <Link to="/logindoctor" href="#" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>¿Eres un doctor?</Link>
                 </li>
                 <li style={{ margin: '0 15px' }}>
                     <a href="#" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>Salir</a>
@@ -20,4 +21,3 @@ import logo from '../../img/logo.png';
         </nav>
     );
 };
-
