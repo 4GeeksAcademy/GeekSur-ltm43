@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Context } from "../store/appContext";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import logo from "../../img/logo.png";
 import { Bar } from "react-chartjs-2";
@@ -12,6 +12,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 export const DashboardDoctor = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
+    const location = useLocation(); // Hook para obtener la ruta actual
 
     // Estado para la hora actual
     const [currentTime, setCurrentTime] = useState(
@@ -59,7 +60,7 @@ export const DashboardDoctor = () => {
     const firstMedicalCenter = medicalCenters.length > 0 ? medicalCenters[0] : null;
     const city = doctor?.city || firstMedicalCenter?.city || "San Francisco";
     const country = doctor?.country || firstMedicalCenter?.country || "CA";
-    const location = `${city}, ${country}`;
+    const doctorLocation = `${city}, ${country}`; // Renombramos la variable para evitar conflicto
 
     // Datos para el gráfico de citas por día
     const appointments = store.doctorPanelData?.doctor?.appointments || [];
@@ -128,13 +129,13 @@ export const DashboardDoctor = () => {
                 <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f0faff" }}>
                     {/* Sidebar fijo */}
                     <div
-                        className="d-flex flex-column flex-shrink-0 p-3 text-white"
+                        className="d-flex flex-column flex-shrink-0 py-3 text-white"
                         style={{
                             width: "280px",
                             backgroundColor: "rgb(100, 191, 208)",
-                            position: "fixed", // Hacer el sidebar fijo
-                            height: "100vh", // Ocupar toda la altura de la pantalla
-                            overflowY: "auto", // Permitir scroll si el contenido es muy largo
+                            position: "fixed",
+                            height: "100vh",
+                            overflowY: "auto",
                         }}
                     >
                         <a
@@ -148,50 +149,80 @@ export const DashboardDoctor = () => {
                             <li className="nav-item">
                                 <Link
                                     to="/dashboarddoctor"
-                                    className="nav-link text-white d-flex align-items-center"
-                                    style={{ padding: "10px", borderRadius: "5px" }}
+                                    className={`nav-link text-white d-flex align-items-center ${
+                                        location.pathname === "/dashboarddoctor" ? "active" : ""
+                                    }`}
+                                    style={{
+                                        padding: "10px 0",
+                                        margin: "0 -15px",
+                                        borderRadius: "0",
+                                    }}
                                 >
-                                    <i className="bi bi-house-door me-2 fs-5"></i>
+                                    <i className="bi bi-house-door me-2 fs-5" style={{ marginLeft: "15px" }}></i>
                                     Dashboard
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     to="/doctor-appointment"
-                                    className="nav-link text-white d-flex align-items-center"
-                                    style={{ padding: "10px", borderRadius: "5px" }}
+                                    className={`nav-link text-white d-flex align-items-center ${
+                                        location.pathname === "/doctor-appointment" ? "active" : ""
+                                    }`}
+                                    style={{
+                                        padding: "10px 0",
+                                        margin: "0 -15px",
+                                        borderRadius: "0",
+                                    }}
                                 >
-                                    <i className="bi bi-calendar-check me-2 fs-5"></i>
+                                    <i className="bi bi-calendar-check me-2 fs-5" style={{ marginLeft: "15px" }}></i>
                                     Ver Mis Citas
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     to="/doctor_edit_specialty"
-                                    className="nav-link text-white d-flex align-items-center"
-                                    style={{ padding: "10px", borderRadius: "5px" }}
+                                    className={`nav-link text-white d-flex align-items-center ${
+                                        location.pathname === "/doctor_edit_specialty" ? "active" : ""
+                                    }`}
+                                    style={{
+                                        padding: "10px 0",
+                                        margin: "0 -15px",
+                                        borderRadius: "0",
+                                    }}
                                 >
-                                    <i className="bi bi-book me-2 fs-5"></i>
+                                    <i className="bi bi-book me-2 fs-5" style={{ marginLeft: "15px" }}></i>
                                     Mis Especialidades
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     to="/center_office_by_doctor"
-                                    className="nav-link text-white d-flex align-items-center"
-                                    style={{ padding: "10px", borderRadius: "5px" }}
+                                    className={`nav-link text-white d-flex align-items-center ${
+                                        location.pathname === "/center_office_by_doctor" ? "active" : ""
+                                    }`}
+                                    style={{
+                                        padding: "10px 0",
+                                        margin: "0 -15px",
+                                        borderRadius: "0",
+                                    }}
                                 >
-                                    <i className="bi bi-building me-2 fs-5"></i>
+                                    <i className="bi bi-building me-2 fs-5" style={{ marginLeft: "15px" }}></i>
                                     Mis Oficinas
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     to="/paneldoctor"
-                                    className="nav-link text-white d-flex align-items-center"
-                                    style={{ padding: "10px", borderRadius: "5px" }}
+                                    className={`nav-link text-white d-flex align-items-center ${
+                                        location.pathname === "/paneldoctor" ? "active" : ""
+                                    }`}
+                                    style={{
+                                        padding: "10px 0",
+                                        margin: "0 -15px",
+                                        borderRadius: "0",
+                                    }}
                                 >
-                                    <i className="bi bi-person me-2 fs-5"></i>
+                                    <i className="bi bi-person me-2 fs-5" style={{ marginLeft: "15px" }}></i>
                                     Mi Perfil
                                 </Link>
                             </li>
@@ -201,15 +232,16 @@ export const DashboardDoctor = () => {
                             onClick={handleLogout}
                             className="btn d-flex align-items-center"
                             style={{
-                                backgroundColor: "#ffffff", // Fondo blanco para mejor contraste
-                                color: "#000", // Texto negro
-                                border: "1px solid #000", // Borde negro para definición
+                                backgroundColor: "#ffffff",
+                                color: "#000",
+                                border: "1px solid #000",
                                 padding: "10px",
                                 borderRadius: "5px",
-                                fontWeight: "500", // Texto un poco más grueso
-                                whiteSpace: "nowrap", // Previene salto de línea
-                                width: "fit-content", // Ancho ajustado al contenido
+                                fontWeight: "500",
+                                whiteSpace: "nowrap",
+                                width: "fit-content",
                                 maxWidth: "100%",
+                                margin: "0 auto",
                             }}
                         >
                             <i className="bi bi-box-arrow-right me-2 fs-5"></i>
@@ -223,7 +255,7 @@ export const DashboardDoctor = () => {
                         style={{
                             backgroundColor: "#f0faff",
                             color: "#000",
-                            marginLeft: "280px", // Ajustar el margen para que no se superponga al sidebar
+                            marginLeft: "280px",
                         }}
                     >
                         {/* Header con hora dinámica y dropdown en la foto de perfil */}
@@ -235,20 +267,20 @@ export const DashboardDoctor = () => {
                             <div className="d-flex align-items-center position-relative">
                                 <span className="text-dark me-3" style={{ opacity: 0.8 }}>
                                     <i className="bi bi-geo-alt me-1"></i>
-                                    {location} - {currentTime}
+                                    {doctorLocation} - {currentTime} {/* Usamos doctorLocation aquí */}
                                 </span>
                                 {doctor?.url && (
                                     <div>
                                         <img
                                             src={doctor.url}
                                             alt="Foto de perfil"
-                                            onClick={() => setShowDropdown(!showDropdown)} // Mostrar/ocultar dropdown
+                                            onClick={() => setShowDropdown(!showDropdown)}
                                             style={{
                                                 width: "40px",
                                                 height: "40px",
                                                 borderRadius: "50%",
                                                 border: "2px solid #97dbe7",
-                                                cursor: "pointer", // Indicar que es clickeable
+                                                cursor: "pointer",
                                             }}
                                         />
                                         {showDropdown && (
@@ -569,3 +601,17 @@ export const DashboardDoctor = () => {
         </>
     );
 };
+
+// Añadir estilos personalizados para el resaltado
+const styles = `
+    .nav-link.active {
+        background-color: #f0faff !important; /* Color gris claro */
+        color: #000 !important; /* Cambiar el color del texto a negro para que sea legible */
+    }
+`;
+
+// Inyectar los estilos en el documento
+const styleSheet = document.createElement("style");
+styleSheet.type = "text/css";
+styleSheet.innerText = styles;
+document.head.appendChild(styleSheet);
