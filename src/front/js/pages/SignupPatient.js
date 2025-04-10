@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Context } from "../store/appContext";
 import logo from "../../img/meedgeeknegro.png";
+import login_patient from "../../img/Login_Patient.jpg";  
 import "../../styles/signup.css";
 
 export const SignupPatient = () => {
@@ -44,12 +45,15 @@ export const SignupPatient = () => {
     };
 
     return (
-        <div className="container">
+        <div className="container_register">
+
+        {/* Columna 1 vacía */}
+        <div className="col empty-col"></div>
 
             <div className="left">
                 <div className="signup-info">
                     <div className="logo-container">
-                        <img src={logo} alt="MedGeek Logo" className="logo" />
+                        <img src={login_patient} alt="MedGeek Login" className="login-image" />
                     </div>
 
                 </div>
@@ -123,17 +127,22 @@ export const SignupPatient = () => {
                             placeholder="Historial Clínico (opcional)"
                         />
 
-                        <div className="button-group">
-                            <button type="submit">Guardar</button>
+                        <div className="button-container">
+                            <button type="submit" className="signup-form-button">Guardar</button>
                             <Link to="/">
-                                <button type="button">Home</button>
+                                <button className="signup-form-button">Home</button>
                             </Link>
                         </div>
+
+
+
                     </form>
                
                
                 </div>
             </div>
+                        {/* Columna 1 vacía */}
+                        <div className="col empty-col"></div>
         </div>
     );
 };
