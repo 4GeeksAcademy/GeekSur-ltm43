@@ -1,38 +1,62 @@
 /* Contenedor principal en dos columnas */
+
 .container_register {
-    display: flex;
-    width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 3fr 3fr 1fr;
+  min-height: 100vh;
+  background-color: #eafcff;
+  border-radius: 10px;
+}
+
+  .empty-col {
+    background-color: #ffffff;
+
   }
+
+  .right label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+    
+}
+
+.right {
+  width: 100%;
+  max-width: 400px;
+  max-height: 800px;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  border-left: 2px solid #7bf5f5; 
+  overflow-y: auto
+}
 
   /* Lado izquierdo con fondo azul */
   .left {
     flex: 1;
     background-color: #e0faff;
     padding: 2rem;
-    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
   }
-  
-  /* Lado derecho con fondo blanco */
-  .right {
-    flex: 1;
-    background-color: white;
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    border-left: 2px solid #7bf5f5; /* Línea de separación gris entre los dos lados */
-  }
-  
+
   /* Estilo para definir el tamaño de la imagen */
   .logo {
-    width: 200px;  /* Establecer el tamaño de la imagen */
+    width: 200px;  
     height: 200px; /* Establecer el tamaño de la imagen */
   }
   
+  .login-image {
+    width: 100%;
+    height: 100%;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+  }
+
+
   /* Formulario */
   .signup-form {
     width: 100%;
@@ -92,7 +116,7 @@
 /* Contenedor de los botones */
 .button-container {
     display: flex;
-    gap: 1rem; /* Espacio entre los botones */
+    gap: 5rem; /* Espacio entre los botones */
     justify-content: center; /* Centra los botones */
     margin-top: 1rem;
 }
