@@ -125,13 +125,23 @@ export const DoctorEditSpecialty = () => {
                 </ul>
                 <hr />
                 <button
-                    onClick={handleLogout}
-                    className="btn btn-light text-dark"
-                    style={{ backgroundColor: "#97dbe7", border: "none" }}
-                >
-                    <i className="bi bi-box-arrow-right me-2"></i>
-                    Cerrar Sesión
-                </button>
+                            onClick={handleLogout}
+                            className="btn d-flex align-items-center"
+                            style={{
+                                backgroundColor: "#ffffff", // Fondo blanco para mejor contraste
+                                color: "#000", // Texto negro
+                                border: "1px solid #000", // Borde negro para definición
+                                padding: "10px",
+                                borderRadius: "5px",
+                                fontWeight: "500", // Texto un poco más grueso
+                                whiteSpace: "nowrap", // Previene salto de línea
+                                width: "fit-content", // Ancho ajustado al contenido
+                                maxWidth: "100%",
+                            }}
+                        >
+                            <i className="bi bi-box-arrow-right me-2 fs-5"></i>
+                            Cerrar Sesión
+                        </button>
             </div>
 
             {/* Contenido principal */}
@@ -220,7 +230,11 @@ export const DoctorEditSpecialty = () => {
                                             <button
                                                 onClick={() => handleDeleteSpecialty(specialty.id)}
                                                 className="btn btn-danger"
-                                                style={{ backgroundColor: "rgb(173 29 29)" }}
+                                                style={{
+                                                    backgroundColor: "rgb(173 29 39)",
+                                                    minWidth: "100px", // Ancho mínimo para el botón
+                                                    whiteSpace: "nowrap", // Evita que el texto se corte
+                                                }}
                                             >
                                                 Eliminar
                                             </button>

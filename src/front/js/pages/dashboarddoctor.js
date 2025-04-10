@@ -18,6 +18,9 @@ export const DashboardDoctor = () => {
         new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     );
 
+    // Estado para el dropdown de la foto de perfil
+    const [showDropdown, setShowDropdown] = useState(false);
+
     // Actualizar la hora cada minuto
     useEffect(() => {
         const interval = setInterval(() => {
@@ -38,12 +41,9 @@ export const DashboardDoctor = () => {
                 actions.getMedicalCenterDoctor();
             }
             if (!store.doctorAppointments) {
-                actions.getDoctorAppointments(); // Cargar las citas del doctor
+                actions.getDoctorAppointments();
             }
         }
-        console.log("Datos de doctorPanelData:", store.doctorPanelData);
-        console.log("Datos de medical_center_doctor:", store.medical_center_doctor);
-        console.log("Datos de doctorAppointments:", store.doctorAppointments); // Para depurar
     }, [store.authDoctor, store.doctorPanelData, store.medical_center_doctor, store.doctorAppointments, actions, navigate]);
 
     const handleLogout = () => {
@@ -67,7 +67,7 @@ export const DashboardDoctor = () => {
     const appointmentsByDay = daysOfWeek.map((day, index) => {
         return appointments.filter((appt) => {
             const apptDate = new Date(appt.date);
-            return apptDate.getDay() === (index + 1) % 7; // Ajustar para que lunes sea 1
+            return apptDate.getDay() === (index + 1) % 7;
         }).length;
     });
 
@@ -108,14 +108,14 @@ export const DashboardDoctor = () => {
         },
     };
 
-    // Datos de actividad reciente (simulados, puedes ajustarlos según tu backend)
+    // Datos de actividad reciente (simulados)
     const recentActivity = [
         { action: "Agendaste una cita con un paciente", time: "1 hr ago" },
         { action: "Añadiste una nueva especialidad", time: "3 hrs ago" },
         { action: "Actualizaste tu perfil", time: "1 day ago" },
     ];
 
-    // Datos de metas (simulados, puedes ajustarlos según tu backend)
+    // Datos de metas (simulados)
     const goals = [
         { title: "Atender 10 citas esta semana", progress: 70, dueDate: "Apr 15" },
         { title: "Agregar una nueva especialidad", progress: 30, dueDate: "Apr 20" },
@@ -126,10 +126,16 @@ export const DashboardDoctor = () => {
         <>
             {store.authDoctor || localStorage.getItem("tokendoctor") ? (
                 <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f0faff" }}>
-                    {/* Sidebar */}
+                    {/* Sidebar fijo */}
                     <div
                         className="d-flex flex-column flex-shrink-0 p-3 text-white"
-                        style={{ width: "280px", backgroundColor: "rgb(100, 191, 208)" }}
+                        style={{
+                            width: "280px",
+                            backgroundColor: "rgb(100, 191, 208)",
+                            position: "fixed", // Hacer el sidebar fijo
+                            height: "100vh", // Ocupar toda la altura de la pantalla
+                            overflowY: "auto", // Permitir scroll si el contenido es muy largo
+                        }}
                     >
                         <a
                             href="/dashboarddoctor"
@@ -195,11 +201,15 @@ export const DashboardDoctor = () => {
                             onClick={handleLogout}
                             className="btn d-flex align-items-center"
                             style={{
-                                backgroundColor: "#97dbe7",
-                                color: "#000",
-                                border: "none",
+                                backgroundColor: "#ffffff", // Fondo blanco para mejor contraste
+                                color: "#000", // Texto negro
+                                border: "1px solid #000", // Borde negro para definición
                                 padding: "10px",
                                 borderRadius: "5px",
+                                fontWeight: "500", // Texto un poco más grueso
+                                whiteSpace: "nowrap", // Previene salto de línea
+                                width: "fit-content", // Ancho ajustado al contenido
+                                maxWidth: "100%",
                             }}
                         >
                             <i className="bi bi-box-arrow-right me-2 fs-5"></i>
@@ -207,30 +217,71 @@ export const DashboardDoctor = () => {
                         </button>
                     </div>
 
-                    {/* Contenido principal */}
-                    <div className="flex-grow-1 p-4" style={{ backgroundColor: "#f0faff", color: "#000" }}>
-                        {/* Header con hora dinámica */}
+                    {/* Contenido principal con margen para el sidebar fijo */}
+                    <div
+                        className="flex-grow-1 p-4"
+                        style={{
+                            backgroundColor: "#f0faff",
+                            color: "#000",
+                            marginLeft: "280px", // Ajustar el margen para que no se superponga al sidebar
+                        }}
+                    >
+                        {/* Header con hora dinámica y dropdown en la foto de perfil */}
                         <div className="d-flex justify-content-between align-items-center mb-4">
                             <div>
                                 <h2>Hello, {doctorName}</h2>
                                 <p className="text-muted">Here's a summary of your activity this week.</p>
                             </div>
-                            <div className="d-flex align-items-center">
+                            <div className="d-flex align-items-center position-relative">
                                 <span className="text-dark me-3" style={{ opacity: 0.8 }}>
                                     <i className="bi bi-geo-alt me-1"></i>
                                     {location} - {currentTime}
                                 </span>
                                 {doctor?.url && (
-                                    <img
-                                        src={doctor.url}
-                                        alt="Foto de perfil"
-                                        style={{
-                                            width: "40px",
-                                            height: "40px",
-                                            borderRadius: "50%",
-                                            border: "2px solid #97dbe7",
-                                        }}
-                                    />
+                                    <div>
+                                        <img
+                                            src={doctor.url}
+                                            alt="Foto de perfil"
+                                            onClick={() => setShowDropdown(!showDropdown)} // Mostrar/ocultar dropdown
+                                            style={{
+                                                width: "40px",
+                                                height: "40px",
+                                                borderRadius: "50%",
+                                                border: "2px solid #97dbe7",
+                                                cursor: "pointer", // Indicar que es clickeable
+                                            }}
+                                        />
+                                        {showDropdown && (
+                                            <div
+                                                style={{
+                                                    position: "absolute",
+                                                    top: "50px",
+                                                    right: "0",
+                                                    backgroundColor: "#fff",
+                                                    border: "1px solid #dee2e6",
+                                                    borderRadius: "5px",
+                                                    boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+                                                    zIndex: 1000,
+                                                }}
+                                            >
+                                                <button
+                                                    onClick={handleLogout}
+                                                    className="btn d-flex align-items-center"
+                                                    style={{
+                                                        padding: "10px 20px",
+                                                        color: "#000",
+                                                        border: "none",
+                                                        background: "none",
+                                                        width: "100%",
+                                                        textAlign: "left",
+                                                    }}
+                                                >
+                                                    <i className="bi bi-box-arrow-right me-2"></i>
+                                                    Cerrar Sesión
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -261,7 +312,7 @@ export const DashboardDoctor = () => {
                                                 store.doctorAppointments?.filter(appointment => {
                                                     const [year, month, day] = appointment.date.split("-").map(Number);
                                                     const appointmentDate = new Date(year, month - 1, day);
-                                                    const currentDate = new Date("2025-04-09"); // Para pruebas; en producción, usar `new Date()`
+                                                    const currentDate = new Date("2025-04-09");
                                                     return (
                                                         appointmentDate >= currentDate &&
                                                         appointment.confirmation !== "cancelled" &&

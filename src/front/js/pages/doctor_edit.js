@@ -172,10 +172,20 @@ export const DoctorEdit = () => {
                         <hr />
                         <button
                             onClick={handleLogout}
-                            className="btn btn-light text-dark d-flex align-items-center py-2"
-                            style={{ backgroundColor: "#97dbe7", border: "none", borderRadius: "8px" }}
+                            className="btn d-flex align-items-center"
+                            style={{
+                                backgroundColor: "#ffffff", // Fondo blanco para mejor contraste
+                                color: "#000", // Texto negro
+                                border: "1px solid #000", // Borde negro para definición
+                                padding: "10px",
+                                borderRadius: "5px",
+                                fontWeight: "500", // Texto un poco más grueso
+                                whiteSpace: "nowrap", // Previene salto de línea
+                                width: "fit-content", // Ancho ajustado al contenido
+                                maxWidth: "100%",
+                            }}
                         >
-                            <i className="bi bi-box-arrow-right me-2"></i>
+                            <i className="bi bi-box-arrow-right me-2 fs-5"></i>
                             Cerrar Sesión
                         </button>
                     </div>

@@ -3,12 +3,11 @@ import { Context } from "../store/appContext";
 import { useNavigate } from "react-router-dom";
 import { FaSearch } from 'react-icons/fa';
 
-
 export const AIConsultation = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
     const [symptoms, setSymptoms] = useState("");
-    const [recommendation, setRecommendation] = useState("");
+    const [response, setResponse] = useState({ recommendation: "", specialty: "", doctors: [] });
     const [error, setError] = useState("");
 
     useEffect(() => {
@@ -20,10 +19,10 @@ export const AIConsultation = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
-        setRecommendation("");
+        setResponse({ recommendation: "", specialty: "", doctors: [] });
 
         try {
-            const response = await fetch(`${process.env.BACKEND_URL}/api/patient/ai-consultation`, {
+            const apiResponse = await fetch(`${process.env.BACKEND_URL}/api/patient/ai-consultation`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -31,9 +30,14 @@ export const AIConsultation = () => {
                 },
                 body: JSON.stringify({ symptoms })
             });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.msg || "Error al consultar la IA");
-            setRecommendation(data.recommendation);
+            const data = await apiResponse.json();
+            if (!apiResponse.ok) throw new Error(data.msg || "Error al consultar la IA");
+
+            setResponse({
+                recommendation: data.recommendation,
+                specialty: data.specialty,
+                doctors: data.doctors
+            });
         } catch (error) {
             setError(error.message);
         }
@@ -70,10 +74,31 @@ export const AIConsultation = () => {
                     >
                         <FaSearch /> Obtener Recomendación
                     </button>
-
                 </form>
-                {recommendation && <p style={{ color: 'white', marginTop: '20px' }}>{recommendation}</p>}
+
+                {response.recommendation && (
+                    <div style={{ color: 'white', marginTop: '20px', textAlign: 'left' }}>
+                        <p>{response.recommendation}</p>
+                        {response.doctors.length > 0 && (
+                            <button
+                                onClick={() => navigate("/dashboardpatient")}
+                                style={{
+                                    marginTop: '10px',
+                                    padding: '8px 16px',
+                                    backgroundColor: 'rgb(93 177 212)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Agendar una cita
+                            </button>
+                        )}
+                    </div>
+                )}
                 {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
+
                 <button
                     onClick={() => navigate("/dashboardpatient")}
                     style={{
