@@ -900,6 +900,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     return null;
                 }
             },
+            
             ////////////////////////// END SEARCH PROFESSIONALS  /////////////////////////////////
 
 
@@ -1553,7 +1554,32 @@ addMedicalCenterDoctor: async (medicalCenterId, office, specialtyId) => {
         return { success: false, msg: "Error al conectar con el servidor" };
     }
 },
+// --------- getuserpatient ------------
+getUserPatient: async () => {
+    const token = localStorage.getItem("tokenpatient");
+    if (token) {
+        try {
+            const resp = await fetch(process.env.BACKEND_URL + "/api/panelpatient", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (resp.ok) {
+                const data = await resp.json();
+                setStore({ ...getStore(), currentPatient: data.patient, authPatient: true });
+            } else {
+                console.error("Error fetching patient data:", resp.status);
+            }
+        } catch (error) {
+            console.error("Error decoding or fetching:", error);
+        }
+    }
+},
 
+logoutPatient: () => {
+    localStorage.removeItem("tokenpatient");
+    setStore({ ...getStore(), authPatient: false, currentPatient: null });
+},
 
 
 ////////////////////////////se agregar buscar Location Medical Center - 07-04-2025

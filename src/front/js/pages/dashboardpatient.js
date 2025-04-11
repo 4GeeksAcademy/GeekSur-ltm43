@@ -1,11 +1,12 @@
-import React, { useEffect, useContext, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Context } from "../store/appContext";
-import { useNavigate, Navigate, Link } from "react-router-dom";
-import { FaPencilAlt } from 'react-icons/fa';
+import { useNavigate, Navigate, Link, useLocation } from "react-router-dom";
+import logo from "../../img/logo.png";
 
 export const DashboardPatient = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
+
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         first_name: '',
@@ -19,23 +20,6 @@ export const DashboardPatient = () => {
     });
     const [isSaving, setIsSaving] = useState(false);
     const [updateError, setUpdateError] = useState('');
-
-    const medicalCenters = store.medical_center_doctor || [];
-    const firstMedicalCenter = medicalCenters.length > 0 ? medicalCenters[0] : null;
-    const city = store.dashboardPatientData?.city || firstMedicalCenter?.city || "San Francisco";
-    const country = store.dashboardPatientData?.country || firstMedicalCenter?.country || "CA";
-    const location = `${city}, ${country}`;
-
-    const [currentTime, setCurrentTime] = useState(
-        new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    );
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-        }, 60000);
-        return () => clearInterval(interval);
-    }, []);
 
     useEffect(() => {
         const token = store.tokenpatient || localStorage.getItem("tokenpatient");
@@ -106,6 +90,7 @@ export const DashboardPatient = () => {
     const handleSaveChanges = async () => {
         setIsSaving(true);
         setUpdateError('');
+
         try {
             const success = await actions.updatePatientProfile(formData);
             if (success) {
@@ -123,92 +108,88 @@ export const DashboardPatient = () => {
 
     if (!store.authPatient && !localStorage.getItem("tokenpatient")) {
         return <Navigate to="/loginpatient" />;
-    }
+    };
 
     return (
-        <div style={{ display: 'flex', height: '100vh', backgroundColor: 'rgb(225 250 255)' }}>
-            <div style={{ width: '250px', backgroundColor: 'rgb(100 191 208)', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <h2 style={{ color: 'white', marginBottom: '30px' }}>Patient Dashboard</h2>
-                <Link to="/ver-mis-citas" style={{ color: 'white', textDecoration: 'none', marginBottom: '10px' }}>Mi Perfil</Link>
-                <Link to="/mis-especialidades" style={{ color: 'white', textDecoration: 'none', marginBottom: '10px' }}>Mis Citas</Link>
-                <Link to="/mis-oficinas" style={{ color: 'white', textDecoration: 'none', marginBottom: '10px' }}>Historial Medico</Link>
-                <button onClick={handleLogout} type="button" className="btn btn-danger" style={{ marginTop: 'auto', width: 'auto' }}>
-                    Cerrar Sesión
-                </button>
-            </div>
-
-            <div style={{ flex: 1, padding: '20px', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', alignItems: 'center' }}>
-                    <span style={{ marginRight: '10px' }}>{location}</span>
-                    <span>{currentTime}</span>
-                </div>
-
-                {store.dashboardPatientData && store.authPatient ? (
-                    <div>
-                        <h1 style={{ color: 'black', marginBottom: '20px' }}>Hello, {store.dashboardPatientData.first_name} {store.dashboardPatientData.last_name}</h1>
-                        <p>Here's a summary of your activity this week.</p>
-
-                        {/* Tarjetas */}
-                        <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '30px' }}>
-                            {/* Mi Perfil */}
-                            <div style={{ backgroundColor: '#f2f2f2', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', width: '40%', marginRight: '20px' }}>
-                                <h3>Mi Perfil</h3>
-                                {isEditing ? (
-                                    <form onSubmit={(e) => { e.preventDefault(); handleSaveChanges(); }} style={{ display: 'flex', flexDirection: 'column' }}>
-                                        <input type="text" name="first_name" value={formData.first_name} onChange={handleInputChange} placeholder="Nombre" required disabled={isSaving} />
-                                        <input type="text" name="last_name" value={formData.last_name} onChange={handleInputChange} placeholder="Apellido" required disabled={isSaving} />
-                                        <input type="date" name="birth_date" value={formData.birth_date} onChange={handleInputChange} required disabled={isSaving} />
-                                        <select name="gender" value={formData.gender} onChange={handleInputChange} required disabled={isSaving}>
-                                            <option value="">Selecciona</option>
-                                            <option value="male">Masculino</option>
-                                            <option value="female">Femenino</option>
-                                            <option value="other">Otro</option>
-                                        </select>
-                                        <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="Email" required disabled={isSaving} />
-                                        <input type="password" name="password" value={formData.password} onChange={handleInputChange} placeholder="Contraseña" disabled={isSaving} />
-                                        <input type="tel" name="phone_number" value={formData.phone_number} onChange={handleInputChange} placeholder="Teléfono" required disabled={isSaving} />
-                                        <textarea name="historial_clinico" value={formData.historial_clinico} onChange={handleInputChange} placeholder="Historial Clínico" disabled={isSaving} />
-                                        {updateError && <p style={{ color: 'red' }}>{updateError}</p>}
-                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <button type="submit" disabled={isSaving}>{isSaving ? 'Guardando...' : 'Guardar Cambios'}</button>
-                                            <button type="button" onClick={handleCancelClick} disabled={isSaving}>Cancelar</button>
-                                        </div>
-                                    </form>
-                                ) : (
-                                    <div>
-                                        <p><strong>Bienvenido,</strong> {store.dashboardPatientData.first_name} {store.dashboardPatientData.last_name}</p>
-                                        <p><strong>Email:</strong> {store.dashboardPatientData.email}</p>
-                                        <p><strong>Teléfono:</strong> {store.dashboardPatientData.phone_number}</p>
-                                        <p><strong>Historial Clínico:</strong> {store.dashboardPatientData.historial_clinico || 'No disponible'}</p>
-                                        <button onClick={handleEditClick} type="button" className="btn btn-primary">
-                                            <FaPencilAlt style={{ marginRight: '8px' }} />
-                                            Editar Mi Perfil
-                                        </button>
-                                    </div>
-                                )}
+        <div className="container" style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '100vh', 
+            backgroundColor: 'rgb(225 250 255)' 
+        }}>
+            {store.dashboardPatientData && store.authPatient ? (
+                <div style={{ 
+                    backgroundColor: 'rgb(152 210 237)', 
+                    padding: '40px', 
+                    borderRadius: '10px', 
+                    width: '700px', 
+                    textAlign: 'center' 
+                }}>
+                    <h1 style={{ color: 'white', marginBottom: '30px' }}>Mi Perfil</h1>
+                    {isEditing ? (
+                        <form onSubmit={(e) => { e.preventDefault(); handleSaveChanges(); }} style={{ display: 'flex', flexDirection: 'column' }}>
+                            <input type="text" name="first_name" value={formData.first_name} onChange={handleInputChange} placeholder="Nombre" required style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
+                            <input type="text" name="last_name" value={formData.last_name} onChange={handleInputChange} placeholder="Apellido" required style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
+                            <input type="date" name="birth_date" value={formData.birth_date} onChange={handleInputChange} required style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
+                            <select name="gender" value={formData.gender} onChange={handleInputChange} required style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving}>
+                                <option value="">Selecciona</option>
+                                <option value="male">Masculino</option>
+                                <option value="female">Femenino</option>
+                                <option value="other">Otro</option>
+                            </select>
+                            <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="Email" required style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
+                            <input type="password" name="password" value={formData.password} onChange={handleInputChange} placeholder="Contraseña" style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
+                            <input type="tel" name="phone_number" value={formData.phone_number} onChange={handleInputChange} placeholder="Teléfono" required style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
+                            <textarea
+                                name="historial_clinico"
+                                value={formData.historial_clinico}
+                                onChange={handleInputChange}
+                                placeholder="Historial Clínico"
+                                style={{ padding: '10px', marginBottom: '20px', border: 'none', borderRadius: '5px', height: '100px' }}
+                                disabled={isSaving}
+                            />
+                            {updateError && <p style={{ color: 'red', marginBottom: '10px' }}>{updateError}</p>}
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#344955', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }} disabled={isSaving}>
+                                    {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+                                </button>
+                                <button type="button" onClick={handleCancelClick} style={{ padding: '10px 20px', backgroundColor: '#232F34', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }} disabled={isSaving}>
+                                    Cancelar
+                                </button>
                             </div>
-
-                            {/* Otras tarjetas */}
-                            <div style={{ backgroundColor: '#f2f2f2', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', width: '25%', marginRight: '20px' }}>
-                                <h3>Citas Próximas</h3>
-                                <p>0</p>
-                                <p>Ver detalles</p>
-                            </div>
-                            <div style={{ backgroundColor: '#f2f2f2', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', width: '25%' }}>
-                                <h3>Historial Clínico</h3>
-                                <p>1</p>
-                                <p>Gestionar</p>
-                            </div>
-                        </div>
-                        <button onClick={() => navigate("/ai-consultation")} style={{ padding: '10px 20px', backgroundColor: 'rgb(93 177 212)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+                        </form>
+                    ) : (
+                        <div>
+                            <p style={{ color: 'white' }}><strong>Bienvenido,</strong> {store.dashboardPatientData.first_name} {store.dashboardPatientData.last_name}</p>
+                            <p style={{ color: 'white' }}><strong>Email:</strong> {store.dashboardPatientData.email}</p>
+                            <p style={{ color: 'white' }}><strong>Teléfono:</strong> {store.dashboardPatientData.phone_number}</p>
+                            <p style={{ color: 'white' }}><strong>Historial Clínico:</strong> {store.dashboardPatientData.historial_clinico || 'No disponible'}</p>
+                            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between' }}>
+                                <button onClick={handleEditClick} style={{ padding: '10px 20px', backgroundColor: 'rgb(93 177 212)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                                    <FaPencilAlt style={{ marginRight: '8px' }} /> 
+                                    Editar Mi Perfil
+                                </button>
+                                <button onClick={() => navigate("/ai-consultation")} style={{ padding: '10px 20px', backgroundColor: 'rgb(93 177 212)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
                                     Consultar con IA
                                 </button>
-                    </div>
-                ) : (
-                    <p>Cargando datos...</p>
-                )}
-                {store.loginPatientError && <p style={{ color: 'red', marginTop: '10px' }}>{store.loginPatientError}</p>}
-            </div>
+                                <button onClick={handleLogout} style={{ padding: '10px 20px', backgroundColor: 'rgb(173 29 29)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+                                    Cerrar Sesión
+                                </button>
+                            </div>
+                            <Link to="/" style={{ marginTop: '20px', display: 'block' }}>
+                                <button style={{ padding: '10px 20px', backgroundColor: 'rgb(93 177 212)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+                                    Back Home
+                                </button>
+                            </Link>
+
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <p style={{ color: 'white' }}>Cargando datos...</p>
+            )}
+            {store.loginPatientError && <p style={{ color: 'red', marginTop: '10px' }}>{store.loginPatientError}</p>}
         </div>
     );
 };

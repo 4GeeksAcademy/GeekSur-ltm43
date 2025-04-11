@@ -19,6 +19,7 @@ class Patient(db.Model):
     phone_number = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(100), nullable=False)
     historial_clinico = db.Column(db.Text, nullable=True)  # Nuevo campo
+    appointments = db.relationship('Appointment', backref='patient', lazy=True) #Relacion con Appointment
 
     def serialize(self):
         return {
@@ -87,21 +88,7 @@ class Doctors(db.Model):
             "url": self.url
         } 
     
-class Specialties(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), unique=True, nullable=False)
-    relation_specialties = db.relationship('Specialties_doctor', backref='Specialties')
-    
 
-    def __repr__(self):
-        return f'<User {self.name}>'
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "name": self.name ,
-            "specialties": [{**specialties_doctor.serialize(),"specialty_name": self.name} for specialties_doctor in self.relation_specialties]          
-        } 
 
 class Specialties_doctor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -114,6 +101,25 @@ class Specialties_doctor(db.Model):
             "id_specialty": self.id_specialty,    
             "id_doctor": self.id_doctor             
         }
+    
+class Specialties(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), unique=True, nullable=False)
+    relation_specialties = db.relationship('Specialties_doctor', backref='Specialties')
+ 
+ 
+    def __repr__(self):
+        return f'<User {self.name}>'
+ 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name ,
+            "specialties": [{**specialties_doctor.serialize(),"specialty_name": self.name} for specialties_doctor in self.relation_specialties]          
+        } 
+
+
+ 
     
 class Appointment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
