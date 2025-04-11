@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 import os, logging
 import google.generativeai as genai 
 from google.generativeai import types
+import traceback
 
 api = Blueprint('api', __name__)
 
@@ -1073,7 +1074,7 @@ def searchdoctor():
         map_specialties = list(chain(*map(lambda x: x["specialties"], obj_all_specialties)))
         filtered_results = list(filter(lambda x: data["name"].lower() in x["info_doctor"]["first_name"].lower() or data["name"].lower() in x["info_doctor"]["last_name"].lower() , map_specialties))
         return jsonify({"results":filtered_results}), 200
-    
+  
     
 
 #////////////////////// END SEARCH PROFESSIONALS ///////////////////
@@ -1361,6 +1362,34 @@ def get_doctor_panel():
 
     return jsonify(data), 200
 #-------
+# ------------ PANEL DEL PACIENTE ------------
+@api.route('/panelpatient', methods=['GET'])
+@jwt_required()
+def get_patient_panel():
+    try:
+        patient_id = get_jwt_identity()
+        patient = Patient.query.get(patient_id) # Usar Patient
+
+        if not patient:
+            return jsonify({"error": "Paciente no encontrado"}), 404
+
+        data = {
+            "patient": {
+                "id": patient.id,
+                "email": patient.email,
+                "first_name": patient.first_name,
+                "last_name": patient.last_name,
+                "phone_number": patient.phone_number,
+                "appointments": [appointment.serialize() for appointment in patient.appointments] if hasattr(patient, 'appointments') else []
+            }
+        }
+
+        return jsonify(data), 200
+    except Exception as e:
+        print(f"Error in get_patient_panel: {e}")
+        traceback.print_exc()
+        return jsonify({"error": "Internal server error"}), 500
+# ------------ END PANEL DEL PACIENTE ------------
 
 @api.route('/specialties_doctor/<int:specialty_id>', methods=['DELETE'])
 @jwt_required()

@@ -3,6 +3,7 @@ import { Context } from "../store/appContext";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import logo from "../../img/meedgeeknegro.png";
+import login_doctor from "../../img/Login_Doctor.jpg";
 import "../../styles/signup.css";
 
 export const RegistrationDoctor = () => {
@@ -63,23 +64,28 @@ export const RegistrationDoctor = () => {
 
     return (
         <div className="container_register">
+
+            {/* Columna 1 vacía */}
+            <div className="col empty-col"></div>
+
             <div className="left">
                 <div className="signup-info">
                     <div className="logo-container">
-                        <img src={logo} alt="MedGeek Logo" className="logo" />
+                        <img src={login_doctor} alt="MedGeek Login" className="login-image" />
                     </div>
                 </div>
             </div>
 
             <div className="right">
+            <h3>Favor Llenar Formulario</h3>
                 <form onSubmit={handleSubmit} encType="multipart/form-data" className="signup-form">
-                    <input
+                     <input
                         className="signup-form-input"
                         type="text"
                         name="first_name"
                         value={formData.first_name}
                         onChange={handleChange}
-                        placeholder="Nombre"
+                         placeholder="Nombre"
                         required
                     />
                     <input
@@ -87,26 +93,26 @@ export const RegistrationDoctor = () => {
                         type="text"
                         name="last_name"
                         value={formData.last_name}
+                         placeholder="Apellido"
                         onChange={handleChange}
-                        placeholder="Apellido"
                         required
                     />
-                    <input
+                      <input
                         className="signup-form-input"
                         type="email"
                         name="email"
                         value={formData.email}
+                         placeholder="Email"
                         onChange={handleChange}
-                        placeholder="Email"
                         required
                     />
-                    <input
+                      <input
                         className="signup-form-input"
                         type="text"
                         name="phone_number"
                         value={formData.phone_number}
+                         placeholder="Telefono"
                         onChange={handleChange}
-                        placeholder="Teléfono"
                         required
                     />
                     <input
@@ -114,8 +120,8 @@ export const RegistrationDoctor = () => {
                         type="password"
                         name="password"
                         value={formData.password}
-                        onChange={handleChange}
                         placeholder="Contraseña"
+                        onChange={handleChange}
                         required
                     />
                     <div className="signup-form-input">
@@ -130,14 +136,19 @@ export const RegistrationDoctor = () => {
                     </div>
                     <div className="button-container">
                         <button type="submit" className="signup-form-button">Guardar</button>
-                        <Link to="/">
-                            <button className="signup-form-button">Home</button>
-                        </Link>
+
                     </div>
                 </form>
 
                 {error && <p style={{ color: "red" }}>{error}</p>}
             </div>
-        </div>
+
+
+            {/* Columna 1 vacía */}
+            <div className="col empty-col"></div>
+
+            </div>
+
     );
 };
+

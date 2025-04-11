@@ -38,20 +38,11 @@ import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
 import { PanelDoctor } from "./pages/paneldoctor";
 
-// Componente Layout para páginas con Navbar y Footer (Home, Demo, Single)
-const PublicLayout = () => (
-  <>
-    <Navbar />
-    <Outlet /> {/* Esto asegura que se rendericen las rutas hijas */}
-    <Footer />
-  </>
-);
-
-// Componente principal
+//create your first component
 const Layout = () => {
   const basename = process.env.BASENAME || "";
 
-  if (!process.env.BACKEND_URL || process.env.BACKEND_URL === "") return <BackendURL />;
+    if (!process.env.BACKEND_URL || process.env.BACKEND_URL === "") return <BackendURL />;
 
   return (
     <div>
