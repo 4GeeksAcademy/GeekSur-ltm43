@@ -63,6 +63,10 @@ const Layout = () => {
               <Route element={<Home />} path="/" />
               <Route element={<Demo />} path="/demo" />
               <Route element={<Single />} path="/single/:theid" />
+              <Route element={<LoginPatient />} path="/loginpatient" />
+              <Route element={<LoginDoctor />} path="/logindoctor" />
+              <Route element={<RegistrationDoctor />} path="/registrationdoctor" />
+              <Route element={<SignupPatient />} path="/signuppatient" />
             </Route>
 
             {/* Rutas sin Navbar ni Footer */}
@@ -72,12 +76,9 @@ const Layout = () => {
             <Route element={<Doctors />} path="/doctors" />
             <Route element={<Specialties />} path="/specialties" />
             <Route element={<Specialties_doctor />} path="/specialties_doctor" />
-            <Route element={<LoginPatient />} path="/loginpatient" />
             <Route element={<DashboardPatient />} path="/dashboardpatient" />
-            <Route element={<LoginDoctor />} path="/logindoctor" />
             <Route element={<DashboardDoctor />} path="/dashboarddoctor" />
             <Route element={<MedicalCenterDoctor />} path="/medicalcenterdoctor" />
-            <Route element={<RegistrationDoctor />} path="/registrationdoctor" />
             <Route element={<Reviews />} path="/reviews" />
             <Route element={<SpecialtyByDoctor />} path="/specialty_by_doctor" />
             <Route element={<CenterOfficeByDoctor />} path="/center_office_by_doctor" />
@@ -85,7 +86,6 @@ const Layout = () => {
             <Route element={<PanelDoctor />} path="/paneldoctor" />
             <Route element={<DoctorEditSpecialty />} path="/doctor_edit_specialty" />
             <Route element={<CenterOfficeByDoctorEdit />} path="/center_office_by_doctor_edit" />
-            <Route element={<SignupPatient />} path="/signuppatient" />
             <Route element={<SearchProfessionals />} path="/search-professionals" />
             <Route path="/doctor/:doctorId/:specialtyId" element={<DoctorProfile />} />
             <Route path="/agendar-turno/:id_doctor/:specialtyId" element={<AgendarTurno />} />

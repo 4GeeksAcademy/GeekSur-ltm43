@@ -86,7 +86,9 @@ def setup_commands(app):
                 "country": "Venezuela",
                 "city": "Caracas",
                 "phone": "582198592475",
-                "email": "clinccrcs@gmail.com"
+                "email": "clinccrcs@gmail.com",
+                "latitude": "10.71783°",
+                "longitude": "-71.62159°"
             },
             {
                 
@@ -95,7 +97,9 @@ def setup_commands(app):
                 "country": "Chile",
                 "city": "Santiago",
                 "phone": "56235885585",
-                "email": "clinccsgo@gmail.com"
+                "email": "clinccsgo@gmail.com",
+                "latitude": "-33.43701593956523°",
+                "longitude": "-70.62458515168339°"
             },
             {
                 
@@ -104,7 +108,9 @@ def setup_commands(app):
                 "country": "New Zealand",
                 "city": "Auckland",
                 "phone": "64205879736",
-                "email": "clinccakl@gmail.com"
+                "email": "clinccakl@gmail.com",
+                "latitude": "-46.43719863891602°",
+                "longitude": "168.35899353027344°"
             }
         ]
 
@@ -117,7 +123,9 @@ def setup_commands(app):
                     country=center_data["country"],
                     city=center_data["city"],
                     phone=center_data["phone"],
-                    email=center_data["email"]
+                    email=center_data["email"],
+                    latitude=center_data["latitude"],
+                    longitude=center_data["longitude"]
                 )
                 db.session.add(center)
             db.session.commit()

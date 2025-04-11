@@ -8,6 +8,7 @@ import doctor5 from "../../img/doctor5.jpg";
 import doctor6 from "../../img/doctor6.jpg";
 import doctor7 from "../../img/doctor7.jpg";
 import backgroundImage from '../../img/backgroundImage.jpg';
+import { Link } from "react-router-dom"; // Asegúrate de importar Link
 
 export const Home = () => {
     const containerRef = useRef(null);
@@ -36,30 +37,33 @@ export const Home = () => {
             rating: 4.5,
         },
         {
-            id: 2,
+            id: 3,
             name: 'Dra. María García',
             specialty: 'Dermatólogo',
             image: doctor3,
             rating: 4.5,
         },
         {
-            id: 2,
+            id: 4,
             name: 'Dra. María García',
             specialty: 'Dermatólogo',
             image: doctor4,
             rating: 4.5,
-        }, {
-            id: 2,
+        },
+        {
+            id: 5,
             name: 'Dra. María García',
             specialty: 'Dermatólogo',
             image: doctor1,
-        }, {
-            id: 2,
+        },
+        {
+            id: 6,
             name: 'Dra. María García',
             specialty: 'Dermatólogo',
             image: doctor2,
-        }, {
-            id: 2,
+        },
+        {
+            id: 7,
             name: 'Dra. María García',
             specialty: 'Dermatólogo',
             image: doctor7,
@@ -97,13 +101,13 @@ export const Home = () => {
                                     <select style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '5px', width: '30%' }}>
                                         <option>Capital Federal</option>
                                     </select>
-                                    <button style={{ backgroundColor: '#4285f4', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', width: '20%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}> <i className="fas fa-search"></i>
+                                    <button style={{ backgroundColor: '#4285f4', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', width: '20%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                        <i className="fas fa-search"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
                 </div>
             </section>
 
@@ -133,7 +137,6 @@ export const Home = () => {
                     </div>
                     <div className="feature-text">Pedí turno de forma fácil</div>
                     <p className="feature-description">Elegí la hora que prefieras y pedí turno sin necesidad de llamar. Es fácil, cómodo y muy rápido.</p>
-
                 </div>
                 <div className="feature">
                     <div className="feature-icon">
@@ -177,9 +180,34 @@ export const Home = () => {
                     ))}
                 </div>
                 <div className="scroll-buttons">
-                    <button className="scroll-button" onClick={() => scroll(-200)} aria-label="Desplazar a la izquierda">&#8249;</button>
-                    <button className="scroll-button" onClick={() => scroll(200)} aria-label="Desplazar a la derecha">&#8250;</button>
+                    <button className="scroll-button" onClick={() => scroll(-200)} aria-label="Desplazar a la izquierda">‹</button>
+                    <button className="scroll-button" onClick={() => scroll(200)} aria-label="Desplazar a la derecha">›</button>
                 </div>
+            </section>
+
+            {/* Nueva sección para el enlace a MedicalCenters */}
+            <section className="medical-centers-link" style={{ textAlign: 'center', padding: '40px 20px' }}>
+                <h2 style={{ color: '#1ca9bb', marginBottom: '20px' }}>Explorá Nuestros Centros Médicos</h2>
+                <p style={{ marginBottom: '30px' }}>Encuentra el centro médico más cercano y agenda tu cita hoy mismo.</p>
+                <Link to="/medical-centers">
+                    <button
+                        style={{
+                            backgroundColor: '#1ca9bb',
+                            color: 'white',
+                            border: 'none',
+                            padding: '15px 30px',
+                            borderRadius: '5px',
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            transition: 'background-color 0.3s',
+                        }}
+                        onMouseOver={(e) => e.target.style.backgroundColor = '#168a9c'}
+                        onMouseOut={(e) => e.target.style.backgroundColor = '#1ca9bb'}
+                    >
+                        Ver Centros Médicos
+                    </button>
+                </Link>
             </section>
         </div>
     );
