@@ -731,11 +731,13 @@ def get_appointment_id(appointment_id):
 
 #-------------------------------------POST-----NEW APPOINTMENT-------------------------------------------------#
 @api.route('/appointments', methods=['POST'])
+@jwt_required()
 def post_appointment():
     data = request.get_json()
+    patient_id = get_jwt_identity()
 
     # Validate required fields
-    required_fields = ['id_patient', 'id_doctor', 'id_center', 'date', 'hour', 'id_specialty', 'confirmation']
+    required_fields = [ 'id_doctor', 'id_center', 'date', 'hour', 'id_specialty']
     for field in required_fields:
         if field not in data:
             raise APIException(f'The field "{field}" is required', status_code=400)
@@ -748,7 +750,7 @@ def post_appointment():
         raise APIException("Invalid date or hour format. Use YYYY-MM-DD for date and HH:MM for hour", status_code=400)
 
     # Validate foreign keys
-    if not Patient.query.get(data["id_patient"]):
+    if not Patient.query.get(int(patient_id)):
         raise APIException("Patient not found", status_code=404)
     if not Doctors.query.get(data["id_doctor"]):
         raise APIException("Doctor not found", status_code=404)
@@ -758,17 +760,17 @@ def post_appointment():
         raise APIException("Specialty not found", status_code=404)
 
     # Validate confirmation value
-    if data["confirmation"] not in ["confirmed", "to_be_confirmed"]:
-        raise APIException("Confirmation must be 'confirmed' or 'to_be_confirmed'", status_code=400)
+    # if data["confirmation"] not in ["confirmed", "to_be_confirmed"]:
+    #     raise APIException("Confirmation must be 'confirmed' or 'to_be_confirmed'", status_code=400)
 
     new_appointment = Appointment(
-        id_patient=data["id_patient"],
+        id_patient=int(patient_id),
         id_doctor=data["id_doctor"],
         id_center=data["id_center"],
         date=appointment_date,
         hour=appointment_hour,
         id_specialty=data["id_specialty"],
-        confirmation=data["confirmation"]
+        confirmation=False
     )
 
     db.session.add(new_appointment)

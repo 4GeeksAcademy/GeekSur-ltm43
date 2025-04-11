@@ -133,11 +133,9 @@ export const SignupPatient = () => {
                         </div>
 
 
-
                     </form>
                
-               
-                </div>
+                               </div>
             </div>
                         {/* Columna 1 vacía */}
                         <div className="col empty-col"></div>

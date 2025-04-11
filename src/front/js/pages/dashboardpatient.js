@@ -42,7 +42,7 @@ export const DashboardPatient = () => {
         if (store.authPatient && token && (!store.dashboardPatientData || !isEditing)) {
             actions.getDashboardPatient();
         }
-    }, [store.authPatient, store.tokenpatient, store.dashboardPatientData, isEditing, actions]);
+    }, [store.authPatient, store.tokenpatient, isEditing]);
 
     useEffect(() => {
         if (store.dashboardPatientData) {
@@ -132,6 +132,7 @@ export const DashboardPatient = () => {
                 <Link to="/ver-mis-citas" style={{ color: 'white', textDecoration: 'none', marginBottom: '10px' }}>Mi Perfil</Link>
                 <Link to="/mis-especialidades" style={{ color: 'white', textDecoration: 'none', marginBottom: '10px' }}>Mis Citas</Link>
                 <Link to="/mis-oficinas" style={{ color: 'white', textDecoration: 'none', marginBottom: '10px' }}>Historial Medico</Link>
+                <Link to="/search-professionals" style={{ color: 'white', textDecoration: 'none', marginBottom: '10px' }}>Buscar y Agendar Profesional</Link>
                 <button onClick={handleLogout} type="button" className="btn btn-danger" style={{ marginTop: 'auto', width: 'auto' }}>
                     Cerrar Sesión
                 </button>
@@ -202,7 +203,8 @@ export const DashboardPatient = () => {
                         </div>
                         <button onClick={() => navigate("/ai-consultation")} style={{ padding: '10px 20px', backgroundColor: 'rgb(93 177 212)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
                                     Consultar con IA
-                                </button>
+                        </button>
+
                     </div>
                 ) : (
                     <p>Cargando datos...</p>

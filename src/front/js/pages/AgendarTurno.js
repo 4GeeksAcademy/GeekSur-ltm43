@@ -17,7 +17,7 @@ function AgendarTurno() {
                 setMedicalCenters(data);
             })
             .catch(error => {
-                console.error('Error al obtener los consultorios:', error);
+                console.error('Error al obtener los consultorios:', error);   
             });
     }, []);
 
@@ -58,7 +58,7 @@ function AgendarTurno() {
             });
 
             if (!response.ok) {
-                throw new Error('Error al agendar la cita.');
+                throw new Error('Error al agendar la cita...');
             }
 
             const citaAgendada = {
@@ -75,6 +75,11 @@ function AgendarTurno() {
             alert('Error al agendar la cita.');
         }
     };
+    
+    const handledashboard = () => {
+        navigate('/dashboardpatient');
+      };
+
 
     return (
         <div style={{
@@ -135,6 +140,14 @@ function AgendarTurno() {
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+
+                    <button style={{ backgroundColor: 'rgb(93 177 212)', color: 'white', padding: '10px 20px', marginRight: '10px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+                    onClick={handledashboard}
+                    > 
+                    DashBoard
+                    </button>
+
+
                     <button style={{ backgroundColor: 'rgb(93 177 212)', color: 'white', padding: '10px 20px', marginRight: '10px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
                         Cancelar
                     </button>
@@ -151,3 +164,4 @@ function AgendarTurno() {
 }
 
 export default AgendarTurno;
+

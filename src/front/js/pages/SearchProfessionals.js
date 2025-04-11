@@ -4,6 +4,9 @@ import { FaSearch } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { GoogleMap, LoadScript, Autocomplete, Marker } from "@react-google-maps/api";
 
+///////oscar////////
+import { useNavigate } from 'react-router-dom';
+
 function SearchProfessionals() {
   const { store, actions } = useContext(Context);
   const { medicalCenterLocations, specialties } = store;
@@ -18,6 +21,7 @@ function SearchProfessionals() {
     actions.getMedicalCenterLocations();
     actions.getSpecialties();
   }, [actions]);
+
 
   const handleSearch = async () => {
     setLoading(true);
@@ -79,6 +83,43 @@ function SearchProfessionals() {
         .map((location) => location.city)
     )]
   : [];
+
+  ////////////////////////////////////////oscar////////////////////
+  const navigate = useNavigate();
+  // funciona en duro
+  // const handleScheduleClick = (doctorId) => {
+  //   const token = localStorage.getItem('tokenpatient');
+  
+  //   if (token && token !== "") {
+  //     // Más adelante deberías pasar doctorId y specialtyId dinámicamente
+  //     navigate(`/agendar-turno/${doctorId}/1`);
+  //   } else {
+  //     navigate('/loginpatient');
+  //   }
+  // };
+
+  const handleScheduleClick = (doctorId) => {
+    const token = localStorage.getItem('tokenpatient');
+  
+    // Encontrar el ID de la especialidad seleccionada
+    const selectedSpecialtyObj = specialties.find(
+      (spec) => spec.name === selectedSpecialty
+    );
+  
+    const specialtyId = selectedSpecialtyObj ? selectedSpecialtyObj.id : null;
+  
+    if (!specialtyId) {
+      alert("Error: No se encontró el ID de la especialidad.");
+      return;
+    }
+  
+    if (token && token !== "") {
+      navigate(`/agendar-turno/${doctorId}/${specialtyId}`);
+    } else {
+      navigate('/loginpatient');
+    }
+  };
+  ////////////////////////////////////////oscar////////////////////
 
   return (
     <div className="container mt-4">
@@ -151,9 +192,6 @@ function SearchProfessionals() {
 
       </div>
 
-
-
-
       <div className="text-center mt-3">
         <button
           className="btn btn-primary"
@@ -177,6 +215,7 @@ function SearchProfessionals() {
               <th>País</th>
               <th>Teléfono</th>
               <th>Email</th>
+              <th>Acción</th>
             </tr>
           </thead>
           <tbody>
@@ -190,17 +229,30 @@ function SearchProfessionals() {
                   <td>{doctor.medical_centers.map((center) => center.country).join(", ")}</td>
                   <td>{doctor.phone_number}</td>
                   <td>{doctor.email}</td>
+                  <td>
+
+                  <button
+                    className="btn btn-success"
+                    style={{ display: "inline-block", padding: "2px 10px",  textAlign: "center",  width: "180px"}}
+                    onClick={() => handleScheduleClick(doctor.id)}
+                  >Agendar
+                    </button>
+                  </td>
                 </tr>
+                
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center">
+                <td colSpan="8" className="text-center">
                   No se encontraron resultados
                 </td>
               </tr>
             )}
+          
           </tbody>
+          
         </table>
+        
       </div>
     </div>
   );
