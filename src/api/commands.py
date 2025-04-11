@@ -87,8 +87,8 @@ def setup_commands(app):
                 "city": "Caracas",
                 "phone": "582198592475",
                 "email": "clinccrcs@gmail.com",
-                "latitude": "10.71783°",
-                "longitude": "-71.62159°"
+                "latitude": "10.71783",
+                "longitude": "-71.62159"
             },
             {
                 
@@ -98,8 +98,8 @@ def setup_commands(app):
                 "city": "Santiago",
                 "phone": "56235885585",
                 "email": "clinccsgo@gmail.com",
-                "latitude": "-33.43701593956523°",
-                "longitude": "-70.62458515168339°"
+                "latitude": "33.43701593956523",
+                "longitude": "-70.62458515168339"
             },
             {
                 
@@ -109,8 +109,8 @@ def setup_commands(app):
                 "city": "Auckland",
                 "phone": "64205879736",
                 "email": "clinccakl@gmail.com",
-                "latitude": "-46.43719863891602°",
-                "longitude": "168.35899353027344°"
+                "latitude": "46.43719863891602",
+                "longitude": "168.35899353027344"
             }
         ]
 

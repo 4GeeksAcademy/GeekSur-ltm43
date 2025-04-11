@@ -38,6 +38,14 @@ import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
 import { PanelDoctor } from "./pages/paneldoctor";
 
+const PublicLayout = () => (
+  <>
+    <Navbar />
+    <Outlet /> {/* Esto asegura que se rendericen las rutas hijas */}
+    <Footer />
+  </>
+);
+
 //create your first component
 const Layout = () => {
   const basename = process.env.BASENAME || "";

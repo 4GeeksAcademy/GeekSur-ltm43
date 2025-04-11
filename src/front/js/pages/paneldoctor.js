@@ -1,16 +1,17 @@
 import React, { useEffect, useContext, useState } from "react";
 import { Context } from "../store/appContext";
-import { useNavigate, Navigate, Link, useLocation } from "react-router-dom"; // Añadimos useLocation
+import { useNavigate, Navigate, Link, useLocation } from "react-router-dom";
 import logo from "../../img/logo.png";
 
 export const PanelDoctor = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
-    const location = useLocation(); // Hook para obtener la ruta actual
+    const location = useLocation();
     const [currentTime, setCurrentTime] = useState(
         new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     );
     const [showDropdown, setShowDropdown] = useState(false);
+    const [hasLoaded, setHasLoaded] = useState(false); // Nuevo estado para evitar solicitudes repetidas
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -22,10 +23,12 @@ export const PanelDoctor = () => {
     useEffect(() => {
         if (!store.authDoctor && !localStorage.getItem("tokendoctor")) {
             navigate("/logindoctor");
-        } else if (!store.doctorPanelData) {
-            actions.getDoctorPanel();
+        } else if (!store.doctorPanelData && !hasLoaded) {
+            actions.getDoctorPanel().then(() => {
+                setHasLoaded(true); // Marca que los datos ya se cargaron
+            });
         }
-    }, [store.authDoctor, store.doctorPanelData, actions, navigate]);
+    }, [store.authDoctor, hasLoaded, navigate]); // Eliminamos store.doctorPanelData de las dependencias
 
     const handleLogout = () => {
         actions.logoutDoctor();
@@ -45,7 +48,7 @@ export const PanelDoctor = () => {
 
     const doctor = store.doctorPanelData?.doctor;
     const doctorName = doctor ? `${doctor.first_name} ${doctor.last_name}` : "Doctor";
-    const doctorLocation = doctor?.city ? `${doctor.city}, ${doctor.country || 'CA'}` : "San Francisco, CA"; // Renombramos a doctorLocation
+    const doctorLocation = doctor?.city ? `${doctor.city}, ${doctor.country || 'CA'}` : "San Francisco, CA";
 
     return (
         <>
@@ -73,9 +76,7 @@ export const PanelDoctor = () => {
                             <li className="nav-item">
                                 <Link
                                     to="/dashboarddoctor"
-                                    className={`nav-link text-white d-flex align-items-center ${
-                                        location.pathname === "/dashboarddoctor" ? "active" : ""
-                                    }`}
+                                    className={`nav-link text-white d-flex align-items-center ${location.pathname === "/dashboarddoctor" ? "active" : ""}`}
                                     style={{
                                         padding: "10px 0",
                                         margin: "0 -15px",
@@ -89,9 +90,7 @@ export const PanelDoctor = () => {
                             <li>
                                 <Link
                                     to="/doctor-appointment"
-                                    className={`nav-link text-white d-flex align-items-center ${
-                                        location.pathname === "/doctor-appointment" ? "active" : ""
-                                    }`}
+                                    className={`nav-link text-white d-flex align-items-center ${location.pathname === "/doctor-appointment" ? "active" : ""}`}
                                     style={{
                                         padding: "10px 0",
                                         margin: "0 -15px",
@@ -105,9 +104,7 @@ export const PanelDoctor = () => {
                             <li>
                                 <Link
                                     to="/doctor_edit_specialty"
-                                    className={`nav-link text-white d-flex align-items-center ${
-                                        location.pathname === "/doctor_edit_specialty" ? "active" : ""
-                                    }`}
+                                    className={`nav-link text-white d-flex align-items-center ${location.pathname === "/doctor_edit_specialty" ? "active" : ""}`}
                                     style={{
                                         padding: "10px 0",
                                         margin: "0 -15px",
@@ -121,9 +118,7 @@ export const PanelDoctor = () => {
                             <li>
                                 <Link
                                     to="/center_office_by_doctor"
-                                    className={`nav-link text-white d-flex align-items-center ${
-                                        location.pathname === "/center_office_by_doctor" ? "active" : ""
-                                    }`}
+                                    className={`nav-link text-white d-flex align-items-center ${location.pathname === "/center_office_by_doctor" ? "active" : ""}`}
                                     style={{
                                         padding: "10px 0",
                                         margin: "0 -15px",
@@ -137,9 +132,7 @@ export const PanelDoctor = () => {
                             <li>
                                 <Link
                                     to="/paneldoctor"
-                                    className={`nav-link text-white d-flex align-items-center ${
-                                        location.pathname === "/paneldoctor" ? "active" : ""
-                                    }`}
+                                    className={`nav-link text-white d-flex align-items-center ${location.pathname === "/paneldoctor" ? "active" : ""}`}
                                     style={{
                                         padding: "10px 0",
                                         margin: "0 -15px",
@@ -186,7 +179,7 @@ export const PanelDoctor = () => {
                             <div className="d-flex align-items-center position-relative">
                                 <span className="text-dark me-3" style={{ opacity: 0.8 }}>
                                     <i className="bi bi-geo-alt me-1"></i>
-                                    {doctorLocation} - {currentTime} {/* Usamos doctorLocation */}
+                                    {doctorLocation} - {currentTime}
                                 </span>
                                 {doctor?.url && (
                                     <div>
@@ -357,12 +350,11 @@ export const PanelDoctor = () => {
 // Añadir estilos personalizados para el resaltado
 const styles = `
     .nav-link.active {
-        background-color: #f0faff !important; /* Color gris claro */
-        color: #000 !important; /* Cambiar el color del texto a negro para que sea legible */
+        background-color: #f0faff !important;
+        color: #000 !important;
     }
 `;
 
-// Inyectar los estilos en el documento
 const styleSheet = document.createElement("style");
 styleSheet.type = "text/css";
 styleSheet.innerText = styles;
