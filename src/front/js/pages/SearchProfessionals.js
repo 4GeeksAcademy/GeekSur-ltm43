@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from "react";
 import { Context } from "../store/appContext";
 import { FaSearch } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { GoogleMap, LoadScript, Autocomplete, Marker } from "@react-google-maps/api";
 
 ///////oscar////////
 import { useNavigate } from 'react-router-dom';
@@ -26,63 +25,32 @@ function SearchProfessionals() {
   const handleSearch = async () => {
     setLoading(true);
     setError(null);
-
     try {
-      let url = `${process.env.BACKEND_URL}/api/professionals/search?country=${selectedLocation}`;
-
-      if (selectedSpecialty) {
-        url += `&specialty=${selectedSpecialty}`;
-      }
-
-      if (selectedCity) {
-        url += `&city=${selectedCity}`;
-      }
-
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error de red");
-      }
-
-      const data = await response.json();
-      if (response.status === 200) {
-        setSearchResults(data.doctors);
-      }
+      const results = await actions.searchDoctors(selectedSpecialty, selectedLocation, selectedCity);
+      setSearchResults(results);
     } catch (err) {
-      setError("Hubo un error al buscar los resultados.");
-      console.error(err);
-    } finally {
-      setLoading(false);
+      setError("Error al buscar profesionales. Inténtalo de nuevo.");
     }
+    setLoading(false);
   };
 
-  const handleLocationChange = (e) => {
-    setSelectedLocation(e.target.value);
-  };
+  const handleLocationChange = (e) => setSelectedLocation(e.target.value);
+  const handleSpecialtyChange = (e) => setSelectedSpecialty(e.target.value);
+  const handleCityChange = (e) => setSelectedCity(e.target.value);
 
-  const handleSpecialtyChange = (e) => {
-    setSelectedSpecialty(e.target.value);
-  };
-
-  const handleCityChange = (e) => {
-    setSelectedCity(e.target.value);
-  };
-
-  // Eliminar duplicados de países
-  const uniqueCountries = medicalCenterLocations ? [...new Set(medicalCenterLocations.map(location => location.country))] : [];
+  const uniqueCountries = medicalCenterLocations
+    ? [...new Set(medicalCenterLocations.map((location) => location.country))]
+    : [];
 
   const uniqueCities = selectedLocation
-  ? [...new Set(
-      medicalCenterLocations
-        .filter((location) => location.country === selectedLocation)
-        .map((location) => location.city)
-    )]
-  : [];
+    ? [
+        ...new Set(
+          medicalCenterLocations
+            .filter((location) => location.country === selectedLocation)
+            .map((location) => location.city)
+        ),
+      ]
+    : [];
 
   ////////////////////////////////////////oscar////////////////////
   const navigate = useNavigate();
@@ -112,17 +80,13 @@ function SearchProfessionals() {
 
   return (
     <div className="container mt-4">
+      <h1 className="text-center mb-4" style={{ color: "#007bff" }}>
+        Buscar Profesionales
+      </h1>
 
-      <h1 className="text-center mb-4">Buscar Profesionales</h1>
-
-      <div className="row">
-        
-        <div className="col-md-4">
-          <select
-            className="form-control"
-            value={selectedLocation}
-            onChange={handleLocationChange}
-          >
+      <div className="row mb-3">
+        <div className="col-md-4 mb-2">
+          <select className="form-control" value={selectedLocation} onChange={handleLocationChange}>
             <option value="">Selecciona un País</option>
             {uniqueCountries.length > 0 ? (
               uniqueCountries.map((country, index) => (
@@ -136,14 +100,9 @@ function SearchProfessionals() {
           </select>
         </div>
 
-        <div className="col-md-4">
-          <select
-            className="form-control"
-            value={selectedSpecialty}
-            onChange={handleSpecialtyChange}
-          >
+        <div className="col-md-4 mb-2">
+          <select className="form-control" value={selectedSpecialty} onChange={handleSpecialtyChange}>
             <option value="">Selecciona una Especialidad</option>
-
             {specialties && specialties.length > 0 ? (
               specialties.map((specialty, index) => (
                 <option key={index} value={specialty.name}>
@@ -154,8 +113,8 @@ function SearchProfessionals() {
               <option value="">Cargando especialidades...</option>
             )}
           </select>
-
         </div>
+
 
         <div className="col-md-4">
                 <select
@@ -176,15 +135,12 @@ function SearchProfessionals() {
                     )}
                 </select>
                 </div>
+
       </div>
 
       <div className="text-center mt-3">
-        <button
-          className="btn btn-primary"
-          onClick={handleSearch}
-          disabled={loading}
-        >
-          {loading ? <span>Buscando...</span> : <FaSearch />} Buscar
+        <button className="btn btn-primary" onClick={handleSearch} disabled={loading}>
+          {loading ? <span>Buscando...</span> : <><FaSearch /> Buscar</>}
         </button>
       </div>
 
@@ -239,6 +195,7 @@ function SearchProfessionals() {
           
         </table>
         
+
       </div>
     </div>
   );

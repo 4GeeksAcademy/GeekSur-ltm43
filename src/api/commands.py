@@ -100,6 +100,7 @@ def setup_commands(app):
                 "email": "clinccsgo@gmail.com",
                 "latitude": "33.43701593956523",
                 "longitude": "-70.62458515168339"
+
             },
             {
                 

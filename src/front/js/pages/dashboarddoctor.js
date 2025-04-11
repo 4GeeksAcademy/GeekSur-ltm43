@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Context } from "../store/appContext";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import logo from "../../img/logo.png";
 import { Bar } from "react-chartjs-2";
@@ -12,11 +12,15 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 export const DashboardDoctor = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
+    const location = useLocation(); // Hook para obtener la ruta actual
 
     // Estado para la hora actual
     const [currentTime, setCurrentTime] = useState(
         new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     );
+
+    // Estado para el dropdown de la foto de perfil
+    const [showDropdown, setShowDropdown] = useState(false);
 
     // Actualizar la hora cada minuto
     useEffect(() => {
@@ -38,12 +42,9 @@ export const DashboardDoctor = () => {
                 actions.getMedicalCenterDoctor();
             }
             if (!store.doctorAppointments) {
-                actions.getDoctorAppointments(); // Cargar las citas del doctor
+                actions.getDoctorAppointments();
             }
         }
-        console.log("Datos de doctorPanelData:", store.doctorPanelData);
-        console.log("Datos de medical_center_doctor:", store.medical_center_doctor);
-        console.log("Datos de doctorAppointments:", store.doctorAppointments); // Para depurar
     }, [store.authDoctor, store.doctorPanelData, store.medical_center_doctor, store.doctorAppointments, actions, navigate]);
 
     const handleLogout = () => {
@@ -59,7 +60,7 @@ export const DashboardDoctor = () => {
     const firstMedicalCenter = medicalCenters.length > 0 ? medicalCenters[0] : null;
     const city = doctor?.city || firstMedicalCenter?.city || "San Francisco";
     const country = doctor?.country || firstMedicalCenter?.country || "CA";
-    const location = `${city}, ${country}`;
+    const doctorLocation = `${city}, ${country}`; // Renombramos la variable para evitar conflicto
 
     // Datos para el gráfico de citas por día
     const appointments = store.doctorPanelData?.doctor?.appointments || [];
@@ -67,7 +68,7 @@ export const DashboardDoctor = () => {
     const appointmentsByDay = daysOfWeek.map((day, index) => {
         return appointments.filter((appt) => {
             const apptDate = new Date(appt.date);
-            return apptDate.getDay() === (index + 1) % 7; // Ajustar para que lunes sea 1
+            return apptDate.getDay() === (index + 1) % 7;
         }).length;
     });
 
@@ -108,14 +109,14 @@ export const DashboardDoctor = () => {
         },
     };
 
-    // Datos de actividad reciente (simulados, puedes ajustarlos según tu backend)
+    // Datos de actividad reciente (simulados)
     const recentActivity = [
         { action: "Agendaste una cita con un paciente", time: "1 hr ago" },
         { action: "Añadiste una nueva especialidad", time: "3 hrs ago" },
         { action: "Actualizaste tu perfil", time: "1 day ago" },
     ];
 
-    // Datos de metas (simulados, puedes ajustarlos según tu backend)
+    // Datos de metas (simulados)
     const goals = [
         { title: "Atender 10 citas esta semana", progress: 70, dueDate: "Apr 15" },
         { title: "Agregar una nueva especialidad", progress: 30, dueDate: "Apr 20" },
@@ -126,10 +127,16 @@ export const DashboardDoctor = () => {
         <>
             {store.authDoctor || localStorage.getItem("tokendoctor") ? (
                 <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f0faff" }}>
-                    {/* Sidebar */}
+                    {/* Sidebar fijo */}
                     <div
-                        className="d-flex flex-column flex-shrink-0 p-3 text-white"
-                        style={{ width: "280px", backgroundColor: "rgb(100, 191, 208)" }}
+                        className="d-flex flex-column flex-shrink-0 py-3 text-white"
+                        style={{
+                            width: "280px",
+                            backgroundColor: "rgb(100, 191, 208)",
+                            position: "fixed",
+                            height: "100vh",
+                            overflowY: "auto",
+                        }}
                     >
                         <a
                             href="/dashboarddoctor"
@@ -142,50 +149,80 @@ export const DashboardDoctor = () => {
                             <li className="nav-item">
                                 <Link
                                     to="/dashboarddoctor"
-                                    className="nav-link text-white d-flex align-items-center"
-                                    style={{ padding: "10px", borderRadius: "5px" }}
+                                    className={`nav-link text-white d-flex align-items-center ${
+                                        location.pathname === "/dashboarddoctor" ? "active" : ""
+                                    }`}
+                                    style={{
+                                        padding: "10px 0",
+                                        margin: "0 -15px",
+                                        borderRadius: "0",
+                                    }}
                                 >
-                                    <i className="bi bi-house-door me-2 fs-5"></i>
+                                    <i className="bi bi-house-door me-2 fs-5" style={{ marginLeft: "15px" }}></i>
                                     Dashboard
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     to="/doctor-appointment"
-                                    className="nav-link text-white d-flex align-items-center"
-                                    style={{ padding: "10px", borderRadius: "5px" }}
+                                    className={`nav-link text-white d-flex align-items-center ${
+                                        location.pathname === "/doctor-appointment" ? "active" : ""
+                                    }`}
+                                    style={{
+                                        padding: "10px 0",
+                                        margin: "0 -15px",
+                                        borderRadius: "0",
+                                    }}
                                 >
-                                    <i className="bi bi-calendar-check me-2 fs-5"></i>
+                                    <i className="bi bi-calendar-check me-2 fs-5" style={{ marginLeft: "15px" }}></i>
                                     Ver Mis Citas
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     to="/doctor_edit_specialty"
-                                    className="nav-link text-white d-flex align-items-center"
-                                    style={{ padding: "10px", borderRadius: "5px" }}
+                                    className={`nav-link text-white d-flex align-items-center ${
+                                        location.pathname === "/doctor_edit_specialty" ? "active" : ""
+                                    }`}
+                                    style={{
+                                        padding: "10px 0",
+                                        margin: "0 -15px",
+                                        borderRadius: "0",
+                                    }}
                                 >
-                                    <i className="bi bi-book me-2 fs-5"></i>
+                                    <i className="bi bi-book me-2 fs-5" style={{ marginLeft: "15px" }}></i>
                                     Mis Especialidades
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     to="/center_office_by_doctor"
-                                    className="nav-link text-white d-flex align-items-center"
-                                    style={{ padding: "10px", borderRadius: "5px" }}
+                                    className={`nav-link text-white d-flex align-items-center ${
+                                        location.pathname === "/center_office_by_doctor" ? "active" : ""
+                                    }`}
+                                    style={{
+                                        padding: "10px 0",
+                                        margin: "0 -15px",
+                                        borderRadius: "0",
+                                    }}
                                 >
-                                    <i className="bi bi-building me-2 fs-5"></i>
+                                    <i className="bi bi-building me-2 fs-5" style={{ marginLeft: "15px" }}></i>
                                     Mis Oficinas
                                 </Link>
                             </li>
                             <li>
                                 <Link
                                     to="/paneldoctor"
-                                    className="nav-link text-white d-flex align-items-center"
-                                    style={{ padding: "10px", borderRadius: "5px" }}
+                                    className={`nav-link text-white d-flex align-items-center ${
+                                        location.pathname === "/paneldoctor" ? "active" : ""
+                                    }`}
+                                    style={{
+                                        padding: "10px 0",
+                                        margin: "0 -15px",
+                                        borderRadius: "0",
+                                    }}
                                 >
-                                    <i className="bi bi-person me-2 fs-5"></i>
+                                    <i className="bi bi-person me-2 fs-5" style={{ marginLeft: "15px" }}></i>
                                     Mi Perfil
                                 </Link>
                             </li>
@@ -195,11 +232,16 @@ export const DashboardDoctor = () => {
                             onClick={handleLogout}
                             className="btn d-flex align-items-center"
                             style={{
-                                backgroundColor: "#97dbe7",
+                                backgroundColor: "#ffffff",
                                 color: "#000",
-                                border: "none",
+                                border: "1px solid #000",
                                 padding: "10px",
                                 borderRadius: "5px",
+                                fontWeight: "500",
+                                whiteSpace: "nowrap",
+                                width: "fit-content",
+                                maxWidth: "100%",
+                                margin: "0 auto",
                             }}
                         >
                             <i className="bi bi-box-arrow-right me-2 fs-5"></i>
@@ -207,30 +249,71 @@ export const DashboardDoctor = () => {
                         </button>
                     </div>
 
-                    {/* Contenido principal */}
-                    <div className="flex-grow-1 p-4" style={{ backgroundColor: "#f0faff", color: "#000" }}>
-                        {/* Header con hora dinámica */}
+                    {/* Contenido principal con margen para el sidebar fijo */}
+                    <div
+                        className="flex-grow-1 p-4"
+                        style={{
+                            backgroundColor: "#f0faff",
+                            color: "#000",
+                            marginLeft: "280px",
+                        }}
+                    >
+                        {/* Header con hora dinámica y dropdown en la foto de perfil */}
                         <div className="d-flex justify-content-between align-items-center mb-4">
                             <div>
                                 <h2>Hello, {doctorName}</h2>
                                 <p className="text-muted">Here's a summary of your activity this week.</p>
                             </div>
-                            <div className="d-flex align-items-center">
+                            <div className="d-flex align-items-center position-relative">
                                 <span className="text-dark me-3" style={{ opacity: 0.8 }}>
                                     <i className="bi bi-geo-alt me-1"></i>
-                                    {location} - {currentTime}
+                                    {doctorLocation} - {currentTime} {/* Usamos doctorLocation aquí */}
                                 </span>
                                 {doctor?.url && (
-                                    <img
-                                        src={doctor.url}
-                                        alt="Foto de perfil"
-                                        style={{
-                                            width: "40px",
-                                            height: "40px",
-                                            borderRadius: "50%",
-                                            border: "2px solid #97dbe7",
-                                        }}
-                                    />
+                                    <div>
+                                        <img
+                                            src={doctor.url}
+                                            alt="Foto de perfil"
+                                            onClick={() => setShowDropdown(!showDropdown)}
+                                            style={{
+                                                width: "40px",
+                                                height: "40px",
+                                                borderRadius: "50%",
+                                                border: "2px solid #97dbe7",
+                                                cursor: "pointer",
+                                            }}
+                                        />
+                                        {showDropdown && (
+                                            <div
+                                                style={{
+                                                    position: "absolute",
+                                                    top: "50px",
+                                                    right: "0",
+                                                    backgroundColor: "#fff",
+                                                    border: "1px solid #dee2e6",
+                                                    borderRadius: "5px",
+                                                    boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+                                                    zIndex: 1000,
+                                                }}
+                                            >
+                                                <button
+                                                    onClick={handleLogout}
+                                                    className="btn d-flex align-items-center"
+                                                    style={{
+                                                        padding: "10px 20px",
+                                                        color: "#000",
+                                                        border: "none",
+                                                        background: "none",
+                                                        width: "100%",
+                                                        textAlign: "left",
+                                                    }}
+                                                >
+                                                    <i className="bi bi-box-arrow-right me-2"></i>
+                                                    Cerrar Sesión
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -261,7 +344,7 @@ export const DashboardDoctor = () => {
                                                 store.doctorAppointments?.filter(appointment => {
                                                     const [year, month, day] = appointment.date.split("-").map(Number);
                                                     const appointmentDate = new Date(year, month - 1, day);
-                                                    const currentDate = new Date("2025-04-09"); // Para pruebas; en producción, usar `new Date()`
+                                                    const currentDate = new Date("2025-04-09");
                                                     return (
                                                         appointmentDate >= currentDate &&
                                                         appointment.confirmation !== "cancelled" &&
@@ -518,3 +601,17 @@ export const DashboardDoctor = () => {
         </>
     );
 };
+
+// Añadir estilos personalizados para el resaltado
+const styles = `
+    .nav-link.active {
+        background-color: #f0faff !important; /* Color gris claro */
+        color: #000 !important; /* Cambiar el color del texto a negro para que sea legible */
+    }
+`;
+
+// Inyectar los estilos en el documento
+const styleSheet = document.createElement("style");
+styleSheet.type = "text/css";
+styleSheet.innerText = styles;
+document.head.appendChild(styleSheet);

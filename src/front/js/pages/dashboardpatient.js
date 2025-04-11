@@ -4,6 +4,7 @@ import { useNavigate, Navigate, Link } from "react-router-dom";
 import logo from "../../img/logo.png";
 import robot3D from "../../img/robot3D.png";
 
+
 export const DashboardPatient = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
@@ -18,6 +19,7 @@ export const DashboardPatient = () => {
         }, 60000);
         return () => clearInterval(interval);
     }, []);
+
 
     useEffect(() => {
         const script = document.createElement('script');
@@ -39,11 +41,13 @@ export const DashboardPatient = () => {
     const patientName = patient ? `${patient.first_name} ${patient.last_name}` : "Paciente";
     const patientLocation = patient ? `${patient.city || "San Francisco"}, ${patient.country || "CA"}` : "San Francisco, CA";
 
+
     if (!store.authPatient && !localStorage.getItem("tokenpatient")) {
         return <Navigate to="/loginpatient" />;
-    }
+    };
 
     return (
+
         <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#b7f4ff" }}>
             {/* Sidebar */}
             <div className="d-flex flex-column flex-shrink-0 p-3 text-white" style={{ width: "280px", backgroundColor: "rgb(100, 191, 208)" }}>
@@ -201,3 +205,4 @@ export const DashboardPatient = () => {
         </div>
     );
 };
+

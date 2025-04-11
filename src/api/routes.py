@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 import os, logging
 import google.generativeai as genai 
 from google.generativeai import types
+import traceback
 
 api = Blueprint('api', __name__)
 
@@ -73,7 +74,10 @@ def post_doctor():
         # Validar los campos requeridos
         if not email:
             raise APIException('El campo "email" es requerido', status_code=400)
-        if not first_name:
+        doctor = Doctors.query.filter_by(email=email).first()
+        if doctor:  
+            raise APIException('Ya existe un doctor con ese correo', status_code=400)
+        if not first_name: 
             raise APIException('El campo "first_name" es requerido', status_code=400)
 
         # Subir la imagen a Cloudinary si se proporcionó
@@ -638,25 +642,17 @@ def get_specialty_doctor_id(specialty_id):
 @api.route('/specialties_doctor', methods=['POST'])
 @jwt_required()
 def post_specialties_doctor():
-    current_doctor_id = get_jwt_identity()  # Obtener ID del doctor desde el token
+    current_doctor_id = get_jwt_identity()
     data = request.get_json()
-    if not data:
-        raise APIException('No se proporcionaron datos', status_code=400)
-    if 'id_specialty' not in data:
+    if not data or 'id_specialty' not in data:
         raise APIException('El campo "id_specialty" es requerido', status_code=400)
-
     new_specialty_doctor = Specialties_doctor(
         id_specialty=data["id_specialty"],
-        id_doctor=current_doctor_id  # Usar el ID del token
+        id_doctor=current_doctor_id
     )
     db.session.add(new_specialty_doctor)
     db.session.commit()
-
-    response_body = {
-        "msg": "Se creó nueva especialidad",
-        "new_Specialty_doctor": new_specialty_doctor.serialize()
-    }
-    return jsonify(response_body), 201
+    return jsonify({"msg": "Se creó nueva especialidad", "new_Specialty_doctor": new_specialty_doctor.serialize()}), 201
 
 #-------------------------------------DELETE----SPECIALTIES_DOCTOR-----------------------------------------------#
 
@@ -1080,7 +1076,7 @@ def searchdoctor():
         map_specialties = list(chain(*map(lambda x: x["specialties"], obj_all_specialties)))
         filtered_results = list(filter(lambda x: data["name"].lower() in x["info_doctor"]["first_name"].lower() or data["name"].lower() in x["info_doctor"]["last_name"].lower() , map_specialties))
         return jsonify({"results":filtered_results}), 200
-    
+  
     
 
 #////////////////////// END SEARCH PROFESSIONALS ///////////////////
@@ -1368,6 +1364,34 @@ def get_doctor_panel():
 
     return jsonify(data), 200
 #-------
+# ------------ PANEL DEL PACIENTE ------------
+@api.route('/panelpatient', methods=['GET'])
+@jwt_required()
+def get_patient_panel():
+    try:
+        patient_id = get_jwt_identity()
+        patient = Patient.query.get(patient_id) # Usar Patient
+
+        if not patient:
+            return jsonify({"error": "Paciente no encontrado"}), 404
+
+        data = {
+            "patient": {
+                "id": patient.id,
+                "email": patient.email,
+                "first_name": patient.first_name,
+                "last_name": patient.last_name,
+                "phone_number": patient.phone_number,
+                "appointments": [appointment.serialize() for appointment in patient.appointments] if hasattr(patient, 'appointments') else []
+            }
+        }
+
+        return jsonify(data), 200
+    except Exception as e:
+        print(f"Error in get_patient_panel: {e}")
+        traceback.print_exc()
+        return jsonify({"error": "Internal server error"}), 500
+# ------------ END PANEL DEL PACIENTE ------------
 
 @api.route('/specialties_doctor/<int:specialty_id>', methods=['DELETE'])
 @jwt_required()
@@ -1520,17 +1544,20 @@ def ai_consultation():
         today = datetime.now()
         birth_date = patient.birth_date
         age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+
         prompt = f"""
         Eres un asistente de IA diseñado para dar recomendaciones generales de salud y sugerir una única especialidad médica basada en síntomas. No eres un médico, y tus respuestas deben ser informativas, no diagnósticas. Usa esta información del paciente:
         - Edad: {age} años
         - Género: {patient.gender}
         - Historial clínico: {patient.historial_clinico or 'No disponible'}
         - Síntomas reportados: {symptoms}
+
         Responde en español con lo siguiente en un solo párrafo fluido, sin números, listas ni repeticiones:
         - Una recomendación general breve y completa (1-2 frases) como descansar o hidratarse.
         - Una sola especialidad médica específica (por ejemplo, "Neumólogo" o "Cardiólogo"), integrada naturalmente en el texto con la frase "te recomendamos consultar con un".
         Usa un tono amigable y claro, completa todas las frases y evita ambigüedades o cortes.
         """
+
         response = client.generate_content(
             prompt,
             generation_config=types.GenerationConfig(
@@ -1538,6 +1565,7 @@ def ai_consultation():
                 temperature=0.2,
             )
         )
+
         gemini_response = response.text.strip()
         logger.debug(f"Respuesta de Gemini: {gemini_response}")
         try:
@@ -1565,6 +1593,7 @@ def ai_consultation():
             }
             specialty = next((spec for symptom, spec in specialty_map.items() if symptom.lower() in symptoms.lower()), "Médico General")
         logger.debug(f"Especialidad sugerida: {specialty}")
+
         # Mapeo de especialidades en español a nombres en la base de datos
         specialty_mapping = {
             "Urólogo": "urology",
@@ -1577,6 +1606,7 @@ def ai_consultation():
             "Ginecólogo": "gynecology",
         }
         db_specialty = specialty_mapping.get(specialty, specialty.lower())
+
         # Búsqueda flexible de especialidad
         specialty_obj = Specialties.query.filter(db.func.lower(Specialties.name) == db_specialty.lower().strip()).first()
         if not specialty_obj:
@@ -1585,6 +1615,7 @@ def ai_consultation():
             logger.debug(f"Especialidades disponibles: {all_specialties}")
         else:
             logger.debug(f"Especialidad encontrada: {specialty_obj.name}, ID: {specialty_obj.id}")
+
         doctors = []
         if specialty_obj:
             specialty_doctors = Specialties_doctor.query.filter_by(id_specialty=specialty_obj.id).all()
@@ -1596,6 +1627,7 @@ def ai_consultation():
                     logger.debug(f"Doctor encontrado: {doctor.first_name} {doctor.last_name}, ID: {doctor.id}")
                 else:
                     logger.debug(f"No se encontró doctor con ID: {sd.id_doctor}")
+
         doctor_names = ", ".join([f"{d['first_name']} {d['last_name']}" for d in doctors]) if doctors else None
         if doctors:
             enriched_response = (
@@ -1606,15 +1638,18 @@ def ai_consultation():
         else:
             enriched_response = (
                 f"Hola! {recommendation} Basado en lo que nos cuentas ('{symptoms}'), te recomendamos consultar con un {specialty}. "
+
                 "Puedes buscar más información o agendar una cita con un especialista desde tu dashboard."
             )
         logger.debug(f"Respuesta final: {enriched_response}")
         logger.debug(f"Doctores encontrados: {len(doctors)}")
+
         return jsonify({
             "recommendation": enriched_response,
             "specialty": specialty,
             "doctors": doctors
         }), 200
+
     except Exception as e:
         logger.error(f"Error al consultar la IA: {str(e)}")
         return jsonify({"msg": f"Error al consultar la IA: {str(e)}"}), 500
@@ -1644,6 +1679,7 @@ def get_medical_center_locations():
             })
 
     return jsonify(unique_locations), 200
+
 
 ######################### GET TO DATOS DOCTOR ######### oscar 07-04-2025 ############
 

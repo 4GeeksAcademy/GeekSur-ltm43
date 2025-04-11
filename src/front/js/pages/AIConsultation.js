@@ -103,7 +103,6 @@ import logo from "../../img/logo.png";
 import { FaSearch } from "react-icons/fa";
 import { IoArrowBack } from "react-icons/io5";
 
-
 export const AIConsultation = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
@@ -129,6 +128,7 @@ export const AIConsultation = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
+
         setRecommendation("");
         //setResponse({ recommendation: "", specialty: "", doctors: [] });
 
@@ -163,6 +163,7 @@ export const AIConsultation = () => {
     };
 
     return (
+
         <div className="d-flex" style={{ height: "100vh", backgroundColor: "#e1faff" }}>
             {/* Sidebar */}
             <div className="d-flex flex-column flex-shrink-0 p-3 text-white" style={{ width: "280px", backgroundColor: "rgb(100, 191, 208)" }}>
@@ -197,6 +198,7 @@ export const AIConsultation = () => {
                     </li>
                 </ul>
                 <hr />
+
                 <button
                     onClick={handleLogout}
                     className="btn text-black"

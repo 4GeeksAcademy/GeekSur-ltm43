@@ -82,6 +82,7 @@ export const PanelPatient = () => {
                                 </Link>
                             </li>
 
+
                             <li>
                                 <Link to="/panelpatient" className="nav-link active text-white">
                                     <i className="bi bi-person me-2"></i>
@@ -93,7 +94,9 @@ export const PanelPatient = () => {
                         <button
                             onClick={handleLogout}
                             className="btn"
+
                             style={{ backgroundColor: "#97dbe7", color: "#000", border: "none", width: "auto" }}
+
                         >
                             <i className="bi bi-box-arrow-right me-2"></i>
                             Cerrar Sesión
