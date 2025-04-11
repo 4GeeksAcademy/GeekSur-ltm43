@@ -727,11 +727,13 @@ def get_appointment_id(appointment_id):
 
 #-------------------------------------POST-----NEW APPOINTMENT-------------------------------------------------#
 @api.route('/appointments', methods=['POST'])
+@jwt_required()
 def post_appointment():
     data = request.get_json()
+    patient_id = get_jwt_identity()
 
     # Validate required fields
-    required_fields = ['id_patient', 'id_doctor', 'id_center', 'date', 'hour', 'id_specialty', 'confirmation']
+    required_fields = [ 'id_doctor', 'id_center', 'date', 'hour', 'id_specialty']
     for field in required_fields:
         if field not in data:
             raise APIException(f'The field "{field}" is required', status_code=400)
@@ -744,7 +746,7 @@ def post_appointment():
         raise APIException("Invalid date or hour format. Use YYYY-MM-DD for date and HH:MM for hour", status_code=400)
 
     # Validate foreign keys
-    if not Patient.query.get(data["id_patient"]):
+    if not Patient.query.get(int(patient_id)):
         raise APIException("Patient not found", status_code=404)
     if not Doctors.query.get(data["id_doctor"]):
         raise APIException("Doctor not found", status_code=404)
@@ -754,17 +756,17 @@ def post_appointment():
         raise APIException("Specialty not found", status_code=404)
 
     # Validate confirmation value
-    if data["confirmation"] not in ["confirmed", "to_be_confirmed"]:
-        raise APIException("Confirmation must be 'confirmed' or 'to_be_confirmed'", status_code=400)
+    # if data["confirmation"] not in ["confirmed", "to_be_confirmed"]:
+    #     raise APIException("Confirmation must be 'confirmed' or 'to_be_confirmed'", status_code=400)
 
     new_appointment = Appointment(
-        id_patient=data["id_patient"],
+        id_patient=int(patient_id),
         id_doctor=data["id_doctor"],
         id_center=data["id_center"],
         date=appointment_date,
         hour=appointment_hour,
         id_specialty=data["id_specialty"],
-        confirmation=data["confirmation"]
+        confirmation=False
     )
 
     db.session.add(new_appointment)
@@ -1533,15 +1535,12 @@ def ai_consultation():
         patient = Patient.query.get(patient_id)
         if not patient:
             return jsonify({"msg": "Paciente no encontrado"}), 404
-
         data = request.get_json()
         if not data or 'symptoms' not in data:
             return jsonify({"msg": "Se requieren síntomas"}), 400
-
         symptoms = data['symptoms']
         logging.basicConfig(level=logging.DEBUG)
         logger = logging.getLogger(__name__)
-
         today = datetime.now()
         birth_date = patient.birth_date
         age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
@@ -1593,7 +1592,6 @@ def ai_consultation():
                 "molestias en mi testículo": "Urólogo",
             }
             specialty = next((spec for symptom, spec in specialty_map.items() if symptom.lower() in symptoms.lower()), "Médico General")
-
         logger.debug(f"Especialidad sugerida: {specialty}")
 
         # Mapeo de especialidades en español a nombres en la base de datos
@@ -1640,10 +1638,9 @@ def ai_consultation():
         else:
             enriched_response = (
                 f"Hola! {recommendation} Basado en lo que nos cuentas ('{symptoms}'), te recomendamos consultar con un {specialty}. "
-                "Lamentablemente, por ahora no tenemos un especialista en esta área en nuestro sistema, pero te sugerimos "
-                "buscar uno en tu localidad o contactarnos para más información."
-            )
 
+                "Puedes buscar más información o agendar una cita con un especialista desde tu dashboard."
+            )
         logger.debug(f"Respuesta final: {enriched_response}")
         logger.debug(f"Doctores encontrados: {len(doctors)}")
 
@@ -1656,6 +1653,33 @@ def ai_consultation():
     except Exception as e:
         logger.error(f"Error al consultar la IA: {str(e)}")
         return jsonify({"msg": f"Error al consultar la IA: {str(e)}"}), 500
+
+    ######################End services  Google Gen AI###########################
+
+
+######################### GET TO LOCATION MEDICAL CENTER #########oscar 07-04-2025 ############
+@api.route("/medical_centers/locations", methods=["GET"])
+def get_medical_center_locations():
+    centers = MedicalCenter.query.with_entities(
+    MedicalCenter.city, MedicalCenter.address, MedicalCenter.country
+).distinct().all()
+
+    # Eliminar duplicados manualmente si es necesario
+    unique_locations = []
+    seen = set()
+
+    for center in centers:
+        key = (center.city, center.address, center.country)
+        if key not in seen:
+            seen.add(key)
+            unique_locations.append({
+                "city": center.city,
+                "address": center.address,
+                "country": center.country
+            })
+
+    return jsonify(unique_locations), 200
+
 
 ######################### GET TO DATOS DOCTOR ######### oscar 07-04-2025 ############
 
@@ -1760,6 +1784,33 @@ def update_doctor_profile():
     except Exception as e:
         db.session.rollback()
         return jsonify({"msg": "Error al actualizar el perfil: " + str(e)}), 500
+    
+
+    # ------------ PANEL DEL PACIENTE ------------
+@api.route('/panelpatient', methods=['GET'])
+@jwt_required()
+def get_patient_panel():
+    try:
+        patient_id = get_jwt_identity()
+        patient = Patient.query.get(patient_id) # Usar Patient
+        if not patient:
+            return jsonify({"error": "Paciente no encontrado"}), 404
+        data = {
+            "patient": {
+                "id": patient.id,
+                "email": patient.email,
+                "first_name": patient.first_name,
+                "last_name": patient.last_name,
+                "phone_number": patient.phone_number,
+                "appointments": [appointment.serialize() for appointment in patient.appointments] if hasattr(patient, 'appointments') else []
+            }
+        }
+        return jsonify(data), 200
+    except Exception as e:
+        print(f"Error in get_patient_panel: {e}")
+        traceback.print_exc()
+        return jsonify({"error": "Internal server error"}), 500
+# ------------ END PANEL DEL PACIENTE ------------
 
 
 

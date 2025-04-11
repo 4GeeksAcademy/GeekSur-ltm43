@@ -1,197 +1,208 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Context } from "../store/appContext";
-import { useNavigate, Navigate, Link, useLocation } from "react-router-dom";
+import { useNavigate, Navigate, Link } from "react-router-dom";
 import logo from "../../img/logo.png";
+import robot3D from "../../img/robot3D.png";
+
 
 export const DashboardPatient = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
 
-    const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState({
-        first_name: '',
-        last_name: '',
-        email: '',
-        phone_number: '',
-        gender: '',
-        birth_date: '',
-        password: '',
-        historial_clinico: ''
-    });
-    const [isSaving, setIsSaving] = useState(false);
-    const [updateError, setUpdateError] = useState('');
+    const [currentTime, setCurrentTime] = useState(
+        new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
 
     useEffect(() => {
-        const token = store.tokenpatient || localStorage.getItem("tokenpatient");
-        if (store.authPatient && token && (!store.dashboardPatientData || !isEditing)) {
-            actions.getDashboardPatient();
-        }
-    }, [store.authPatient, store.tokenpatient, store.dashboardPatientData, isEditing, actions]);
+        const interval = setInterval(() => {
+            setCurrentTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+        }, 60000);
+        return () => clearInterval(interval);
+    }, []);
+
 
     useEffect(() => {
-        if (store.dashboardPatientData) {
-            setFormData({
-                first_name: store.dashboardPatientData.first_name || '',
-                last_name: store.dashboardPatientData.last_name || '',
-                email: store.dashboardPatientData.email || '',
-                phone_number: store.dashboardPatientData.phone_number || '',
-                gender: store.dashboardPatientData.gender || '',
-                birth_date: store.dashboardPatientData.birth_date || '',
-                historial_clinico: store.dashboardPatientData.historial_clinico || ''
-            });
-        }
-    }, [store.dashboardPatientData]);
+        const script = document.createElement('script');
+        script.src = 'https://animatedicons.co/scripts/embed-animated-icons.js';
+        script.async = true;
+        document.body.appendChild(script);
+
+        return () => {
+            document.body.removeChild(script);
+        };
+    }, []);
 
     const handleLogout = () => {
         actions.logoutPatient();
         navigate("/loginpatient");
     };
 
-    const handleEditClick = () => {
-        setIsEditing(true);
-        setUpdateError('');
-        if (store.dashboardPatientData) {
-            setFormData({
-                first_name: store.dashboardPatientData.first_name || '',
-                last_name: store.dashboardPatientData.last_name || '',
-                email: store.dashboardPatientData.email || '',
-                phone_number: store.dashboardPatientData.phone_number || '',
-                gender: store.dashboardPatientData.gender || '',
-                birth_date: store.dashboardPatientData.birth_date || '',
-                historial_clinico: store.dashboardPatientData.historial_clinico || ''
-            });
-        }
-    };
+    const patient = store.currentPatient;
+    const patientName = patient ? `${patient.first_name} ${patient.last_name}` : "Paciente";
+    const patientLocation = patient ? `${patient.city || "San Francisco"}, ${patient.country || "CA"}` : "San Francisco, CA";
 
-    const handleCancelClick = () => {
-        setIsEditing(false);
-        setUpdateError('');
-        if (store.dashboardPatientData) {
-            setFormData({
-                first_name: store.dashboardPatientData.first_name || '',
-                last_name: store.dashboardPatientData.last_name || '',
-                email: store.dashboardPatientData.email || '',
-                phone_number: store.dashboardPatientData.phone_number || '',
-                gender: store.dashboardPatientData.gender || '',
-                birth_date: store.dashboardPatientData.birth_date || '',
-                historial_clinico: store.dashboardPatientData.historial_clinico || ''
-            });
-        }
-    };
-
-    const handleInputChange = (event) => {
-        const { name, value } = event.target;
-        setFormData(prevData => ({
-            ...prevData,
-            [name]: value
-        }));
-    };
-
-    const handleSaveChanges = async () => {
-        setIsSaving(true);
-        setUpdateError('');
-
-        try {
-            const success = await actions.updatePatientProfile(formData);
-            if (success) {
-                setIsEditing(false);
-            } else {
-                setUpdateError("No se pudo actualizar el perfil. Inténtalo de nuevo.");
-            }
-        } catch (error) {
-            console.error("Error al guardar cambios:", error);
-            setUpdateError(error.message || "Ocurrió un error al guardar los cambios.");
-        } finally {
-            setIsSaving(false);
-        }
-    };
 
     if (!store.authPatient && !localStorage.getItem("tokenpatient")) {
         return <Navigate to="/loginpatient" />;
     };
 
     return (
-        <div className="container" style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            height: '100vh', 
-            backgroundColor: 'rgb(225 250 255)' 
-        }}>
-            {store.dashboardPatientData && store.authPatient ? (
-                <div style={{ 
-                    backgroundColor: 'rgb(152 210 237)', 
-                    padding: '40px', 
-                    borderRadius: '10px', 
-                    width: '700px', 
-                    textAlign: 'center' 
-                }}>
-                    <h1 style={{ color: 'white', marginBottom: '30px' }}>Mi Perfil</h1>
-                    {isEditing ? (
-                        <form onSubmit={(e) => { e.preventDefault(); handleSaveChanges(); }} style={{ display: 'flex', flexDirection: 'column' }}>
-                            <input type="text" name="first_name" value={formData.first_name} onChange={handleInputChange} placeholder="Nombre" required style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
-                            <input type="text" name="last_name" value={formData.last_name} onChange={handleInputChange} placeholder="Apellido" required style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
-                            <input type="date" name="birth_date" value={formData.birth_date} onChange={handleInputChange} required style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
-                            <select name="gender" value={formData.gender} onChange={handleInputChange} required style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving}>
-                                <option value="">Selecciona</option>
-                                <option value="male">Masculino</option>
-                                <option value="female">Femenino</option>
-                                <option value="other">Otro</option>
-                            </select>
-                            <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="Email" required style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
-                            <input type="password" name="password" value={formData.password} onChange={handleInputChange} placeholder="Contraseña" style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
-                            <input type="tel" name="phone_number" value={formData.phone_number} onChange={handleInputChange} placeholder="Teléfono" required style={{ padding: '10px', marginBottom: '10px', border: 'none', borderRadius: '5px' }} disabled={isSaving} />
-                            <textarea
-                                name="historial_clinico"
-                                value={formData.historial_clinico}
-                                onChange={handleInputChange}
-                                placeholder="Historial Clínico"
-                                style={{ padding: '10px', marginBottom: '20px', border: 'none', borderRadius: '5px', height: '100px' }}
-                                disabled={isSaving}
-                            />
-                            {updateError && <p style={{ color: 'red', marginBottom: '10px' }}>{updateError}</p>}
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#344955', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }} disabled={isSaving}>
-                                    {isSaving ? 'Guardando...' : 'Guardar Cambios'}
-                                </button>
-                                <button type="button" onClick={handleCancelClick} style={{ padding: '10px 20px', backgroundColor: '#232F34', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }} disabled={isSaving}>
-                                    Cancelar
-                                </button>
-                            </div>
-                        </form>
-                    ) : (
-                        <div>
-                            <p style={{ color: 'white' }}><strong>Bienvenido,</strong> {store.dashboardPatientData.first_name} {store.dashboardPatientData.last_name}</p>
-                            <p style={{ color: 'white' }}><strong>Email:</strong> {store.dashboardPatientData.email}</p>
-                            <p style={{ color: 'white' }}><strong>Teléfono:</strong> {store.dashboardPatientData.phone_number}</p>
-                            <p style={{ color: 'white' }}><strong>Historial Clínico:</strong> {store.dashboardPatientData.historial_clinico || 'No disponible'}</p>
-                            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between' }}>
-                                <button onClick={handleEditClick} style={{ padding: '10px 20px', backgroundColor: 'rgb(93 177 212)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                                    <FaPencilAlt style={{ marginRight: '8px' }} /> 
-                                    Editar Mi Perfil
-                                </button>
-                                <button onClick={() => navigate("/ai-consultation")} style={{ padding: '10px 20px', backgroundColor: 'rgb(93 177 212)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
-                                    Consultar con IA
-                                </button>
-                                <button onClick={handleLogout} style={{ padding: '10px 20px', backgroundColor: 'rgb(173 29 29)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
-                                    Cerrar Sesión
-                                </button>
-                            </div>
-                            <Link to="/" style={{ marginTop: '20px', display: 'block' }}>
-                                <button style={{ padding: '10px 20px', backgroundColor: 'rgb(93 177 212)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
-                                    Back Home
-                                </button>
-                            </Link>
 
-                        </div>
-                    )}
+        <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#b7f4ff" }}>
+            {/* Sidebar */}
+            <div className="d-flex flex-column flex-shrink-0 p-3 text-white" style={{ width: "280px", backgroundColor: "rgb(100, 191, 208)" }}>
+                <a href="/dashboardpatient" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+                    <img src={logo} alt="Logo de Mi Sitio" style={{ height: '100px', width: '100%' }} />
+                </a>
+                <hr />
+                <ul className="nav nav-pills flex-column mb-auto">
+                    <li className="nav-item">
+                        <Link to="/dashboardpatient" className="nav-link active text-white">
+                            <i className="bi bi-house-door me-2"></i>
+                            Dashboard
+                        </Link>
+                    </li>
+                    <li>
+                        <Link to="/panelpatient" className="nav-link text-white">
+                            <i className="bi bi-person me-2"></i>
+                            Mi Perfil
+                        </Link>
+                    </li>
+                    <li>
+                        <Link to="/miscitas" className="nav-link text-white">
+                            <i className="bi bi-calendar-check me-2"></i>
+                            Mis Citas
+                        </Link>
+                    </li>
+                    <li>
+                        <Link to="/search-professionals" className="nav-link text-white">
+                            <i className="bi bi-search me-2"></i>
+                            Buscar Profesional
+                        </Link>
+                    </li>
+                </ul>
+                <hr />
+                <button onClick={handleLogout} className="btn" style={{ backgroundColor: "#97dbe7", color: "#000", border: "none" }}>
+                    <i className="bi bi-box-arrow-right me-2"></i>
+                    Cerrar Sesión
+                </button>
+            </div>
+
+            {/* Contenido principal */}
+            <div className="flex-grow-1 p-4" style={{ backgroundColor: "#b7f4ff", color: "#000" }}>
+                {/* Header */}
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2>Hola, {patientName}</h2>
+                        <p className="text-muted">Aquí tienes un resumen de tu actividad reciente.</p>
+                    </div>
+                    <div className="d-flex align-items-center">
+                        <span className="text-dark me-3" style={{ opacity: 0.8 }}>
+                            <i className="bi bi-geo-alt me-1"></i>
+                            {patientLocation} - {currentTime}
+                        </span>
+                        {patient?.url && (
+                            <img
+                                src={patient.url}
+                                alt="Foto de perfil"
+                                style={{
+                                    width: "40px",
+                                    height: "40px",
+                                    borderRadius: "50%",
+                                    border: "2px solid #97dbe7",
+                                }}
+                            />
+                        )}
+                    </div>
                 </div>
-            ) : (
-                <p style={{ color: 'white' }}>Cargando datos...</p>
-            )}
-            {store.loginPatientError && <p style={{ color: 'red', marginTop: '10px' }}>{store.loginPatientError}</p>}
+
+                {/* Tarjetas */}
+                <div className="row g-4">
+                    <div className="col-md-4">
+                        <div className="card" style={{ backgroundColor: "#f8f9fa", border: "none" }}>
+                            <div className="card-body">
+                                <div className="d-flex align-items-center mb-3">
+                                    <i className="bi bi-calendar-check fs-3 me-3" style={{ color: "#97dbe7" }}></i>
+                                    <h5 className="card-title mb-0">Mis Citas</h5>
+                                </div>
+                                <h3 className="card-text">{patient?.appointments?.length || 0}</h3>
+                                <Link to="/miscitas" className="text-decoration-none" style={{ color: "#97dbe7" }}>
+                                    Ver detalles <i className="bi bi-arrow-right"></i>
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="col-md-4">
+                        <div className="card" style={{ backgroundColor: "#f8f9fa", border: "none" }}>
+                            <div className="card-body">
+                                <div className="d-flex align-items-center mb-3">
+                                    <i className="bi bi-chat-dots fs-3 me-3" style={{ color: "#97dbe7" }}></i>
+                                    <h5 className="card-title mb-0">Consultar con IA</h5>
+                                </div>
+                                <h3 className="card-text">Disponible</h3>
+                                <Link to="/ai-consultation" className="text-decoration-none" style={{ color: "#97dbe7" }}>
+                                    Comenzar <i className="bi bi-arrow-right"></i>
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="col-md-4">
+                        <div className="card" style={{ backgroundColor: "#f8f9fa", border: "none" }}>
+                            <div className="card-body">
+                                <div className="d-flex align-items-center mb-3">
+                                    <i className="bi bi-person fs-3 me-3" style={{ color: "#97dbe7" }}></i>
+                                    <h5 className="card-title mb-0">Mi Perfil</h5>
+                                </div>
+                                <h3 className="card-text">Editar</h3>
+                                <Link to="/panelpatient" className="text-decoration-none" style={{ color: "#97dbe7" }}>
+                                    Ir al perfil <i className="bi bi-arrow-right"></i>
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Botón flotante IA */}
+                <div style={{
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    zIndex: 9999
+                }}>
+                    <span style={{
+                        marginRight: '10px',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        backgroundColor: '#fff',
+                        padding: '6px 10px',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                        borderBottom: '2px solid black'
+                    }}>
+                        chatea con nuestro boti
+                    </span>
+                    <Link to="/ai-consultation">
+                        <img
+                            src={robot3D}
+                            alt="Chatbot"
+                            style={{
+                                width: "100px",
+                                height: "100px",
+                                cursor: "pointer",
+                                transition: "transform 0.3s",
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.1)"}
+                            onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+                        />
+                    </Link>
+                </div>
+            </div>
         </div>
     );
 };
 
-export default DashboardPatient;

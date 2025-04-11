@@ -3,6 +3,9 @@ import { Context } from "../store/appContext";
 import { FaSearch } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+///////oscar////////
+import { useNavigate } from 'react-router-dom';
+
 function SearchProfessionals() {
   const { store, actions } = useContext(Context);
   const { medicalCenterLocations, specialties } = store;
@@ -17,6 +20,7 @@ function SearchProfessionals() {
     actions.getMedicalCenterLocations();
     actions.getSpecialties();
   }, [actions]);
+
 
   const handleSearch = async () => {
     setLoading(true);
@@ -47,6 +51,32 @@ function SearchProfessionals() {
         ),
       ]
     : [];
+
+  ////////////////////////////////////////oscar////////////////////
+  const navigate = useNavigate();
+
+  const handleScheduleClick = (doctorId) => {
+    const token = localStorage.getItem('tokenpatient');
+  
+    // Encontrar el ID de la especialidad seleccionada
+    const selectedSpecialtyObj = specialties.find(
+      (spec) => spec.name === selectedSpecialty
+    );
+  
+    const specialtyId = selectedSpecialtyObj ? selectedSpecialtyObj.id : null;
+  
+    if (!specialtyId) {
+      alert("Error: No se encontró el ID de la especialidad.");
+      return;
+    }
+  
+    if (token && token !== "") {
+      navigate(`/agendar-turno/${doctorId}/${specialtyId}`
+    ); } else {
+      navigate('/loginpatient');
+    }
+  };
+  ////////////////////////////////////////oscar////////////////////
 
   return (
     <div className="container mt-4">
@@ -85,25 +115,27 @@ function SearchProfessionals() {
           </select>
         </div>
 
-        <div className="col-md-4 mb-2">
-          <select
-            className="form-control"
-            value={selectedCity}
-            onChange={handleCityChange}
-            disabled={!selectedLocation}
-          >
-            <option value="">Selecciona una Ciudad</option>
-            {uniqueCities.length > 0 ? (
-              uniqueCities.map((city, index) => (
-                <option key={index} value={city}>
-                  {city}
-                </option>
-              ))
-            ) : (
-              <option value="">No hay ciudades disponibles</option>
-            )}
-          </select>
-        </div>
+
+        <div className="col-md-4">
+                <select
+                    className="form-control"
+                    value={selectedCity}
+                    onChange={handleCityChange}
+                    disabled={!selectedLocation}
+                >
+                    <option value="">Selecciona una Ciudad</option>
+                    {uniqueCities.length > 0 ? (
+                    uniqueCities.map((city, index) => (
+                        <option key={index} value={city}>
+                        {city}
+                        </option>
+                    ))
+                    ) : (
+                    <option value="">No hay ciudades disponibles</option>
+                    )}
+                </select>
+                </div>
+
       </div>
 
       <div className="text-center mt-3">
@@ -114,47 +146,56 @@ function SearchProfessionals() {
 
       {error && <div className="alert alert-danger mt-3">{error}</div>}
 
-      {/* RESULTADOS EN TARJETAS */}
-      <div className="row mt-4">
-        {searchResults.length > 0 ? (
-          searchResults.map((doctor) => (
-            <div key={doctor.id} className="col-md-12 mb-4">
-              <div className="card shadow-sm border rounded p-3">
-                <div className="d-flex align-items-center">
-                  <img
-                    src="https://via.placeholder.com/80"
-                    alt="doctor"
-                    className="rounded-circle mr-3"
-                    style={{ width: "80px", height: "80px", objectFit: "cover" }}
-                  />
-                  <div className="flex-grow-1">
-                    <h5 className="mb-1">
-                      {doctor.first_name} {doctor.last_name}
-                    </h5>
-                    <p className="mb-1 text-muted">
-                      {doctor.specialties.map((spec) => spec.name).join(", ")}
-                    </p>
-                    <p className="mb-1 text-muted" style={{ fontSize: "0.9rem" }}>
-                      {doctor.medical_centers.map((center) => center.name).join(", ")} –{" "}
-                      {doctor.medical_centers.map((center) => center.city).join(", ")},{" "}
-                      {doctor.medical_centers.map((center) => center.country).join(", ")}
-                    </p>
-                    <p className="mb-0" style={{ fontSize: "0.9rem" }}>
-                      Tel: {doctor.phone_number} | Email: {doctor.email}
-                    </p>
-                  </div>
-                  <div className="text-right ml-3">
-                    <button className="btn btn-outline-success">Ver Perfil del Profesional</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="col-12 text-center">
-            <p>No se encontraron resultados</p>
-          </div>
-        )}
+      <div className="table-responsive mt-4">
+        <table className="table table-striped table-bordered">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Especialidad</th>
+              <th>Centro Médico</th>
+              <th>Ciudad</th>
+              <th>País</th>
+              <th>Teléfono</th>
+              <th>Email</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {searchResults.length > 0 ? (
+              searchResults.map((doctor) => (
+                <tr key={doctor.id}>
+                  <td>{doctor.first_name} {doctor.last_name}</td>
+                  <td>{doctor.specialties.map((spec) => spec.name).join(", ")}</td>
+                  <td>{doctor.medical_centers.map((center) => center.name).join(", ")}</td>
+                  <td>{doctor.medical_centers.map((center) => center.city).join(", ")}</td>
+                  <td>{doctor.medical_centers.map((center) => center.country).join(", ")}</td>
+                  <td>{doctor.phone_number}</td>
+                  <td>{doctor.email}</td>
+                  <td>
+
+                  <button
+                    className="btn btn-success"
+                    style={{ display: "inline-block", padding: "2px 10px",  textAlign: "center",  width: "180px"}}
+                    onClick={() => handleScheduleClick(doctor.id)}
+                  >Agendar
+                    </button>
+                  </td>
+                </tr>
+                
+              ))
+            ) : (
+              <tr>
+                <td colSpan="8" className="text-center">
+                  No se encontraron resultados
+                </td>
+              </tr>
+            )}
+          
+          </tbody>
+          
+        </table>
+        
+
       </div>
     </div>
   );

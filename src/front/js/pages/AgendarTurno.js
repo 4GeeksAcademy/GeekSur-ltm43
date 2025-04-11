@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams  } from 'react-router-dom';
 
 function AgendarTurno() {
     const { id_doctor, specialtyId } = useParams();
@@ -13,11 +13,11 @@ function AgendarTurno() {
         fetch(process.env.BACKEND_URL + '/api/medical_centers')
             .then(response => response.json())
             .then(data => {
-                console.log('Medical Centers:', data);
+                // console.log('Medical Centers:', data);
                 setMedicalCenters(data);
             })
             .catch(error => {
-                console.error('Error al obtener los consultorios:', error);
+                console.error('Error al obtener los consultorios:', error);   
             });
     }, []);
 
@@ -58,7 +58,7 @@ function AgendarTurno() {
             });
 
             if (!response.ok) {
-                throw new Error('Error al agendar la cita.');
+                throw new Error('Error al agendar la cita...');
             }
 
             const citaAgendada = {
@@ -75,6 +75,16 @@ function AgendarTurno() {
             alert('Error al agendar la cita.');
         }
     };
+    
+    const handledashboard = () => {
+        navigate('/dashboardpatient');
+      };
+
+    const handleSearch = () => {
+        navigate('/search-professionals');
+      }; 
+
+
 
     return (
         <div style={{
@@ -135,9 +145,23 @@ function AgendarTurno() {
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-                    <button style={{ backgroundColor: 'rgb(93 177 212)', color: 'white', padding: '10px 20px', marginRight: '10px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+
+                    <button style={{ backgroundColor: 'rgb(93 177 212)', color: 'white', padding: '10px 20px', marginRight: '10px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+                    onClick={handledashboard}
+                    > 
+                    DashBoard
+                    </button>
+
+
+                    <button style={{ backgroundColor: 'rgb(93 177 212)', color: 'white', padding: '10px 20px', marginRight: '10px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
+                    onClick={handleSearch}
+                    >
                         Cancelar
                     </button>
+
+
+
+
                     <button
                         style={{ backgroundColor: 'rgb(93 177 212)', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
                         onClick={handleSubmit}
@@ -151,3 +175,4 @@ function AgendarTurno() {
 }
 
 export default AgendarTurno;
+

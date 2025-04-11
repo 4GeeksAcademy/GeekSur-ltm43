@@ -74,18 +74,15 @@ export const PanelPatient = () => {
                                     Ver Mis Citas
                                 </Link>
                             </li>
+
                             <li>
-                                <Link to="/patient_edit_specialty" className="nav-link text-white">
-                                    <i className="bi bi-book me-2"></i>
-                                    Mis Especialidades
+                                <Link to="/search-professionals" className="nav-link text-white">
+                                    <i className="bi bi-search me-2"></i>
+                                    Buscar Profesional
                                 </Link>
                             </li>
-                            <li>
-                                <Link to="/patient_medical_centers" className="nav-link text-white">
-                                    <i className="bi bi-building me-2"></i>
-                                    Mis Centros Médicos
-                                </Link>
-                            </li>
+
+
                             <li>
                                 <Link to="/panelpatient" className="nav-link active text-white">
                                     <i className="bi bi-person me-2"></i>
@@ -97,7 +94,9 @@ export const PanelPatient = () => {
                         <button
                             onClick={handleLogout}
                             className="btn"
-                            style={{ backgroundColor: "#97dbe7", color: "#000", border: "none" }}
+
+                            style={{ backgroundColor: "#97dbe7", color: "#000", border: "none", width: "auto" }}
+
                         >
                             <i className="bi bi-box-arrow-right me-2"></i>
                             Cerrar Sesión
@@ -159,63 +158,6 @@ export const PanelPatient = () => {
                                                 <strong>Email:</strong> {patient.email}<br />
                                                 <strong>Teléfono:</strong> {patient.phone_number}
                                             </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Sección de especialidades y centros médicos */}
-                                <div className="col-md-6">
-                                    <div className="card mb-4" style={{ backgroundColor: "#f8f9fa", border: "none" }}>
-                                        <div className="card-body">
-                                            <h5 className="card-title" style={{ color: "#000" }}>Especialidades</h5>
-                                            {patient.specialties && patient.specialties.length > 0 ? (
-                                                <ul className="list-unstyled">
-                                                    {patient.specialties.map((spec) => (
-                                                        <li key={spec.id} style={{ color: "#000" }}>{spec.name}</li>
-                                                    ))}
-                                                </ul>
-                                            ) : (
-                                                <p style={{ color: "#000" }}>No tienes especialidades asignadas.</p>
-                                            )}
-                                            <Link
-                                                to="/patient_edit_specialty"
-                                                className="text-decoration-none"
-                                                style={{ color: "#97dbe7" }}
-                                            >
-                                                Gestionar Especialidades <i className="bi bi-arrow-right"></i>
-                                            </Link>
-                                        </div>
-                                    </div>
-
-                                    <div className="card" style={{ backgroundColor: "#f8f9fa", border: "none" }}>
-                                        <div className="card-body">
-                                            <h5 className="card-title" style={{ color: "#000" }}>Centros Médicos</h5>
-                                            {patient.medical_centers && patient.medical_centers.length > 0 ? (
-                                                <ul className="list-unstyled">
-                                                    {patient.medical_centers
-                                                        .sort((a, b) => {
-                                                            if (a.name < b.name) return -1;
-                                                            if (a.name > b.name) return 1;
-                                                            if (a.office < b.office) return -1;
-                                                            if (a.office > b.office) return 1;
-                                                            return 0;
-                                                        })
-                                                        .map((center) => (
-                                                            <li key={center.id} style={{ color: "#000" }}>
-                                                                {center.name} - Oficina: {center.office}
-                                                            </li>
-                                                        ))}
-                                                </ul>
-                                            ) : (
-                                                <p style={{ color: "#000" }}>No tienes centros médicos asignados.</p>
-                                            )}
-                                            <Link
-                                                to="/patient_medical_centers"
-                                                className="text-decoration-none"
-                                                style={{ color: "#97dbe7" }}
-                                            >
-                                                Gestionar Centros <i className="bi bi-arrow-right"></i>
-                                            </Link>
                                         </div>
                                     </div>
                                 </div>
