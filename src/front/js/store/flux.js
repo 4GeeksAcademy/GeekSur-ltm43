@@ -515,11 +515,11 @@ const getState = ({ getStore, getActions, setStore }) => {
                         throw new Error(`Error fetching medical centers: ${resp.status} - ${errorText}`);
                     }
                     const data = await resp.json();
-                    console.log("Medical centers obtained:", data);
+                    //console.log("Medical centers obtained:", data);
                     setStore({ medicalCenters: data, medicalCenterError: null });
                     return data;
                 } catch (error) {
-                    console.log("Error fetching medical centers:", error.message);
+                    //console.log("Error fetching medical centers:", error.message);
                     setStore({ medicalCenterError: "Error loading medical centers: " + error.message });
                 }
             },
@@ -1594,11 +1594,7 @@ getMedicalCenterLocations: async () => {
         console.error("Error cargando ubicaciones únicas:", error);
     }
 },
-
-
-
-
-            
+          
         }
     };
 };

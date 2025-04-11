@@ -90,8 +90,13 @@ export const Home = () => {
                         <div className="card text-center" style={{ backgroundColor: '#9de3f0', border: 'none' }}>
                             <div className="card-header">
                                 <ul className="nav nav-tabs card-header-tabs">
-                                    <li className="nav-item">
+                                    {/* <li className="nav-item">
                                         <a className="nav-link active" aria-current="true" href="#">Turno presencial</a>
+                                    </li> */}
+                                    <li className="nav-item">
+                                        <Link to="/search-professionals" className="nav-link active" aria-current="true">
+                                            Turno presencial
+                                        </Link>
                                     </li>
                                 </ul>
                             </div>
@@ -99,11 +104,31 @@ export const Home = () => {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
                                     <input type="text" placeholder="especialidad, enfermedad o nombre" style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '5px', width: '60%' }} />
                                     <select style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '5px', width: '30%' }}>
-                                        <option>Capital Federal</option>
+                                        <option>Buscar</option>
+                                        <option>Chile</option>
+                                        <option>Argentina</option>
+                                        <option>Velenzuela</option>
                                     </select>
-                                    <button style={{ backgroundColor: '#4285f4', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', width: '20%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    {/* <button  style={{ backgroundColor: '#4285f4', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', width: '20%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                         <i className="fas fa-search"></i>
-                                    </button>
+                                    </button> */}
+                                    <Link
+                                        to="/search-professionals"
+                                        style={{
+                                            backgroundColor: '#4285f4',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '10px 20px',
+                                            borderRadius: '5px',
+                                            width: '20%',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            textDecoration: 'none',
+                                        }}
+                                        >
+                                        <i className="fas fa-search"></i>
+                                        </Link>
                                 </div>
                             </div>
                         </div>
@@ -207,6 +232,28 @@ export const Home = () => {
                     >
                         Ver Centros Médicos
                     </button>
+
+                    <Link to="/reviews">
+                        <button
+                            style={{
+                                backgroundColor: '#1CA9BB',
+                                color: 'white',
+                                border: 'none',
+                                padding: '15px 30px',
+                                borderRadius: '5px',
+                                fontSize: '16px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                transition: 'background-color 0.3s',
+                                margin: 'auto',
+                            }}
+                            onMouseOver={(e) => e.target.style.backgroundColor = '#168A9C'}
+                            onMouseOut={(e) => e.target.style.backgroundColor = '#1CA9BB'}
+                        >
+                            Nuestra reseñas
+                                        </button>
+                        </Link>
+
                 </Link>
             </section>
         </div>
