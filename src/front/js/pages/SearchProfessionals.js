@@ -86,17 +86,6 @@ function SearchProfessionals() {
 
   ////////////////////////////////////////oscar////////////////////
   const navigate = useNavigate();
-  // funciona en duro
-  // const handleScheduleClick = (doctorId) => {
-  //   const token = localStorage.getItem('tokenpatient');
-  
-  //   if (token && token !== "") {
-  //     // Más adelante deberías pasar doctorId y specialtyId dinámicamente
-  //     navigate(`/agendar-turno/${doctorId}/1`);
-  //   } else {
-  //     navigate('/loginpatient');
-  //   }
-  // };
 
   const handleScheduleClick = (doctorId) => {
     const token = localStorage.getItem('tokenpatient');
@@ -114,8 +103,8 @@ function SearchProfessionals() {
     }
   
     if (token && token !== "") {
-      navigate(`/agendar-turno/${doctorId}/${specialtyId}`);
-    } else {
+      navigate(`/agendar-turno/${doctorId}/${specialtyId}`
+    ); } else {
       navigate('/loginpatient');
     }
   };
