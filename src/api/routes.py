@@ -1511,44 +1511,114 @@ def ai_consultation():
         patient = Patient.query.get(patient_id)
         if not patient:
             return jsonify({"msg": "Paciente no encontrado"}), 404
-
         data = request.get_json()
         if not data or 'symptoms' not in data:
             return jsonify({"msg": "Se requieren síntomas"}), 400
-
         symptoms = data['symptoms']
-
-        # Calcular edad aproximada
+        logging.basicConfig(level=logging.DEBUG)
+        logger = logging.getLogger(__name__)
         today = datetime.now()
         birth_date = patient.birth_date
         age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
-
-        # Preparar el prompt con datos del paciente
         prompt = f"""
-        Eres un asistente de IA diseñado para proporcionar recomendaciones generales de salud basadas en síntomas. No eres un médico, y tus respuestas deben ser informativas y no diagnósticas. Usa esta información del paciente:
+        Eres un asistente de IA diseñado para dar recomendaciones generales de salud y sugerir una única especialidad médica basada en síntomas. No eres un médico, y tus respuestas deben ser informativas, no diagnósticas. Usa esta información del paciente:
         - Edad: {age} años
         - Género: {patient.gender}
         - Historial clínico: {patient.historial_clinico or 'No disponible'}
         - Síntomas reportados: {symptoms}
-
-        Basándote en esta información, proporciona recomendaciones generales (como descansar, hidratarse, o consultar a un médico) sin hacer diagnósticos médicos. Responde en un tono amigable y claro, pero mantén la respuesta breve (máximo 2-3 frases).
+        Responde en español con lo siguiente en un solo párrafo fluido, sin números, listas ni repeticiones:
+        - Una recomendación general breve y completa (1-2 frases) como descansar o hidratarse.
+        - Una sola especialidad médica específica (por ejemplo, "Neumólogo" o "Cardiólogo"), integrada naturalmente en el texto con la frase "te recomendamos consultar con un".
+        Usa un tono amigable y claro, completa todas las frases y evita ambigüedades o cortes.
         """
-
-        # Generar contenido con Google Gen AI, aplicando configuraciones
         response = client.generate_content(
             prompt,
             generation_config=types.GenerationConfig(
-                max_output_tokens=50,  # Limitar la respuesta a 50 tokens (aproximadamente 2-3 frases cortas)
-                temperature=0.3,       # Hacer la respuesta más predecible y menos creativa
+                max_output_tokens=150,
+                temperature=0.2,
             )
         )
-
-        # Obtener la respuesta del modelo
-        recommendation = response.text.strip()
-        return jsonify({"recommendation": recommendation}), 200
-
+        gemini_response = response.text.strip()
+        logger.debug(f"Respuesta de Gemini: {gemini_response}")
+        try:
+            specialty_marker = "te recomendamos consultar con un "
+            if specialty_marker in gemini_response:
+                start_idx = gemini_response.index(specialty_marker) + len(specialty_marker)
+                specialty_end = gemini_response.find(".", start_idx)
+                specialty = gemini_response[start_idx:specialty_end if specialty_end != -1 else None].strip().capitalize()
+                recommendation = gemini_response[:start_idx - len(specialty_marker)].strip()
+            else:
+                raise ValueError("No se encontró especialidad")
+        except (ValueError, IndexError):
+            recommendation = "Te recomendamos descansar y evitar actividades que puedan empeorar tus síntomas mientras los observas."
+            specialty_map = {
+                "dolor de cabeza": "Neurólogo",
+                "fiebre": "Médico General",
+                "dolor de estómago": "Gastroenterólogo",
+                "dolor de espalda": "Ortopedista",
+                "falta el aire": "Neumólogo",
+                "pecho apretado": "Neumólogo",
+                "tos": "Neumólogo",
+                "dolor de pecho": "Cardiólogo",
+                "dolor en un testículo": "Urólogo",
+                "molestias en mi testículo": "Urólogo",
+            }
+            specialty = next((spec for symptom, spec in specialty_map.items() if symptom.lower() in symptoms.lower()), "Médico General")
+        logger.debug(f"Especialidad sugerida: {specialty}")
+        # Mapeo de especialidades en español a nombres en la base de datos
+        specialty_mapping = {
+            "Urólogo": "urology",
+            "Neumólogo": "pulmonology",
+            "Cardiólogo": "Cardiólogo",  # Como está en la base de datos
+            "Gastroenterólogo": "gastroenterology",
+            "Neurólogo": "neurology",
+            "Ortopedista": "orthopedics",
+            "Médico General": "general medicine",
+            "Ginecólogo": "gynecology",
+        }
+        db_specialty = specialty_mapping.get(specialty, specialty.lower())
+        # Búsqueda flexible de especialidad
+        specialty_obj = Specialties.query.filter(db.func.lower(Specialties.name) == db_specialty.lower().strip()).first()
+        if not specialty_obj:
+            logger.debug(f"No se encontró la especialidad '{db_specialty}' en Specialties")
+            all_specialties = [s.name for s in Specialties.query.all()]
+            logger.debug(f"Especialidades disponibles: {all_specialties}")
+        else:
+            logger.debug(f"Especialidad encontrada: {specialty_obj.name}, ID: {specialty_obj.id}")
+        doctors = []
+        if specialty_obj:
+            specialty_doctors = Specialties_doctor.query.filter_by(id_specialty=specialty_obj.id).all()
+            logger.debug(f"Especialidades-Doctor encontradas: {len(specialty_doctors)}")
+            for sd in specialty_doctors:
+                doctor = Doctors.query.get(sd.id_doctor)
+                if doctor:
+                    doctors.append(doctor.serialize())
+                    logger.debug(f"Doctor encontrado: {doctor.first_name} {doctor.last_name}, ID: {doctor.id}")
+                else:
+                    logger.debug(f"No se encontró doctor con ID: {sd.id_doctor}")
+        doctor_names = ", ".join([f"{d['first_name']} {d['last_name']}" for d in doctors]) if doctors else None
+        if doctors:
+            enriched_response = (
+                f"Hola! {recommendation} Basado en lo que nos cuentas ('{symptoms}'), te recomendamos consultar con un {specialty}. "
+                f"¡Buenas noticias! En nuestro sistema contamos con {doctor_names}, quienes podrían ayudarte. "
+                "Puedes agendar una cita con ellos desde tu dashboard si lo deseas."
+            )
+        else:
+            enriched_response = (
+                f"Hola! {recommendation} Basado en lo que nos cuentas ('{symptoms}'), te recomendamos consultar con un {specialty}. "
+                "Puedes buscar más información o agendar una cita con un especialista desde tu dashboard."
+            )
+        logger.debug(f"Respuesta final: {enriched_response}")
+        logger.debug(f"Doctores encontrados: {len(doctors)}")
+        return jsonify({
+            "recommendation": enriched_response,
+            "specialty": specialty,
+            "doctors": doctors
+        }), 200
     except Exception as e:
+        logger.error(f"Error al consultar la IA: {str(e)}")
         return jsonify({"msg": f"Error al consultar la IA: {str(e)}"}), 500
+
     ######################End services  Google Gen AI###########################
 
 
@@ -1678,6 +1748,33 @@ def update_doctor_profile():
     except Exception as e:
         db.session.rollback()
         return jsonify({"msg": "Error al actualizar el perfil: " + str(e)}), 500
+    
+
+    # ------------ PANEL DEL PACIENTE ------------
+@api.route('/panelpatient', methods=['GET'])
+@jwt_required()
+def get_patient_panel():
+    try:
+        patient_id = get_jwt_identity()
+        patient = Patient.query.get(patient_id) # Usar Patient
+        if not patient:
+            return jsonify({"error": "Paciente no encontrado"}), 404
+        data = {
+            "patient": {
+                "id": patient.id,
+                "email": patient.email,
+                "first_name": patient.first_name,
+                "last_name": patient.last_name,
+                "phone_number": patient.phone_number,
+                "appointments": [appointment.serialize() for appointment in patient.appointments] if hasattr(patient, 'appointments') else []
+            }
+        }
+        return jsonify(data), 200
+    except Exception as e:
+        print(f"Error in get_patient_panel: {e}")
+        traceback.print_exc()
+        return jsonify({"error": "Internal server error"}), 500
+# ------------ END PANEL DEL PACIENTE ------------
 
 
 

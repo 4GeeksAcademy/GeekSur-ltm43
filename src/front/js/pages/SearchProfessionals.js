@@ -176,9 +176,6 @@ function SearchProfessionals() {
                     )}
                 </select>
                 </div>
-
-
-
       </div>
 
       <div className="text-center mt-3">
