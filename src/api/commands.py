@@ -136,58 +136,6 @@ def setup_commands(app):
             print(f"Error inserting medical centers: {str(e)}")
             raise
 
-    # @app.cli.command("insert-test-medical-centers")
-    # def insert_test_medical_centers():
-    #     print("Inserting test data for Medical Centers")
-    #     medical_centers_data = [
-    #         {
-                
-    #             "name": "Clinica Caracas",
-    #             "address": "Centro de Caracas",
-    #             "country": "Venezuela",
-    #             "city": "Caracas",
-    #             "phone": "582198592475",
-    #             "email": "clinccrcs@gmail.com"
-    #         },
-    #         {
-                
-    #             "name": "Clinica Santiago",
-    #             "address": "Centro de Santiago",
-    #             "country": "Chile",
-    #             "city": "Santiago",
-    #             "phone": "56235885585",
-    #             "email": "clinccsgo@gmail.com"
-    #         },
-    #         {
-                
-    #             "name": "Clinica Auckland",
-    #             "address": "Centro de Auckland",
-    #             "country": "New Zealand",
-    #             "city": "Auckland",
-    #             "phone": "64205879736",
-    #             "email": "clinccakl@gmail.com"
-    #         }
-    #     ]
-
-    #     try:
-    #         for center_data in medical_centers_data:
-    #             center = MedicalCenter(
-                    
-    #                 name=center_data["name"],
-    #                 address=center_data["address"],
-    #                 country=center_data["country"],
-    #                 city=center_data["city"],
-    #                 phone=center_data["phone"],
-    #                 email=center_data["email"]
-    #             )
-    #             db.session.add(center)
-    #         db.session.commit()
-    #         print("All test medical centers inserted successfully!")
-    #     except Exception as e:
-    #         db.session.rollback()
-    #         print(f"Error inserting medical centers: {str(e)}")
-    #         raise
-
     @app.cli.command("insert-test-doctors")
     def insert_test_doctors():
         print("Inserting test data for Doctors")

@@ -25,7 +25,7 @@ export const PanelDoctor = () => {
         } else if (!store.doctorPanelData) {
             actions.getDoctorPanel();
         }
-    }, [store.authDoctor, store.doctorPanelData, actions, navigate]);
+    }, [store.authDoctor, store.doctorPanelData, navigate]);
 
     const handleLogout = () => {
         actions.logoutDoctor();
