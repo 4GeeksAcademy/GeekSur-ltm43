@@ -50,7 +50,6 @@ export const SignupPatient = () => {
         {/* Columna 1 vacía */}
         <div className="col empty-col"></div>
 
-        <div className="container">
             <div className="left">
                 <div className="signup-info">
                     <div className="logo-container">
@@ -132,19 +131,14 @@ export const SignupPatient = () => {
                             <button type="submit" className="signup-form-button">Guardar</button>
 
                         </div>
-                        <Link to="/loginpatient" style={{ marginLeft: '78px', textDecoration: 'none' }}>
-                            Ya tienes una cuenta? Iniciar sesión
-                        </Link>
-                        
-                    </form>
-                    </div>
 
-                </div>
+
+                    </form>
+               
+                               </div>
             </div>
                         {/* Columna 1 vacía */}
                         <div className="col empty-col"></div>
         </div>
-
-
     );
 };
