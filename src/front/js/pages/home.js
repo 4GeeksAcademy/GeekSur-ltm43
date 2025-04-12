@@ -201,13 +201,36 @@ export const Home = () => {
                             fontWeight: 'bold',
                             cursor: 'pointer',
                             transition: 'background-color 0.3s',
+                            margin: '10px'
                         }}
                         onMouseOver={(e) => e.target.style.backgroundColor = '#168a9c'}
                         onMouseOut={(e) => e.target.style.backgroundColor = '#1ca9bb'}
                     >
                         Ver Centros Médicos
                     </button>
+
+                    <Link to="/reviews">
+                        <button
+                            style={{
+                                backgroundColor: '#1ca9bb',
+                                color: 'white',
+                                border: 'none',
+                                padding: '15px 30px',
+                                borderRadius: '5px',
+                                fontSize: '16px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                transition: 'background-color 0.3s',
+                                margin: '10px'
+                            }}
+                            onMouseOver={(e) => e.target.style.backgroundColor = '#168a9c'}
+                            onMouseOut={(e) => e.target.style.backgroundColor = '#1ca9bb'}
+                        >
+                            Nuestra reseñas
+                        </button>
+                    </Link>
                 </Link>
+                
             </section>
         </div>
     );

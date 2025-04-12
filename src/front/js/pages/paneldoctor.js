@@ -4,7 +4,7 @@ import { useNavigate, Navigate, Link, useLocation } from "react-router-dom"; // 
 import logo from "../../img/logo.png";
 
 export const PanelDoctor = () => {
-    const { store, actions } = useContext(Context);
+    const { store} = useContext(Context);
     const navigate = useNavigate();
     const location = useLocation(); // Hook para obtener la ruta actual
     const [currentTime, setCurrentTime] = useState(
@@ -25,7 +25,7 @@ export const PanelDoctor = () => {
         } else if (!store.doctorPanelData) {
             actions.getDoctorPanel();
         }
-    }, [store.authDoctor, store.doctorPanelData, actions, navigate]);
+    }, [store.authDoctor, store.doctorPanelData, navigate]);
 
     const handleLogout = () => {
         actions.logoutDoctor();

@@ -1,100 +1,3 @@
-// import React, { useState, useContext, useEffect } from "react";
-// import { Context } from "../store/appContext";
-// import { useNavigate } from "react-router-dom";
-// import { FaSearch } from 'react-icons/fa';
-
-
-// export const AIConsultation = () => {
-//     const { store, actions } = useContext(Context);
-//     const navigate = useNavigate();
-//     const [symptoms, setSymptoms] = useState("");
-//     const [recommendation, setRecommendation] = useState("");
-//     const [error, setError] = useState("");
-
-//     useEffect(() => {
-//         if (!store.authPatient && !localStorage.getItem("tokenpatient")) {
-//             navigate("/loginpatient");
-//         }
-//     }, [store.authPatient, navigate]);
-
-//     const handleSubmit = async (e) => {
-//         e.preventDefault();
-//         setError("");
-//         setRecommendation("");
-
-//         try {
-//             const response = await fetch(`${process.env.BACKEND_URL}/api/patient/ai-consultation`, {
-//                 method: "POST",
-//                 headers: {
-//                     "Content-Type": "application/json",
-//                     "Authorization": `Bearer ${store.tokenpatient || localStorage.getItem("tokenpatient")}`
-//                 },
-//                 body: JSON.stringify({ symptoms })
-//             });
-//             const data = await response.json();
-//             if (!response.ok) throw new Error(data.msg || "Error al consultar la IA");
-//             setRecommendation(data.recommendation);
-//         } catch (error) {
-//             setError(error.message);
-//         }
-//     };
-
-//     return (
-//         <div className="container" style={{
-//             display: 'flex',
-//             justifyContent: 'center',
-//             alignItems: 'center',
-//             height: '100vh',
-//             backgroundColor: 'rgb(225 250 255)'
-//         }}>
-//             <div style={{
-//                 backgroundColor: 'rgb(152 210 237)',
-//                 padding: '40px',
-//                 borderRadius: '10px',
-//                 width: '500px',
-//                 textAlign: 'center'
-//             }}>
-//                 <h1 style={{ color: 'white', marginBottom: '30px' }}>Consulta con IA</h1>
-//                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
-//                     <textarea
-//                         name="symptoms"
-//                         value={symptoms}
-//                         onChange={(e) => setSymptoms(e.target.value)}
-//                         placeholder="Describe tus síntomas (ejemplo: dolor de cabeza, fiebre)..."
-//                         required
-//                         style={{ padding: '10px', marginBottom: '20px', border: 'none', borderRadius: '5px', height: '100px' }}
-//                     />
-//                     <button
-//                         type="submit"
-//                         className="btn btn-primary d-flex align-items-center gap-2 justify-content-center w-100"
-//                     >
-//                         <FaSearch /> Obtener Recomendación
-//                     </button>
-
-//                 </form>
-//                 {recommendation && <p style={{ color: 'white', marginTop: '20px' }}>{recommendation}</p>}
-//                 {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
-//                 <button
-//                     onClick={() => navigate("/dashboardpatient")}
-//                     style={{
-//                         marginTop: '30px',
-//                         padding: '10px 20px',
-//                         backgroundColor: 'rgb(93 177 212)',
-//                         color: 'white',
-//                         border: 'none',
-//                         borderRadius: '5px',
-//                         width: 'auto',
-//                         cursor: 'pointer'
-//                     }}
-//                 >
-//                     Volver al Dashboard
-//                 </button>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default AIConsultation;
 import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate, Link } from "react-router-dom";
@@ -107,12 +10,8 @@ export const AIConsultation = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
     const [symptoms, setSymptoms] = useState("");
-    const [response, setResponse] = useState({ recommendation: "", specialty: "", doctors: [] });
+    const [response, setResponse] = useState({ recommendation: "", link: { text: "", url: "" }, specialty: "", doctors: [] });
     const [error, setError] = useState("");
-
-    ///oscar
-    const [recommendation, setRecommendation] = useState("");
-    ///
 
     useEffect(() => {
         if (!store.authPatient && !localStorage.getItem("tokenpatient")) {
@@ -128,18 +27,7 @@ export const AIConsultation = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
-
-        setRecommendation("");
-        //setResponse({ recommendation: "", specialty: "", doctors: [] });
-
-        //     const handleSubmit = async (e) => {
-//         e.preventDefault();
-//         setError("");
-//         setRecommendation("");
-
-
-
-
+        setResponse({ recommendation: "", link: { text: "", url: "" }, specialty: "", doctors: [] });
         try {
             const apiResponse = await fetch(`${process.env.BACKEND_URL}/api/patient/ai-consultation`, {
                 method: "POST",
@@ -154,6 +42,7 @@ export const AIConsultation = () => {
 
             setResponse({
                 recommendation: data.recommendation,
+                link: data.link,
                 specialty: data.specialty,
                 doctors: data.doctors
             });
@@ -163,7 +52,6 @@ export const AIConsultation = () => {
     };
 
     return (
-
         <div className="d-flex" style={{ height: "100vh", backgroundColor: "#e1faff" }}>
             {/* Sidebar */}
             <div className="d-flex flex-column flex-shrink-0 p-3 text-white" style={{ width: "280px", backgroundColor: "rgb(100, 191, 208)" }}>
@@ -268,23 +156,14 @@ export const AIConsultation = () => {
                     {response.recommendation && (
                         <div className="mt-4" style={{ textAlign: "left", color: "#333" }}>
                             <p>{response.recommendation}</p>
-                            {response.doctors.length > 0 && (
-                                <div className="text-center mt-3">
-                                    <button
-                                        onClick={() => navigate("/dashboardpatient")}
-                                        className="btn"
-                                        style={{
-                                            backgroundColor: "#97dbe7",
-                                            color: "#000",
-                                            border: "none",
-                                            borderRadius: "8px",
-                                            padding: "8px 20px",
-                                            fontWeight: "bold"
-                                        }}
-                                    >
-                                        Agendar una cita
-                                    </button>
-                                </div>
+                            {response.link && (
+                                <p>
+                                    {response.link.text.split("haciendo clic aquí")[0]}
+                                    <Link to={response.link.url} style={{ color: "#64bfd0", textDecoration: "underline" }}>
+                                        haciendo clic aquí
+                                    </Link>
+                                    .
+                                </p>
                             )}
                         </div>
                     )}

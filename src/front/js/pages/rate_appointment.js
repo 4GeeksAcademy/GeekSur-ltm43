@@ -47,7 +47,7 @@ export const RateAppointment = () => {
         e.preventDefault();
         try {
             await actions.createPatientReview(reviewData);
-            navigate("/patient-appointments");
+            navigate("/miscitas");
         } catch (error) {
             console.error("Error al enviar la reseña:", error);
         }

@@ -4,7 +4,7 @@ import "../../styles/home.css";
 import { Link } from "react-router-dom";
 
 export const MedicalCenterDoctor = () => {
-    const { store, actions } = useContext(Context);
+    const { store} = useContext(Context);
     const [editId, setEditId] = useState(null);
 
     const [formData, setFormData] = useState({
@@ -69,8 +69,7 @@ export const MedicalCenterDoctor = () => {
             }
         }
     };
-  // CONSOLE LOG PARA VER EN COMPONENTE LISTADO DE medical_center_doctor
-  console.log("Lista de medical_center_doctor en el Store:", store.medical_center_doctor);
+  
 
   return (
       <div className="container">
