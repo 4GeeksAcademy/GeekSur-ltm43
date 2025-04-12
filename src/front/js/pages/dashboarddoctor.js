@@ -127,6 +127,7 @@ export const DashboardDoctor = () => {
         <>
             {store.authDoctor || localStorage.getItem("tokendoctor") ? (
                 <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f0faff" }}>
+                    
                     {/* Sidebar fijo */}
                     <div
                         className="d-flex flex-column flex-shrink-0 py-3 text-white"
@@ -137,6 +138,7 @@ export const DashboardDoctor = () => {
                             height: "100vh",
                             overflowY: "auto",
                         }}
+
                     >
                         <a
                             href="/dashboarddoctor"
