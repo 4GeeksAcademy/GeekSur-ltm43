@@ -22,7 +22,7 @@ const hospitalImages = {
 };
 
 function MedicalCenters() {
-    const { store } = useContext(Context);
+    const { store, actions } = useContext(Context);
     const { medicalCenters, medicalCenterError, medicalCenterSuccessMessage } = store || {};
     const { getMedicalCenters } = actions || {};
 
