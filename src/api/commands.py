@@ -85,10 +85,10 @@ def setup_commands(app):
                 "address": "Centro de Caracas",
                 "country": "Venezuela",
                 "city": "Caracas",
-                "phone": "582198592475",
+                "phone": "584148592472",
                 "email": "clinccrcs@gmail.com",
-                "latitude": "10.71783",
-                "longitude": "-71.62159"
+                "latitude": "10.4904845",
+                "longitude": "-66.8937980231858"
             },
             {
                 
@@ -98,8 +98,8 @@ def setup_commands(app):
                 "city": "Santiago",
                 "phone": "56235885585",
                 "email": "clinccsgo@gmail.com",
-                "latitude": "33.43701593956523",
-                "longitude": "-70.62458515168339"
+                "latitude": "-33.4203",
+                "longitude": "-70.6532"
 
             },
             {
@@ -110,9 +110,32 @@ def setup_commands(app):
                 "city": "Auckland",
                 "phone": "64205879736",
                 "email": "clinccakl@gmail.com",
-                "latitude": "46.43719863891602",
-                "longitude": "168.35899353027344"
+                "latitude": "-36.859936",
+                "longitude": "174.769943"
+            },
+            {
+                
+                "name": "Clinica Buenos Aires",
+                "address": "Centro de Buenos Aires",
+                "country": "Argentina",
+                "city": "Buenos Aires",
+                "phone": "5420587973658",
+                "email": "clinccbna@gmail.com",
+                "latitude": "-34.577541",
+                "longitude": "-58.541584"
+            },
+            {
+                
+                "name": "Clinica Maracaibo",
+                "address": "Centro de Maracaibo",
+                "country": "Venezuela",
+                "city": "Maracaibo",
+                "phone": "584243895622",
+                "email": "clinccmrb@gmail.com",
+                "latitude": "10.5987086",
+                "longitude": "-71.6253913505539"
             }
+
         ]
 
         try:
@@ -208,9 +231,29 @@ def setup_commands(app):
 
         # Insert specialties first
         specialties_data = [
-            { "name": "urology"},
-            { "name": "cardiology"},
-            { "name": "gynecology"}
+            { "name": "Urología"},
+            { "name": "Cardiología"},
+            { "name": "Ginecología"},
+            { "name": "Pediatra"},
+            { "name": "Odontología"},
+            { "name": "Otorrinolaringología"},
+            { "name": "Medicina General"},
+            { "name": "Obstetricia"},
+            { "name": "Neurología"},
+            { "name": "Psiquiatría"},
+            { "name": "Reumatología"},
+            { "name": "Cirugía General"},
+            { "name": "Cirugía Pediatrica"},
+            { "name": "Anatomía Patológica"},
+            { "name": "Anesteciología"},
+            { "name": "Laboratorio Clínico"},
+            { "name": "Geriatría"},
+            { "name": "Oftalmología"},
+            { "name": "Nutrición"},
+            { "name": "Traumatología"},
+             { "name": "Ortopedia"},
+             { "name": "Oncología"},
+             { "name": "Radiología"},
         ]
 
         try:

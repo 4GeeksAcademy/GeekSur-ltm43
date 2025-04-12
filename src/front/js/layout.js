@@ -68,19 +68,19 @@ const Layout = () => {
               <Route element={<LoginDoctor />} path="/logindoctor" />
               <Route element={<RegistrationDoctor />} path="/registrationdoctor" />
               <Route element={<SignupPatient />} path="/signuppatient" />
+              <Route element={<MedicalCenters />} path="/medical-centers" />
+              <Route element={<Reviews />} path="/reviews" />
             </Route>
 
             {/* Rutas sin Navbar ni Footer */}
             <Route element={<Patients />} path="/patients" />
             <Route element={<Appointments />} path="/appointments" />
-            <Route element={<MedicalCenters />} path="/medical-centers" />
             <Route element={<Doctors />} path="/doctors" />
             <Route element={<Specialties />} path="/specialties" />
             <Route element={<Specialties_doctor />} path="/specialties_doctor" />
             <Route element={<DashboardPatient />} path="/dashboardpatient" />
             <Route element={<DashboardDoctor />} path="/dashboarddoctor" />
             <Route element={<MedicalCenterDoctor />} path="/medicalcenterdoctor" />
-            <Route element={<Reviews />} path="/reviews" />
             <Route element={<SpecialtyByDoctor />} path="/specialty_by_doctor" />
             <Route element={<CenterOfficeByDoctor />} path="/center_office_by_doctor" />
             <Route element={<DoctorEdit />} path="/doctor_edit" />
