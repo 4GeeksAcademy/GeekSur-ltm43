@@ -31,7 +31,7 @@ export const DoctorEditSpecialty = () => {
             actions.getDoctorSpecialties();
             actions.getDoctorPanel();
         }
-    }, [store.authDoctor, actions, navigate]);
+    }, []);
 
     useEffect(() => {
         const filteredSpecialties = store.specialties.filter(
@@ -183,24 +183,25 @@ export const DoctorEditSpecialty = () => {
                 </ul>
                 <hr />
                 <button
-                    onClick={handleLogout}
-                    className="btn d-flex align-items-center"
-                    style={{
-                        backgroundColor: "#ffffff",
-                        color: "#000",
-                        border: "1px solid #000",
-                        padding: "10px",
-                        borderRadius: "5px",
-                        fontWeight: "500",
-                        whiteSpace: "nowrap",
-                        width: "fit-content",
-                        maxWidth: "100%",
-                        margin: "0 auto",
-                    }}
-                >
-                    <i className="bi bi-box-arrow-right me-2 fs-5"></i>
-                    Cerrar Sesión
-                </button>
+                            onClick={handleLogout}
+                            className="btn d-flex align-items-center"
+                            style={{
+                                backgroundColor: "#97dbe7",
+                                color: "#000",
+                                minWidth: "100px",
+                                whiteSpace: "nowrap",
+                                padding: "10px",
+                                borderRadius: "5px",
+                                fontWeight: "500",
+                                whiteSpace: "nowrap",
+                                width: "fit-content",
+                                maxWidth: "100%",
+                                margin: "0 auto",
+                            }}
+                        >
+                            <i className="bi bi-box-arrow-right me-2 fs-5"></i>
+                            Cerrar Sesión
+                        </button>
             </div>
 
             {/* Contenido principal con margen para el sidebar fijo */}
@@ -213,7 +214,7 @@ export const DoctorEditSpecialty = () => {
                 <div className="container-fluid">
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h2 className="fw-bold">Hello, {doctorName}</h2>
+                            <h2 className="fw-bold">Hola, {doctorName}</h2>
                             <p className="text-muted">Gestiona tus especialidades aquí.</p>
                         </div>
                         <div className="d-flex align-items-center position-relative">
