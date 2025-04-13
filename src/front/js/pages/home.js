@@ -188,7 +188,7 @@ export const Home = () => {
             {/* Nueva sección para el enlace a MedicalCenters */}
             <section className="medical-centers-link" style={{ textAlign: 'center', padding: '40px 20px' }}>
                 <h2 style={{ color: '#1ca9bb', marginBottom: '20px' }}>Explorá Nuestros Centros Médicos</h2>
-                <p style={{ marginBottom: '30px' }}>Encuentra el centro médico más cercano y agenda tu cita hoy mismo.</p>
+                <p style={{ marginBottom: '30px' }}>Encuentra nuestras sucursales y lee las reseñas de nuestros pacientes.</p>
                 <Link to="/medical-centers">
                     <button
                         style={{

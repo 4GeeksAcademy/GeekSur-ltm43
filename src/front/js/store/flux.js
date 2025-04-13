@@ -331,21 +331,22 @@ const getState = ({ getStore, getActions, setStore }) => {
                         setStore({ currentPatient: null, authPatient: false, error: "No hay token" });
                         return;
                     }
-            
+
                     const response = await fetch(`${process.env.BACKEND_URL}/api/patient/profile`, {
                         method: "GET",
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     });
-            
+
                     const data = await response.json();
                     if (!response.ok) {
                         setStore({ currentPatient: null, error: data.msg || "Error al obtener datos del paciente" });
                         return;
                     }
-            
+
                     setStore({ currentPatient: data.patient, error: null });
+                    return data.patient; // Retornamos los datos para depuración
                 } catch (error) {
                     console.error("Error fetching patient data:", error);
                     setStore({ currentPatient: null, error: "Error al obtener datos del paciente" });
@@ -1019,7 +1020,11 @@ const getState = ({ getStore, getActions, setStore }) => {
                     const data = await resp.json();
                     if (!resp.ok) throw new Error(data.msg || "Error al cargar el dashboard");
 
-                    setStore({ dashboardPatientData: data.patient });
+                    // Actualizar tanto dashboardPatientData como currentPatient
+                    setStore({ 
+                        dashboardPatientData: data.patient,
+                        currentPatient: data.patient // Aseguramos que currentPatient también se actualice
+                    });
                     return data;
                 } catch (error) {
                     console.log("Error al cargar el dashboard:", error.message);
@@ -1031,6 +1036,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             // Acción para logout
             logoutPatient: () => {
                 setStore({
+                    tokenpatient: null,
                     authPatient: false,
                     currentPatient: null,
                     dashboardPatientData: null,
@@ -1053,11 +1059,18 @@ const getState = ({ getStore, getActions, setStore }) => {
                 if (token) {
                     setStore({ tokenpatient: token, authPatient: true });
                     try {
-                        await getActions().getDashboardPatient(); // Verifica el token y carga datos
+                        await getActions().getDashboardPatient();
                         console.log("Paciente autenticado correctamente");
                     } catch (error) {
-                        console.error("Token inválido, cerrando sesión:", error);
-                        getActions().logoutPatient(); // Si el token no es válido, cerrar sesión
+                        console.error("Error al validar autenticación, intentando con getPatientData:", error);
+                        // Si getDashboardPatient falla, intentamos con getPatientData
+                        try {
+                            await getActions().getPatientData();
+                            console.log("Datos del paciente cargados con getPatientData");
+                        } catch (error) {
+                            console.error("Token inválido, cerrando sesión:", error);
+                            getActions().logoutPatient();
+                        }
                     }
                 }
             },

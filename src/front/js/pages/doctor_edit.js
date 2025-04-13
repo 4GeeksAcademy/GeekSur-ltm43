@@ -211,9 +211,10 @@ export const DoctorEdit = () => {
                             onClick={handleLogout}
                             className="btn d-flex align-items-center"
                             style={{
-                                backgroundColor: "#ffffff",
+                                backgroundColor: "#97dbe7",
                                 color: "#000",
-                                border: "1px solid #000",
+                                minWidth: "100px",
+                                whiteSpace: "nowrap",
                                 padding: "10px",
                                 borderRadius: "5px",
                                 fontWeight: "500",
