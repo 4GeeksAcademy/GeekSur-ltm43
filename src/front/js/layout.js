@@ -38,6 +38,8 @@ import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
 import { PanelDoctor } from "./pages/paneldoctor";
 import { PanelPatient } from "./pages/panelpatient";
+import  SobreNosotros  from './pages/SobreNosotros';
+import  Contactanos  from './pages/contactanos';
 
 // Componente Layout para páginas con Navbar y Footer (Home, Demo, Single)
 const PublicLayout = () => (
@@ -96,6 +98,8 @@ const Layout = () => {
             <Route element={<RateAppointment />} path="/rate-appointment/:appointmentId" />
             <Route element={<AIConsultation />} path="/ai-consultation" />
             <Route path="/panelpatient" element={<PanelPatient />} />
+            <Route path="/sobre-nosotros" element={<SobreNosotros />} />
+            <Route path="/contactanos" element={<Contactanos />} />
 
 
             <Route element={<h1>Not found!</h1>} path="*" />

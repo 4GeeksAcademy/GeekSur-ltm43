@@ -1,5 +1,6 @@
 import React from 'react';
 import logo from '../../img/logo.png';
+import { Link } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaLinkedinIn } from 'react-icons/fa'; 
 
 
@@ -15,8 +16,8 @@ import { FaFacebookF, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
                 <div className="footer-section">
                     <h3>Page</h3>
                     <ul>
-                        <li><a href="#">About us</a></li>
-                        <li><a href="#">Contact us</a></li>
+                    <li><Link to="/sobre-nosotros">About us</Link></li>
+                    <li><Link to="/contactanos">Contactanos</Link></li>
                         <li><a href="#">News and Blog</a></li>
                         <li><a href="#">Meet a Team</a></li>
                     </ul>
