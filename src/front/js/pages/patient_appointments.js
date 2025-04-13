@@ -25,6 +25,10 @@ export const PatientAppointments = () => {
             navigate("/loginpatient");
         } else {
             actions.getPatientAppointments();
+            // Cargar datos de doctores, centros médicos y especialidades
+            actions.getDoctors();
+            actions.getMedicalCenters();
+            actions.getSpecialties();
         }
     }, [store.authPatient]);
 
@@ -40,6 +44,22 @@ export const PatientAppointments = () => {
     const patient = store.currentPatient;
     const patientName = patient ? `${patient.first_name} ${patient.last_name}` : "Paciente";
     const patientLocation = patient?.city ? `${patient.city}, ${patient.country || 'CA'}` : "San Francisco, CA";
+
+    // Funciones para mapear IDs a nombres
+    const getDoctorName = (doctorId) => {
+        const doctor = store.doctors.find(d => d.id === doctorId);
+        return doctor ? `${doctor.first_name} ${doctor.last_name}` : `Doctor ${doctorId}`;
+    };
+
+    const getCenterName = (centerId) => {
+        const center = store.medicalCenters.find(c => c.id === centerId);
+        return center ? center.name : `Centro ${centerId}`;
+    };
+
+    const getSpecialtyName = (specialtyId) => {
+        const specialty = store.specialties.find(s => s.id === specialtyId);
+        return specialty ? specialty.name : `Especialidad ${specialtyId}`;
+    };
 
     return (
         <>
@@ -314,9 +334,9 @@ export const PatientAppointments = () => {
                                                 <tr key={appointment.id}>
                                                     <td>{appointment.date}</td>
                                                     <td>{appointment.hour}</td>
-                                                    <td>Dr. {appointment.doctor_name || `ID: ${appointment.id_doctor}`}</td>
-                                                    <td>{appointment.center_name || `ID: ${appointment.id_center}`}</td>
-                                                    <td>{appointment.specialty_name || `ID: ${appointment.id_specialty}`}</td>
+                                                    <td>Dr. {getDoctorName(appointment.id_doctor)}</td>
+                                                    <td>{getCenterName(appointment.id_center)}</td>
+                                                    <td>{getSpecialtyName(appointment.id_specialty)}</td>
                                                     <td>
                                                         <span className={`badge ${
                                                             appointment.confirmation === "confirmed" ? "bg-success" :
@@ -367,7 +387,7 @@ export const PatientAppointments = () => {
             {/* Añadir estilos personalizados para el resaltado */}
             <style>{`
                 .nav-link.active {
-                    background-color: #f0faff !important;
+                    backgroundColor: #f0faff !important;
                     color: #000 !important;
                 }
             `}</style>

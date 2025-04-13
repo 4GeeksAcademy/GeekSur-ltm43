@@ -25,6 +25,10 @@ export const DoctorAppointment = () => {
         } else {
             console.log("Cargando citas para el doctor con token:", localStorage.getItem("tokendoctor"));
             actions.getDoctorAppointments();
+            // Cargar datos de pacientes, centros médicos y especialidades
+            actions.getPatients();
+            actions.getMedicalCenters();
+            actions.getSpecialties();
         }
     }, []);
 
@@ -39,7 +43,23 @@ export const DoctorAppointment = () => {
 
     const doctor = store.doctorPanelData?.doctor;
     const doctorName = doctor ? `${doctor.first_name} ${doctor.last_name}` : "Doctor";
-    const doctorLocation = doctor?.city ? `${doctor.city}, ${doctor.country || 'CA'}` : "San Francisco, CA"; // Renombramos a doctorLocation
+    const doctorLocation = doctor?.city ? `${doctor.city}, ${doctor.country || 'CA'}` : "San Francisco, CA";
+
+    // Funciones para mapear IDs a nombres
+    const getPatientName = (patientId) => {
+        const patient = store.patients.find(p => p.id === patientId);
+        return patient ? `${patient.first_name} ${patient.last_name}` : `Paciente ${patientId}`;
+    };
+
+    const getCenterName = (centerId) => {
+        const center = store.medicalCenters.find(c => c.id === centerId);
+        return center ? center.name : `Centro ${centerId}`;
+    };
+
+    const getSpecialtyName = (specialtyId) => {
+        const specialty = store.specialties.find(s => s.id === specialtyId);
+        return specialty ? specialty.name : `Especialidad ${specialtyId}`;
+    };
 
     return (
         <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f0faff" }}>
@@ -145,25 +165,25 @@ export const DoctorAppointment = () => {
                 </ul>
                 <hr />
                 <button
-                            onClick={handleLogout}
-                            className="btn d-flex align-items-center"
-                            style={{
-                                backgroundColor: "#97dbe7",
-                                color: "#000",
-                                minWidth: "100px",
-                                whiteSpace: "nowrap",
-                                padding: "10px",
-                                borderRadius: "5px",
-                                fontWeight: "500",
-                                whiteSpace: "nowrap",
-                                width: "fit-content",
-                                maxWidth: "100%",
-                                margin: "0 auto",
-                            }}
-                        >
-                            <i className="bi bi-box-arrow-right me-2 fs-5"></i>
-                            Cerrar Sesión
-                        </button>
+                    onClick={handleLogout}
+                    className="btn d-flex align-items-center"
+                    style={{
+                        backgroundColor: "#97dbe7",
+                        color: "#000",
+                        minWidth: "100px",
+                        whiteSpace: "nowrap",
+                        padding: "10px",
+                        borderRadius: "5px",
+                        fontWeight: "500",
+                        whiteSpace: "nowrap",
+                        width: "fit-content",
+                        maxWidth: "100%",
+                        margin: "0 auto",
+                    }}
+                >
+                    <i className="bi bi-box-arrow-right me-2 fs-5"></i>
+                    Cerrar Sesión
+                </button>
             </div>
 
             {/* Contenido principal con margen para el sidebar fijo */}
@@ -182,7 +202,7 @@ export const DoctorAppointment = () => {
                         <div className="d-flex align-items-center position-relative">
                             <span className="text-dark me-3" style={{ opacity: 0.8 }}>
                                 <i className="bi bi-geo-alt me-1"></i>
-                                {doctorLocation} - {currentTime} {/* Usamos doctorLocation */}
+                                {doctorLocation} - {currentTime}
                             </span>
                             {doctor?.url && (
                                 <div>
@@ -245,9 +265,9 @@ export const DoctorAppointment = () => {
                                             <p className="card-text" style={{ color: "#000" }}>
                                                 <strong>Fecha:</strong> {appointment.date}<br />
                                                 <strong>Hora:</strong> {appointment.hour}<br />
-                                                <strong>Paciente ID:</strong> {appointment.id_patient}<br />
-                                                <strong>Centro ID:</strong> {appointment.id_center}<br />
-                                                <strong>Especialidad ID:</strong> {appointment.id_specialty}<br />
+                                                <strong>Paciente:</strong> {getPatientName(appointment.id_patient)}<br />
+                                                <strong>Centro Médico:</strong> {getCenterName(appointment.id_center)}<br />
+                                                <strong>Especialidad:</strong> {getSpecialtyName(appointment.id_specialty)}<br />
                                                 <strong>Estado:</strong> {appointment.confirmation}
                                             </p>
                                             <div className="d-flex gap-2">

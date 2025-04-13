@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
-import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
+import { useNavigate, useParams, Link, useLocation, Navigate } from "react-router-dom";
 import logo from "../../img/logo.png";
 
 export const RateAppointment = () => {
@@ -42,6 +42,9 @@ export const RateAppointment = () => {
                     date: appointment.date,
                 });
             }
+            // Cargar datos de doctores y centros médicos
+            actions.getDoctors();
+            actions.getMedicalCenters();
         }
     }, []);
 
@@ -84,6 +87,17 @@ export const RateAppointment = () => {
 
     const patient = store.currentPatient;
     const patientLocation = patient?.city ? `${patient.city}, ${patient.country || 'CA'}` : "San Francisco, CA";
+
+    // Funciones para mapear IDs a nombres
+    const getDoctorName = (doctorId) => {
+        const doctor = store.doctors.find(d => d.id === doctorId);
+        return doctor ? `${doctor.first_name} ${doctor.last_name}` : `Doctor ${doctorId}`;
+    };
+
+    const getCenterName = (centerId) => {
+        const center = store.medicalCenters.find(c => c.id === centerId);
+        return center ? center.name : `Centro ${centerId}`;
+    };
 
     return (
         <>
@@ -284,27 +298,35 @@ export const RateAppointment = () => {
                             <form onSubmit={handleSubmit}>
                                 <div className="row mb-3">
                                     <div className="col-md-4">
-                                        <label className="form-label">Doctor ID:</label>
+                                        <label className="form-label">Doctor:</label>
                                         <input
-                                            type="number"
+                                            type="text"
                                             className="form-control"
-                                            name="id_doctor"
-                                            value={reviewData.id_doctor}
-                                            onChange={handleInputChange}
+                                            value={getDoctorName(reviewData.id_doctor)}
                                             disabled
                                             style={{ border: "1px solid #000" }}
                                         />
+                                        {/* Campo oculto para enviar el id_doctor */}
+                                        <input
+                                            type="hidden"
+                                            name="id_doctor"
+                                            value={reviewData.id_doctor}
+                                        />
                                     </div>
                                     <div className="col-md-4">
-                                        <label className="form-label">Centro ID:</label>
+                                        <label className="form-label">Centro Médico:</label>
                                         <input
-                                            type="number"
+                                            type="text"
                                             className="form-control"
-                                            name="id_center"
-                                            value={reviewData.id_center}
-                                            onChange={handleInputChange}
+                                            value={getCenterName(reviewData.id_center)}
                                             disabled
                                             style={{ border: "1px solid #000" }}
+                                        />
+                                        {/* Campo oculto para enviar el id_center */}
+                                        <input
+                                            type="hidden"
+                                            name="id_center"
+                                            value={reviewData.id_center}
                                         />
                                     </div>
                                     <div className="col-md-4">
@@ -367,7 +389,7 @@ export const RateAppointment = () => {
             {/* Estilos CSS */}
             <style>{`
                 .nav-link.active {
-                    background-color: #f0faff !important;
+                    backgroundColor: #f0faff !important;
                     color: #000 !important;
                 }
             `}</style>
