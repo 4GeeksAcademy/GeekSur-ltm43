@@ -128,10 +128,11 @@ export const PatientAppointments = () => {
                                     Buscar Profesional
                                 </Link>
                             </li>
-                            <Link
+                            <li>
+                                <Link
                                     to="/ai-consultation"
                                     className={`nav-link text-white d-flex align-items-center ${
-                                      location.pathname === "/ai-consultation" ? "active" : ""
+                                        location.pathname === "/ai-consultation" ? "active" : ""
                                     }`}
                                     style={{
                                         padding: "10px 0",
@@ -142,7 +143,7 @@ export const PatientAppointments = () => {
                                     <i className="bi bi-person me-2 fs-5" style={{ marginLeft: "15px" }}></i>
                                     Habla Con Boti IA
                                 </Link>
-
+                            </li>
                         </ul>
                         <hr />
                         <button
@@ -156,10 +157,10 @@ export const PatientAppointments = () => {
                                 padding: "10px",
                                 borderRadius: "5px",
                                 fontWeight: "500",
-                                 whiteSpace: "nowrap",
-                                 width: "fit-content",
-                                 maxWidth: "100%",
-                                 margin: "0 auto",
+                                whiteSpace: "nowrap",
+                                width: "fit-content",
+                                maxWidth: "100%",
+                                margin: "0 auto",
                             }}
                         >
                             <i className="bi bi-box-arrow-right me-2 fs-5"></i>
@@ -187,7 +188,7 @@ export const PatientAppointments = () => {
                                     <i className="bi bi-geo-alt me-1"></i>
                                     {patientLocation} - {currentTime}
                                 </span>
-                                {patient?.url && (
+                                {patient?.url ? (
                                     <div>
                                         <img
                                             src={patient.url}
@@ -218,17 +219,60 @@ export const PatientAppointments = () => {
                                                     onClick={handleLogout}
                                                     className="btn d-flex align-items-center"
                                                     style={{
-                                                        backgroundColor: "#97dbe7",
+                                                        padding: "10px 20px",
                                                         color: "#000",
-                                                        minWidth: "100px",
-                                                        whiteSpace: "nowrap",
-                                                        padding: "10px",
-                                                        borderRadius: "5px",
-                                                        fontWeight: "500",
-                                                         whiteSpace: "nowrap",
-                                                         width: "fit-content",
-                                                         maxWidth: "100%",
-                                                         margin: "0 auto",
+                                                        border: "none",
+                                                        background: "none",
+                                                        width: "100%",
+                                                        textAlign: "left",
+                                                    }}
+                                                >
+                                                    <i className="bi bi-box-arrow-right me-2"></i>
+                                                    Cerrar Sesión
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div
+                                        style={{
+                                            width: "40px",
+                                            height: "40px",
+                                            borderRadius: "50%",
+                                            backgroundColor: "#97dbe7",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            color: "#fff",
+                                            fontWeight: "bold",
+                                            cursor: "pointer",
+                                        }}
+                                        onClick={() => setShowDropdown(!showDropdown)}
+                                    >
+                                        {patientName.charAt(0).toUpperCase()}
+                                        {showDropdown && (
+                                            <div
+                                                style={{
+                                                    position: "absolute",
+                                                    top: "50px",
+                                                    right: "0",
+                                                    backgroundColor: "#fff",
+                                                    border: "1px solid #dee2e6",
+                                                    borderRadius: "5px",
+                                                    boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+                                                    zIndex: 1000,
+                                                }}
+                                            >
+                                                <button
+                                                    onClick={handleLogout}
+                                                    className="btn d-flex align-items-center"
+                                                    style={{
+                                                        padding: "10px 20px",
+                                                        color: "#000",
+                                                        border: "none",
+                                                        background: "none",
+                                                        width: "100%",
+                                                        textAlign: "left",
                                                     }}
                                                 >
                                                     <i className="bi bi-box-arrow-right me-2"></i>
@@ -277,11 +321,9 @@ export const PatientAppointments = () => {
                                                         <span className={`badge ${
                                                             appointment.confirmation === "confirmed" ? "bg-success" :
                                                             appointment.confirmation === "pending" ? "bg-warning" :
-                                                            // appointment.confirmation === "cancelled" ? "bg-danger" : "bg-secondary"
                                                             appointment.confirmation === "false" ? "bg-danger" : "bg-secondary"
-                                                                                                                       
                                                         }`}>
-                                                             {appointment.confirmation === "false" ? "Pendiente" : appointment.confirmation}
+                                                            {appointment.confirmation === "false" ? "Pendiente" : appointment.confirmation}
                                                         </span>
                                                     </td>
                                                     <td>
@@ -315,9 +357,7 @@ export const PatientAppointments = () => {
                             </div>
                         )}
 
-                        <div className="mt-4">
-
-                        </div>
+                        <div className="mt-4"></div>
                     </div>
                 </div>
             ) : (

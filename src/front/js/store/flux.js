@@ -263,22 +263,20 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-            createPatient: async (patientData) => {
+            createPatient: async (formData) => {
                 try {
                     const resp = await fetch(process.env.BACKEND_URL + "/api/patients", {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(patientData),
+                        body: formData,
                     });
+            
+                    const responseData = await resp.json();
                     if (!resp.ok) {
-                        const errorText = await resp.text();
-                        throw new Error(`Error creating patient: ${resp.status} - ${errorText}`);
+                        throw new Error(responseData.msg || "Error creating patient");
                     }
-                    const data = await resp.json();
+            
                     getActions().getPatients(); // Refrescar la lista
-                    return data;
+                    return responseData;
                 } catch (error) {
                     console.log("Error creating patient:", error.message);
                     throw error;

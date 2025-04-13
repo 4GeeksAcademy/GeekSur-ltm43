@@ -2,11 +2,12 @@ import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Context } from "../store/appContext";
 import logo from "../../img/meedgeeknegro.png";
-import login_patient from "../../img/Login_Patient.jpg";  
+import login_patient from "../../img/Login_Patient.jpg";
 import "../../styles/signup.css";
 
 export const SignupPatient = () => {
     const { actions } = useContext(Context);
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: "",
         first_name: "",
@@ -15,18 +16,38 @@ export const SignupPatient = () => {
         birth_date: "",
         phone_number: "",
         password: "",
-        historial_clinico: ""
+        historial_clinico: "",
     });
-    const navigate = useNavigate();
+    const [photo, setPhoto] = useState(null); // Estado para la imagen
+    const [error, setError] = useState(""); // Estado para manejar errores
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleFileChange = (e) => {
+        setPhoto(e.target.files[0]); // Guardar el archivo seleccionado
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(""); // Limpiar errores previos
+
         try {
-            await actions.createPatient(formData);
+            const data = new FormData();
+            data.append("email", formData.email);
+            data.append("first_name", formData.first_name);
+            data.append("last_name", formData.last_name);
+            data.append("gender", formData.gender);
+            data.append("birth_date", formData.birth_date);
+            data.append("phone_number", formData.phone_number);
+            data.append("password", formData.password);
+            data.append("historial_clinico", formData.historial_clinico);
+            if (photo) {
+                data.append("photo", photo); // Agregar la imagen si existe
+            }
+
+            await actions.createPatient(data);
             setFormData({
                 email: "",
                 first_name: "",
@@ -35,34 +56,34 @@ export const SignupPatient = () => {
                 birth_date: "",
                 phone_number: "",
                 password: "",
-                historial_clinico: ""
+                historial_clinico: "",
             });
+            setPhoto(null); // Limpiar el campo de la imagen
             alert("Paciente registrado exitosamente");
             navigate("/loginpatient");
         } catch (error) {
-            alert("Error: " + error.message);
+            setError(error.message || "Error al registrar paciente");
+            console.error("Error al registrar paciente:", error.message);
         }
     };
 
     return (
         <div className="container_register">
-
-        {/* Columna 1 vacía */}
-        <div className="col empty-col"></div>
+            {/* Columna 1 vacía */}
+            <div className="col empty-col"></div>
 
             <div className="left">
                 <div className="signup-info">
                     <div className="logo-container">
                         <img src={login_patient} alt="MedGeek Login" className="login-image" />
                     </div>
-
                 </div>
             </div>
+
             <div className="right">
                 <h3>Favor Llenar Formulario</h3>
-
                 <div className="signup-form">
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} encType="multipart/form-data">
                         <input
                             type="email"
                             name="email"
@@ -126,19 +147,25 @@ export const SignupPatient = () => {
                             onChange={handleChange}
                             placeholder="Historial Clínico (opcional)"
                         />
-
+                        <div className="signup-form-input">
+                            <label>Foto de perfil (opcional):</label>
+                            <input
+                                type="file"
+                                name="photo"
+                                onChange={handleFileChange}
+                                accept="image/*"
+                            />
+                        </div>
                         <div className="button-container">
                             <button type="submit" className="signup-form-button">Guardar</button>
-
                         </div>
-
-
                     </form>
-               
-                               </div>
+                    {error && <p style={{ color: "red" }}>{error}</p>}
+                </div>
             </div>
-                        {/* Columna 1 vacía */}
-                        <div className="col empty-col"></div>
+
+            {/* Columna 1 vacía */}
+            <div className="col empty-col"></div>
         </div>
     );
 };
