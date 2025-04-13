@@ -90,13 +90,8 @@ export const Home = () => {
                         <div className="card text-center" style={{ backgroundColor: '#9de3f0', border: 'none' }}>
                             <div className="card-header">
                                 <ul className="nav nav-tabs card-header-tabs">
-                                    {/* <li className="nav-item">
-                                        <a className="nav-link active" aria-current="true" href="#">Turno presencial</a>
-                                    </li> */}
                                     <li className="nav-item">
-                                        <Link to="/search-professionals" className="nav-link active" aria-current="true">
-                                            Turno presencial
-                                        </Link>
+                                        <a className="nav-link active" aria-current="true" href="#">Turno presencial</a>
                                     </li>
                                 </ul>
                             </div>
@@ -104,31 +99,11 @@ export const Home = () => {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
                                     <input type="text" placeholder="especialidad, enfermedad o nombre" style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '5px', width: '60%' }} />
                                     <select style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '5px', width: '30%' }}>
-                                        <option>Buscar</option>
-                                        <option>Chile</option>
-                                        <option>Argentina</option>
-                                        <option>Velenzuela</option>
+                                        <option>Capital Federal</option>
                                     </select>
-                                    {/* <button  style={{ backgroundColor: '#4285f4', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', width: '20%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    <button style={{ backgroundColor: '#4285f4', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', width: '20%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                         <i className="fas fa-search"></i>
-                                    </button> */}
-                                    <Link
-                                        to="/search-professionals"
-                                        style={{
-                                            backgroundColor: '#4285f4',
-                                            color: 'white',
-                                            border: 'none',
-                                            padding: '10px 20px',
-                                            borderRadius: '5px',
-                                            width: '20%',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            textDecoration: 'none',
-                                        }}
-                                        >
-                                        <i className="fas fa-search"></i>
-                                        </Link>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -226,6 +201,7 @@ export const Home = () => {
                             fontWeight: 'bold',
                             cursor: 'pointer',
                             transition: 'background-color 0.3s',
+                            margin: '10px'
                         }}
                         onMouseOver={(e) => e.target.style.backgroundColor = '#168a9c'}
                         onMouseOut={(e) => e.target.style.backgroundColor = '#1ca9bb'}
@@ -236,7 +212,7 @@ export const Home = () => {
                     <Link to="/reviews">
                         <button
                             style={{
-                                backgroundColor: '#1CA9BB',
+                                backgroundColor: '#1ca9bb',
                                 color: 'white',
                                 border: 'none',
                                 padding: '15px 30px',
@@ -245,16 +221,16 @@ export const Home = () => {
                                 fontWeight: 'bold',
                                 cursor: 'pointer',
                                 transition: 'background-color 0.3s',
-                                margin: 'auto',
+                                margin: '10px'
                             }}
-                            onMouseOver={(e) => e.target.style.backgroundColor = '#168A9C'}
-                            onMouseOut={(e) => e.target.style.backgroundColor = '#1CA9BB'}
+                            onMouseOver={(e) => e.target.style.backgroundColor = '#168a9c'}
+                            onMouseOut={(e) => e.target.style.backgroundColor = '#1ca9bb'}
                         >
                             Nuestra reseñas
-                                        </button>
-                        </Link>
-
+                        </button>
+                    </Link>
                 </Link>
+                
             </section>
         </div>
     );

@@ -38,6 +38,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             appointmentSuccessMessage: null,
             tokenpatient: null,
             authPatient: false,
+            error: null,
             currentPatient: null,
             dashboardPatientData: null,
             loginPatientError: null,
@@ -68,6 +69,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             doctorAppointments: [],
             patientAppointments: [],
             patientAppointmentError: null,
+            doctorAppointmentsChartData: null,
         },
         actions: {
             updatePatientProfile: async (patientData) => {
@@ -322,6 +324,35 @@ const getState = ({ getStore, getActions, setStore }) => {
 
             ///////////////////Beguin Patients appointment and review/////////////////////////////////
 
+            getPatientData: async () => {
+                try {
+                    const token = localStorage.getItem("tokenpatient");
+                    if (!token) {
+                        setStore({ currentPatient: null, authPatient: false, error: "No hay token" });
+                        return;
+                    }
+            
+                    const response = await fetch(`${process.env.BACKEND_URL}/api/patient/profile`, {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+            
+                    const data = await response.json();
+                    if (!response.ok) {
+                        setStore({ currentPatient: null, error: data.msg || "Error al obtener datos del paciente" });
+                        return;
+                    }
+            
+                    setStore({ currentPatient: data.patient, error: null });
+                } catch (error) {
+                    console.error("Error fetching patient data:", error);
+                    setStore({ currentPatient: null, error: "Error al obtener datos del paciente" });
+                }
+            },
+            
+            
             getPatientAppointments: async () => {
                 try {
                     const token = localStorage.getItem("tokenpatient");
@@ -460,21 +491,56 @@ const getState = ({ getStore, getActions, setStore }) => {
 
             getDoctorAppointments: async () => {
                 try {
+                    const token = localStorage.getItem("tokendoctor");
+                    if (!token) {
+                        setStore({ doctorAppointments: [], doctorAppointmentsChartData: null, error: "No hay token, por favor inicia sesión" });
+                        return;
+                    }
+            
                     const response = await fetch(`${process.env.BACKEND_URL}/api/doctor/appointments`, {
                         method: "GET",
                         headers: {
-                            Authorization: `Bearer ${localStorage.getItem("tokendoctor")}`,
+                            Authorization: `Bearer ${token}`,
                         },
                     });
+            
                     const data = await response.json();
-                    if (response.ok) {
-                        setStore({ doctorAppointments: data.appointments });
-                    } else {
-                        setStore({ doctorAppointments: [], error: data.msg });
+                    if (!response.ok) {
+                        setStore({ doctorAppointments: [], doctorAppointmentsChartData: null, error: data.msg || "Error al obtener citas" });
+                        return;
                     }
+            
+                    // Agrupar citas por día
+                    const appointmentsByDay = data.appointments.reduce((acc, appointment) => {
+                        const date = new Date(appointment.date).toLocaleDateString("es-ES", {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                        });
+                        acc[date] = (acc[date] || 0) + 1;
+                        return acc;
+                    }, {});
+            
+                    // Ordenar fechas para el gráfico
+                    const sortedDates = Object.keys(appointmentsByDay).sort((a, b) => {
+                        const dateA = new Date(a.split("/").reverse().join("-"));
+                        const dateB = new Date(b.split("/").reverse().join("-"));
+                        return dateA - dateB;
+                    });
+            
+                    const chartData = {
+                        labels: sortedDates,
+                        values: sortedDates.map((date) => appointmentsByDay[date]),
+                    };
+            
+                    setStore({
+                        doctorAppointments: data.appointments,
+                        doctorAppointmentsChartData: chartData,
+                        error: null,
+                    });
                 } catch (error) {
                     console.error("Error fetching doctor appointments:", error);
-                    setStore({ doctorAppointments: [], error: "Error fetching appointments" });
+                    setStore({ doctorAppointments: [], doctorAppointmentsChartData: null, error: "Error al obtener citas" });
                 }
             },
 
