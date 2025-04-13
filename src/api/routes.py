@@ -437,7 +437,7 @@ def create_patient():
 
 @api.route('/patients/<int:id>', methods=['DELETE'])
 def delete_patient(id):
-    # Busca el paciente por ID
+    
     patient = Patient.query.get_or_404(id)
     
     # Elimina el paciente de la base de datos
