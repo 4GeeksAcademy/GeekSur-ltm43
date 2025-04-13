@@ -8,6 +8,10 @@ const Reviews = () => {
 
     useEffect(() => {
         actions.getReviews();
+        // Cargar datos de doctores, pacientes y centros médicos
+        actions.getDoctors();
+        actions.getPatients();
+        actions.getMedicalCenters();
     }, []);
 
     const renderStars = (rating) => {
@@ -23,6 +27,22 @@ const Reviews = () => {
             );
         }
         return stars;
+    };
+
+    // Funciones para mapear IDs a nombres
+    const getDoctorName = (doctorId) => {
+        const doctor = store.doctors.find(d => d.id === doctorId);
+        return doctor ? `${doctor.first_name} ${doctor.last_name}` : `Doctor ${doctorId}`;
+    };
+
+    const getPatientName = (patientId) => {
+        const patient = store.patients.find(p => p.id === patientId);
+        return patient ? `${patient.first_name} ${patient.last_name}` : `Paciente ${patientId}`;
+    };
+
+    const getCenterName = (centerId) => {
+        const center = store.medicalCenters.find(c => c.id === centerId);
+        return center ? center.name : `Centro ${centerId}`;
     };
 
     return (
@@ -64,13 +84,13 @@ const Reviews = () => {
                                         <strong>Comentarios:</strong> {review.comments || 'Sin comentarios'}
                                     </p>
                                     <p style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>
-                                        <strong>Doctor ID:</strong> {review.id_doctor}
+                                        <strong>Doctor:</strong> {getDoctorName(review.id_doctor)}
                                     </p>
                                     <p style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>
-                                        <strong>Paciente ID:</strong> {review.id_patient}
+                                        <strong>Paciente:</strong> {getPatientName(review.id_patient)}
                                     </p>
                                     <p style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>
-                                        <strong>Centro ID:</strong> {review.id_center}
+                                        <strong>Centro Médico:</strong> {getCenterName(review.id_center)}
                                     </p>
                                 </div>
                             </div>
