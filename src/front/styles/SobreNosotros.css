@@ -21,8 +21,9 @@
 }
 
 .hero p {
-    font-size: 18px;
+    font-size: 15px;
     margin-bottom: 30px;
+    color:#0000006e
 }
 
 .badges {
@@ -99,12 +100,16 @@
     font-family: "Poppins", sans-serif;
     font-weight: 800;
     display: flex;
-    margin-left: 15%;
+    font-size: 45px;
+    color: #2a9aa4;
 }
 
 .story p {
-    font-size: 16px;
-    line-height: 1.7;
+    font-size: 17px;
+    line-height: 1.9;
+    color:#0000008a ;
+    text-align: justify;
+
 }
 
 .services {
@@ -121,15 +126,17 @@
 }
 
 .service-card {
-    background-color: #ffffff; /* Fondo blanco */
+    background-color: #70c6d6; 
     padding: 20px;
     border-radius: 15px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    
 }
 
 .service-card h3 {
     margin-top: 10px;
     font-size: 18px;
+    
 }
 
 .team {
@@ -144,6 +151,8 @@
     font-weight: 800;
     display: flex;
     margin-left: 15%;
+    font-size: 45px;
+    color: #2a9aa4;
 }
 
 .team-grid {
@@ -163,7 +172,7 @@
     height: 300px;
     object-fit: cover;
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background-color: transparent;
 }
 
 .member h3 {
