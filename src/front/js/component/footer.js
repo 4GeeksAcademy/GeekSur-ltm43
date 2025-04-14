@@ -1,5 +1,6 @@
 import React from 'react';
 import logo from '../../img/logo.png';
+import { Link } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaLinkedinIn } from 'react-icons/fa'; 
 
 
@@ -13,12 +14,10 @@ import { FaFacebookF, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
                     <p>tumedico@gmail.com</p>
                 </div>
                 <div className="footer-section">
-                    <h3>Page</h3>
+                    <h3>Pagina</h3>
                     <ul>
-                        <li><a href="#">About us</a></li>
-                        <li><a href="#">Contact us</a></li>
-                        <li><a href="#">News and Blog</a></li>
-                        <li><a href="#">Meet a Team</a></li>
+                    <li><Link to="/sobre-nosotros">Sobre Nosotros</Link></li>
+                    <li><Link to="/contactanos">Contactanos</Link></li>
                     </ul>
                 </div>
                 <div className="footer-section">
@@ -26,10 +25,9 @@ import { FaFacebookF, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
                     <ul>
                         <li><a href="#">Sign up</a></li>
                         <li><a href="#">Sign in</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms</a></li>
-                        <li><a href="#">Cookie</a></li>
-                        <li><a href="#">Support</a></li>
+                        <li><a href="#">Terminos</a></li>
+                        <li><a href="#">Cookies</a></li>
+                        <li><a href="#">Soporte</a></li>
                     </ul>
                 </div>
                 <div className="footer-section" > 
@@ -45,8 +43,7 @@ import { FaFacebookF, FaInstagram, FaLinkedinIn } from 'react-icons/fa';
                 <p>Copyrights © 2025. Build by Alejandro A, Saray R, Oscar V.</p>
                 <div className="footer-bottom-links">
                     <a href="#">Privacy policy</a>
-                    <a href="#">Terms and conditions</a>
-                    <a href="#">Refund policy</a>
+                    <a href="#">Terminos y condiciones</a>
                 </div>
             </div>
         </footer>

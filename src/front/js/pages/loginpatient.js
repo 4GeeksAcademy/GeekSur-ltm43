@@ -22,70 +22,65 @@ export const LoginPatient = () => {
   };
 
   return (
-    <div className="login-grid">
-      
-      {/* Columna 1 vacía */}
-      <div className="col empty-col"></div>
-  
-      {/* Columna 2: Imagen */}
-      <div className="col image-col">
-        <div className="login-image-container">
-          <img src={login_patient} alt="MedGeek Login" className="login-image" />
+      <div className="login-container">
+        <div className="login-card">
+          {/* Imagen ilustrada */}
+          <div className="login-illustration">
+            <img src={login_patient} alt="Login Illustration" />
+          </div>
+    
+          {/* Formulario */}
+          <div className="login-form-side">
+            <div className="login-form">
+              <div className="logo-container">
+                <img src={logo} alt="MedGeek Logo" className="logo" />
+              </div>
+    
+              <h2>Bienvenido!</h2>
+              <p>Nuevo aquí? <Link to="/signuppatient">Crear una cuenta</Link></p>
+    
+              <form onSubmit={handleSubmit}>
+                <div>
+                  <label>Email:</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label>Contraseña:</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <label>
+                    <input type="checkbox" /> Recuérdame
+                  </label>
+                  <Link to="/forgotpassword" style={{ fontSize: '0.9rem' }}>Olvidaste tu contraseña?</Link>
+                </div>
+    
+                <button type="submit" className="sent">Login</button>
+              </form>
+    
+              {store.loginPatientError && (
+                <p className="error">{store.loginPatientError}</p>
+              )}
+    
+              <div className="login-buttons">
+                <div className="social-button google">Iniciar con Google</div>
+                <div className="social-button facebook">Iniciar con Facebook</div>
+              </div>
+    
+              <p className="copyright">©2025 MedGeek.</p>
+            </div>
+          </div>
         </div>
       </div>
-  
-      {/* Columna 3: Formulario */}
-      <div className="col form-col">
-        <div className="login-form">
-          <div className="logo-container">
-            <img src={logo} alt="MedGeek Logo" className="logo" />
-          </div>
-
-          <h2>
-            Mi Portal: <strong>Pacientes</strong>
-          </h2>
-          <p>Ingresa tu Email y Clave para iniciar sesión</p>
-  
-          <form onSubmit={handleSubmit}>
-            <div>
-              <label>Email:</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label>Contraseña:</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <button type="submit" className="sent">Login</button>
-          </form>
-  
-          {store.loginPatientError && (
-            <p className="error">{store.loginPatientError}</p>
-          )}
-  
-          <div className="login-buttons">
-            <p className="register-message">
-              ¿No tiene cuenta? Favor haga clic en{" "}
-              <Link to="/signuppatient" className="register-link">
-                registrarse
-              </Link>
-            </p>
-          </div>
-        </div>
-      </div>
-  
-      {/* Columna 4 vacía */}
-      <div className="col empty-col"></div>
-  
-    </div>
-  );
-};
+    );
+  }   

@@ -1081,19 +1081,22 @@ def searchdoctor():
     list_specialties = Specialties.query.all()
     obj_all_specialties = [specialty.serialize() for specialty in list_specialties]
 
-    filtered_specialties = list(filter(lambda x: data["specialty"].lower() in x['name'].lower(), obj_all_specialties))
-    print(filtered_specialties)
-    if len(filtered_specialties) == 0:
-        return jsonify({"msg": "No specialties found"}), 404
-    if len(filtered_specialties) > 0 and data["name"] == "":
-        return jsonify({"results": filtered_specialties[0]["specialties"]}), 200
-    elif len(filtered_specialties) > 0 and data["name"] != "":
-        filtered_professional = list(filter(lambda x: data["name"].lower() in x["info_doctor"]["first_name"].lower() or data["name"].lower() in x["info_doctor"]["last_name"].lower(), filtered_specialties[0]["specialties"]))
-        return jsonify({"results": filtered_professional}), 200
+    if data["specialty"] != "":
+
+        filtered_specialties = list(filter(lambda x: data["specialty"].lower() == x['name'].lower(), obj_all_specialties))
+     
+        if len(filtered_specialties) == 0:
+            return jsonify({"msg": "No specialties found"}), 404
+        if len(filtered_specialties) > 0 and data["name"] == "":
+            return jsonify({"results": filtered_specialties[0]["specialties"]}), 200
+        elif len(filtered_specialties) > 0 and data["name"] != "":
+            filtered_professional = list(filter(lambda x: data["name"].lower() in x["info_doctor"]["first_name"].lower() or data["name"].lower() in x["info_doctor"]["last_name"].lower(), filtered_specialties[0]["specialties"]))
+            return jsonify({"results": filtered_professional}), 200
     else:
         map_specialties = list(chain(*map(lambda x: x["specialties"], obj_all_specialties)))
         filtered_results = list(filter(lambda x: data["name"].lower() in x["info_doctor"]["first_name"].lower() or data["name"].lower() in x["info_doctor"]["last_name"].lower() , map_specialties))
         return jsonify({"results":filtered_results}), 200
+
   
     
 
@@ -1885,6 +1888,7 @@ def update_patient_profile():
 
 
     
+
 
 
 

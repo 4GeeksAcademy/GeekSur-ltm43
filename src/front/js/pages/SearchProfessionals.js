@@ -6,21 +6,56 @@ import logo from "../../img/meedgeeknegro.png";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function SearchProfessionals() {
-    const { store, actions } = useContext(Context);
-    const { medicalCenterLocations, specialties } = store;
-    const [selectedLocation, setSelectedLocation] = useState("");
-    const [selectedSpecialty, setSelectedSpecialty] = useState("");
-    const [selectedCity, setSelectedCity] = useState("");
-    const [searchResults, setSearchResults] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const navigate = useNavigate();
-    const location = useLocation();
-    
-    const [currentTime, setCurrentTime] = useState(
-        new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    );
-    const [showDropdown, setShowDropdown] = useState(false);
+  const { store, actions } = useContext(Context);
+  const { medicalCenterLocations, specialties } = store;
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [selectedSpecialty, setSelectedSpecialty] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const searchParams = location.state;
+
+  const [currentTime, setCurrentTime] = useState(
+    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  );
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    actions.getMedicalCenterLocations();
+    actions.getSpecialties();
+
+    if (!store.authPatient && !localStorage.getItem("tokenpatient")) {
+      navigate("/loginpatient");
+    }
+  }, []);
+
+  // Ejecutar búsqueda automáticamente si hay datos del Home
+  useEffect(() => {
+    if (searchParams) {
+      const { country, specialty, city } = searchParams;
+      if (country) setSelectedLocation(country);
+      if (specialty) setSelectedSpecialty(specialty);
+      if (city) setSelectedCity(city);
+    }
+  }, [searchParams]);
+
+  // Cuando ya estén cargados los datos y se hayan seteado los filtros, lanza búsqueda automática
+  useEffect(() => {
+    if (selectedLocation && selectedSpecialty) {
+      handleSearch();
+    }
+  }, [selectedLocation, selectedSpecialty]);
 
     useEffect(() => {
         const interval = setInterval(() => {

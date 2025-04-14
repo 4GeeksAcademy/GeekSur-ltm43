@@ -1,4 +1,6 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import "../../styles/home.css";
 import doctor1 from "../../img/doctor1.jpg";
 import doctor2 from "../../img/doctor2.jpg";
@@ -7,67 +9,93 @@ import doctor4 from "../../img/doctor4.jpg";
 import doctor5 from "../../img/doctor5.jpg";
 import doctor6 from "../../img/doctor6.jpg";
 import doctor7 from "../../img/doctor7.jpg";
+import mifoto from "../../img/mifoto.jpg";
 import backgroundImage from '../../img/backgroundImage.jpg';
-import { Link } from "react-router-dom"; // Asegúrate de importar Link
+import { Link } from "react-router-dom";
 
 export const Home = () => {
     const containerRef = useRef(null);
+    const navigate = useNavigate();
+
+    const [nameQuery, setNameQuery] = useState("");
+    const [specialtyQuery, setSpecialtyQuery] = useState("");
+    const [results, setResults] = useState([]);
+    const [error, setError] = useState(false);
+
+
 
     const scroll = (scrollOffset) => {
         if (containerRef.current) {
             containerRef.current.scrollLeft += scrollOffset;
-        } else {
-            console.warn("containerRef.current is null.");
+        }
+    };
+
+    const handleSearch = async () => {
+        setError(false)
+
+        try {
+            const response = await fetch(process.env.BACKEND_URL + "/api/search-doctor", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ name: nameQuery, specialty: specialtyQuery })
+            });
+            console.log(response);
+
+            if (!response.ok) {
+                // const data = await response.json();
+                setError(true);
+                setResults([]);
+                return;
+            }
+            const data = await response.json();
+            if (data.results.length === 0) {
+                setError(true)
+            }
+
+
+            console.log(data.results);
+            setResults(data.results)
+
+            //   setResults()
+            // navigate("/search-professionals", {
+            //     state: {
+            //         specialty: specialtyQuery,
+            //         results: data // opcional si quieres pasar los resultados directamente
+            //     }
+            // });
+
+            //   setError(null);
+            // const queryParams = new URLSearchParams();
+            // if (nameQuery) queryParams.append("name", nameQuery);
+            // if (specialtyQuery && specialtyQuery !== "Especialidades") queryParams.append("specialty", specialtyQuery);
+
+            // const response = await fetch(`${process.env.BACKEND_URL}/search-doctor?${queryParams.toString()}`);
+            // const data = await response.json();
+
+            // if (response.ok) {
+            //     navigate("/search-professionals", { state: { results: data } });
+            // } else {
+            //     console.error("Error en la búsqueda:", data.message);
+            // }
+        } catch (error) {
+            console.error("Error al buscar profesionales:", error);
         }
     };
 
     const doctorsData = [
-        {
-            id: 1,
-            name: 'Dr. Juan Pérez',
-            specialty: 'Cardiólogo',
-            image: doctor5,
-            rating: 4.5,
-        },
-        {
-            id: 2,
-            name: 'Dra. María García',
-            specialty: 'Dermatólogo',
-            image: doctor6,
-            rating: 4.5,
-        },
-        {
-            id: 3,
-            name: 'Dra. María García',
-            specialty: 'Dermatólogo',
-            image: doctor3,
-            rating: 4.5,
-        },
-        {
-            id: 4,
-            name: 'Dra. María García',
-            specialty: 'Dermatólogo',
-            image: doctor4,
-            rating: 4.5,
-        },
-        {
-            id: 5,
-            name: 'Dra. María García',
-            specialty: 'Dermatólogo',
-            image: doctor1,
-        },
-        {
-            id: 6,
-            name: 'Dra. María García',
-            specialty: 'Dermatólogo',
-            image: doctor2,
-        },
-        {
-            id: 7,
-            name: 'Dra. María García',
-            specialty: 'Dermatólogo',
-            image: doctor7,
-        },
+        { id: 1, name: 'Dr. Juan Pérez', specialty: 'Cardiólogo', image: doctor5, rating: 4.5 },
+        { id: 2, name: 'Dra. María García', specialty: 'Dermatólogo', image: doctor6, rating: 4.5 },
+        { id: 3, name: 'Dr. Carlos Gómez', specialty: 'Pediatra', image: doctor3, rating: 4.5 },
+        { id: 4, name: 'Dra. Emily Jones', specialty: 'Cardiología', image: doctor4, rating: 4.5 },
+        { id: 5, name: 'Dr. Mario Fernández', specialty: 'Neurólogo', image: doctor1 },
+        { id: 6, name: 'Dr. Alejandro Torres', specialty: 'Traumatólogo', image: doctor2 },
+        { id: 7, name: 'Dr. Pablo Núñez', specialty: 'Ginecólogo', image: doctor7 },
+    ];
+
+    const specialties = [
+        "Cardiólogo", "Dermatólogo", "Pediatra", "Oftalmólogo", "Neurólogo", "Traumatólogo", "Ginecólogo"
     ];
 
     return (
@@ -91,17 +119,41 @@ export const Home = () => {
                             <div className="card-header">
                                 <ul className="nav nav-tabs card-header-tabs">
                                     <li className="nav-item">
-                                        <a className="nav-link active" aria-current="true" href="#">Turno presencial</a>
+                                        <span className="nav-link active">Turno presencial</span>
+                                        <span>{error ? "No se encontraron resultados para tu busqueda" : null}</span>
                                     </li>
                                 </ul>
                             </div>
                             <div className="card-body">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
-                                    <input type="text" placeholder="especialidad, enfermedad o nombre" style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '5px', width: '60%' }} />
-                                    <select style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '5px', width: '30%' }}>
-                                        <option>Capital Federal</option>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                                    <input
+                                        type="text"
+                                        placeholder="Nombre del Profesional"
+                                        value={nameQuery}
+                                        onChange={(e) => setNameQuery(e.target.value)}
+                                        style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '5px', flex: 2 }}
+                                    />
+                                    <select
+                                        value={specialtyQuery}
+                                        onChange={(e) => setSpecialtyQuery(e.target.value)}
+                                        style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '5px', flex: 1 }}
+                                    >
+                                        <option>Especialidades</option>
+                                        {specialties.map((spec, i) => (
+                                            <option key={i} value={spec}>{spec}</option>
+                                        ))}
                                     </select>
-                                    <button style={{ backgroundColor: '#4285f4', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', width: '20%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    <button
+                                        onClick={handleSearch}
+                                        style={{
+                                            backgroundColor: 'rgb(37 114 123)',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '10px 20px',
+                                            borderRadius: '5px',
+                                            flex: 0.5
+                                        }}
+                                    >
                                         <i className="fas fa-search"></i>
                                     </button>
                                 </div>
@@ -109,6 +161,62 @@ export const Home = () => {
                         </div>
                     </div>
                 </div>
+            </section>
+            <section style={{ backgroundColor: 'aliceblue', paddingTop: '40px', paddingBottom: '40px' }}>
+                {results.length > 0 && (
+                    <div style={{ backgroundColor: 'aliceblue', padding: '2rem 0', minHeight: '50vh' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+                            {results.map((item, index) => (
+                                <div
+                                    key={index}
+                                    style={{
+                                        backgroundColor: 'white',
+                                        borderRadius: '16px',
+                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                                        width: '250px',
+                                        padding: '1rem',
+                                        textAlign: 'center'
+                                    }}
+                                >
+                                    <img
+                                        src="/mifoto.jpg"
+                                        alt={`Doctor ${item.name}`}
+                                        style={{
+                                            width: '100%',
+                                            height: '200px',
+                                            objectFit: 'cover',
+                                            borderRadius: '12px',
+                                            marginBottom: '1rem'
+                                        }}
+                                    />
+                                    <div className="doctor-details">
+                                        <h3>{item.info_doctor.first_name} {item.info_doctor.last_name}</h3>
+                                        <p>{item.specialty_name}</p></div>
+                                    <p style={{ fontSize: '0.95rem', color: '#636e72', margin: '0.2rem 0 0.5rem' }}>
+                                        {item.specialty || 'Especialidad'}
+                                    </p>
+                                    <div
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            backgroundColor: '#eafaf1',
+                                            borderRadius: '8px',
+                                            padding: '0.3rem 0.6rem',
+                                            fontSize: '0.9rem',
+                                            fontWeight: 'bold',
+                                            color: '#10ac84',
+                                            marginTop: '0.5rem'
+                                        }}
+                                    >
+                                        ⭐ {item.rating || '4.8'}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
             </section>
 
             <section className="features">
@@ -230,7 +338,7 @@ export const Home = () => {
                         </button>
                     </Link>
                 </Link>
-                
+
             </section>
         </div>
     );

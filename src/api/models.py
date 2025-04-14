@@ -79,8 +79,7 @@ class Doctors(db.Model):
     def __repr__(self):
         return f'<User {self.email}>'
 
-    def serialize(self):
-        print(self.specialties)
+    def serialize(self): 
         return {
             "id": self.id,
             "email": self.email,
@@ -98,10 +97,13 @@ class Specialties_doctor(db.Model):
     id_doctor = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
 
     def serialize(self):
+        doctor = Doctors.query.get(self.id_doctor)
+       
         return {
             "id": self.id,
             "id_specialty": self.id_specialty,    
-            "id_doctor": self.id_doctor             
+            "id_doctor": self.id_doctor,
+            "info_doctor": doctor.serialize()          
         }
     
 class Specialties(db.Model):
