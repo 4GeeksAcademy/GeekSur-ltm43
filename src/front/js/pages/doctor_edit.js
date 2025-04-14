@@ -564,7 +564,7 @@ export const DoctorEdit = () => {
     );
 };
 
-// Añadir estilos personalizados para el resaltado
+// estilos personalizados para el resaltado
 const styles = `
     .nav-link.active {
         background-color: #f0faff !important; /* Color gris claro */

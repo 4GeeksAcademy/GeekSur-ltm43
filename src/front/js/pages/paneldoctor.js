@@ -44,7 +44,7 @@ export const PanelDoctor = () => {
         };
 
         loadData();
-    }, []); // Dependencias vacías para ejecutar solo al montar
+    }, []); // vacio para ejecutar solo al montar
 
     const handleLogout = () => {
         actions.logoutDoctor();
@@ -380,7 +380,7 @@ export const PanelDoctor = () => {
     );
 };
 
-// Añadir estilos personalizados para el resaltado
+// estilos personalizados para el resaltado
 const styles = `
     .nav-link.active {
         background-color: #f0faff !important;
