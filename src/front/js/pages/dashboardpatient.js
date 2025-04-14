@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate, Navigate, Link, useLocation } from "react-router-dom";
-import logo from "../../img/logo.png";
+import logo from "../../img/meedgeeknegro.png";
 import robot3D from "../../img/robot3D.png";
 
 export const DashboardPatient = () => {
@@ -15,6 +15,16 @@ export const DashboardPatient = () => {
 
     const [showDropdown, setShowDropdown] = useState(false);
     const [isLoading, setIsLoading] = useState(true); // Estado para manejar la carga
+
+    useEffect(() => {
+        console.log("Store completo:", store); // Verifica toda la estructura del store
+        console.log("Current Patient:", store.currentPatient);
+        console.log("First Name:", store.currentPatient?.first_name);
+        console.log("Token:", localStorage.getItem("tokenpatient")); 
+    }, [store, store.currentPatient]);
+
+
+
 
     // Actualizar la hora cada minuto
     useEffect(() => {
@@ -36,6 +46,13 @@ export const DashboardPatient = () => {
                     navigate("/loginpatient");
                     return;
                 }
+
+                // Ejecutar todas las acciones
+                const promises = [
+                    actions.getPatientData().then(() => console.log("GetPatientData completado")),
+
+                ];
+
 
                 console.log("Autenticación confirmada, cargando datos...");
 
@@ -65,8 +82,14 @@ export const DashboardPatient = () => {
         navigate("/loginpatient");
     };
 
-    const patient = store.currentPatient;
+    // const patient = store.currentPatient;
+    const patient = store.getPatients;
     const patientName = patient ? `${patient.first_name} ${patient.last_name}` : "Paciente";
+
+    const doctor = store.doctorPanelData?.doctor;
+    const doctorName = doctor ? `${doctor.first_name} ${doctor.last_name}` : "Doctor";
+
+
     const patientLocation = patient ? `${patient.city || "San Francisco"}, ${patient.country || "CA"}` : "San Francisco, CA";
 
     // Filtrar citas pendientes

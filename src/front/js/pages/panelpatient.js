@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate, Navigate, Link, useLocation } from "react-router-dom";
-import logo from "../../img/logo.png";
+import logo from "../../img/meedgeeknegro.png";
 
 export const PanelPatient = () => {
     const { store, actions } = useContext(Context);
@@ -340,10 +340,46 @@ export const PanelPatient = () => {
                                             <h6 style={{ color: "#000" }}>{patientName}</h6>
                                             <p className="card-text" style={{ color: "#000" }}>
                                                 <strong>Email:</strong> {patient.email}<br />
-                                                <strong>Teléfono:</strong> {patient.phone_number}
+                                                <strong>Teléfono:</strong> {patient.phone_number}<br />
+                                                <strong>Género:</strong> {
+                                                String(patient.gender).toLowerCase() === 'male' ? 'Hombre' : 
+                                                String(patient.gender).toLowerCase() === 'female' ? 'Mujer' : 
+                                                'No especificado'
+                                                }<br />
+                                                <p>
+                                                <strong>Fecha Nacimiento:</strong>{" "}
+                                                {patient.birth_date
+                                                ? new Date(patient.birth_date).toLocaleDateString("es-ES", {
+                                                    day: "2-digit",
+                                                    month: "2-digit",
+                                                    year: "numeric",
+                                                    })
+                                                : ""}
+                                                </p>
                                             </p>
                                         </div>
                                     </div>
+
+
+<div 
+                                        className="card shadow-sm"
+                                        style={{
+                                            backgroundColor: "#f8f9fa",
+                                            border: "1px solid #dee2e6",
+                                            borderRadius: "10px",
+                                        }}
+                                    >
+                                        <div className="card-body">
+                                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                                <h5 className="card-title" style={{ color: "#000" }}>Historial Clinico</h5>
+                                            </div>
+                                            <p className="card-text" style={{ color: "#000" }}>
+                                               <strong>Su Informacion:</strong> {patient.historial_clinico}
+                                            </p>
+                                        </div>
+
+                                    </div>
+
                                 </div>
 
                                 {/* Botón "Delete Account" */}

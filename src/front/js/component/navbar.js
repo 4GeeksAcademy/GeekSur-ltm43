@@ -14,10 +14,6 @@ import logo from '../../img/logo.png';
                 </li>
            
                 <li style={{ margin: '0 15px' }}>
-                    <Link to="/search-professionals" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>¿Necesitas un Medico?</Link>
-                </li>
-
-                <li style={{ margin: '0 15px' }}>
                     <Link to="/loginpatient" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>¿Eres un Paciente?</Link>
                 </li>
 

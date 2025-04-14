@@ -60,7 +60,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             addSpecialtyToDoctor: null,
             addSpecialtyToDoctor_1:null,
             getDoctorSpecialties:null,
-            doctorPanelData: null,   //oscar
+            doctorPanelData: null,  
             deleteDoctorSpecialty: null,
             addMedicalCenterDoctor: null,
             doctorSpecialties: [],
@@ -70,6 +70,8 @@ const getState = ({ getStore, getActions, setStore }) => {
             patientAppointments: [],
             patientAppointmentError: null,
             doctorAppointmentsChartData: null,
+            getUserPatient:null,
+            getPatients:null
         },
         actions: {
             updatePatientProfile: async (patientData) => {
@@ -228,8 +230,6 @@ const getState = ({ getStore, getActions, setStore }) => {
                     throw error;
                 }
             },
-
-
 
             // UPDATE A DOCTOR
             updateDoctor: async (doctorData) => {  // Quitamos el parámetro "id"
@@ -1773,6 +1773,56 @@ getMedicalCenterLocations: async () => {
         console.error("Error cargando ubicaciones únicas:", error);
     }
 },
+
+////////////////////////////se agregar Editar Data Pacient - 14-04-2025
+
+ // UPDATE A PACIENTE
+ updatePatient: async (patientData) => {  
+    try {
+        const token = localStorage.getItem("tokenpatient");
+        if (!token) throw new Error("No hay token disponible");
+
+        console.log("Datos enviados al backend:");
+        for (let [key, value] of patientData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+
+        const resp = await fetch(`${process.env.BACKEND_URL}/api/patient/profile`, {
+            method: "PUT",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+            body: patientData, // Enviar FormData directamente
+        });
+
+        const data = await resp.json();
+        console.log("Respuesta completa del backend:", data);
+
+        if (!resp.ok) {
+            throw new Error(data.msg || "Error updating Patient");
+        }
+
+        setStore({
+            getUserPatient: {
+                ...getStore().getUserPatient,
+                pacient: data.updated_patient,
+            },
+        });
+
+        await getActions().getUserPatient();
+        return data;
+    } catch (error) {
+        console.log("Error updating pacient:", error);
+        throw error;
+    }
+},
+
+
+
+
+
+
+
           
         }
     };
