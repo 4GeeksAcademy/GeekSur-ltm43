@@ -52,26 +52,38 @@ export const AIConsultation = () => {
     };
 
     return (
-        <div className="d-flex" style={{ height: "100vh", backgroundColor: "#e1faff" }}>
-            {/* Sidebar */}
-            <div className="d-flex flex-column flex-shrink-0 p-3 text-white" style={{ width: "280px", backgroundColor: "rgb(100, 191, 208)" }}>
-                <a href="/dashboardpatient" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-                    <img src={logo} alt="Logo de Mi Sitio" style={{ height: '100px', width: '100%' }} />
-                </a>
-                <hr />
-                <ul className="nav nav-pills flex-column mb-auto">
-                                    <li className="nav-item">
-                                        <Link
-                                            to="/dashboardpatient"
-                                            className={`nav-link text-white d-flex align-items-center ${
-                                                location.pathname === "/dashboardpatient" ? "active" : ""
-                                            }`}
-                                            style={{
-                                                padding: "10px 0",
-                                                margin: "0 -15px",
-                                                borderRadius: "0",
-                                            }}
-                                        >
+        <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f0faff" }}>
+                    {/* Sidebar fijo */}
+                    <div
+                        className="d-flex flex-column flex-shrink-0 py-3 text-white"
+                        style={{
+                            width: "280px",
+                            backgroundColor: "rgb(100, 191, 208)",
+                            position: "fixed",
+                            height: "100vh",
+                            overflowY: "auto",
+                        }}
+                    >
+                        <a
+                            href="/dashboardpatient"
+                            className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none"
+                        >
+                            <img src={logo} alt="Logo de Mi Sitio" style={{ height: "100px", width: "100%" }} />
+                        </a>
+                        <hr />
+                        <ul className="nav nav-pills flex-column mb-auto">
+                            <li className="nav-item">
+                                <Link
+                                    to="/dashboardpatient"
+                                    className={`nav-link text-white d-flex align-items-center ${
+                                        location.pathname === "/dashboardpatient" ? "active" : ""
+                                    }`}
+                                    style={{
+                                        padding: "10px 0",
+                                        margin: "0 -15px",
+                                        borderRadius: "0",
+                                    }}
+                                >
                                             <i className="bi bi-house-door me-2 fs-5" style={{ marginLeft: "15px" }}></i>
                                             Dashboard
                                         </Link>
