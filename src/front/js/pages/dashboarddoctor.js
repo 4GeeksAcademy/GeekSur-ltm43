@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate, Navigate, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
-import logo from "../../img/logo.png";
+import logo from "../../img/meedgeeknegro.png";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 
@@ -303,8 +303,8 @@ export const DashboardDoctor = () => {
                         {/* Header con hora dinámica y dropdown en la foto de perfil */}
                         <div className="d-flex justify-content-between align-items-center mb-4">
                             <div>
-                                <h2>Hello, {doctorName}</h2>
-                                <p className="text-muted">Here's a summary of your activity this week.</p>
+                                <h2>Hola, {doctorName}</h2>
+                                <p className="text-muted">Aquí tienes un resumen de tu actividad esta semana.</p>
                             </div>
                             <div className="d-flex align-items-center position-relative">
                                 <span className="text-dark me-3" style={{ opacity: 0.8 }}>

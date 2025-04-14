@@ -60,7 +60,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             addSpecialtyToDoctor: null,
             addSpecialtyToDoctor_1:null,
             getDoctorSpecialties:null,
-            doctorPanelData: null,   //oscar
+            doctorPanelData: null,  
             deleteDoctorSpecialty: null,
             addMedicalCenterDoctor: null,
             doctorSpecialties: [],
@@ -70,6 +70,8 @@ const getState = ({ getStore, getActions, setStore }) => {
             patientAppointments: [],
             patientAppointmentError: null,
             doctorAppointmentsChartData: null,
+            getUserPatient:null,
+            getPatients:null
         },
         actions: {
             updatePatientProfile: async (patientData) => {
@@ -126,6 +128,50 @@ const getState = ({ getStore, getActions, setStore }) => {
                 });
                 localStorage.removeItem("tokenpatient");
             },
+
+            //Accion para eliminar cuenta del paciente
+
+            deletePatientAccount: async () => {
+                const store = getStore();
+                const token = store.tokenpatient || localStorage.getItem("tokenpatient");
+                const patientId = store.currentPatient?.id;
+            
+                if (!token) {
+                    setStore({ loginPatientError: "No hay token, por favor inicia sesión" });
+                    throw new Error("No hay token disponible");
+                }
+            
+                if (!patientId) {
+                    setStore({ loginPatientError: "No se encontró el ID del paciente" });
+                    throw new Error("No se encontró el ID del paciente");
+                }
+            
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/api/patients/${patientId}`, {
+                        method: "DELETE",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    });
+            
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.msg || "Error al eliminar la cuenta");
+                    }
+            
+                    // Limpiar el estado de autenticación
+                    getActions().logoutPatient();
+            
+                    return true; // Indicar éxito
+                } catch (error) {
+                    console.error("Error al eliminar la cuenta:", error.message);
+                    setStore({ loginPatientError: error.message });
+                    throw error;
+                }
+            },
+
+
             ///////////////////START/////////////////////////////////DOCTORS////////////////////////////////////
 
             // SE CREA ACTION PARA VER LISTA DE DOCTOR EN COMPONENTE DOCTORS
@@ -184,8 +230,6 @@ const getState = ({ getStore, getActions, setStore }) => {
                     throw error;
                 }
             },
-
-
 
             // UPDATE A DOCTOR
             updateDoctor: async (doctorData) => {  // Quitamos el parámetro "id"
@@ -263,22 +307,20 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-            createPatient: async (patientData) => {
+            createPatient: async (formData) => {
                 try {
                     const resp = await fetch(process.env.BACKEND_URL + "/api/patients", {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(patientData),
+                        body: formData,
                     });
+            
+                    const responseData = await resp.json();
                     if (!resp.ok) {
-                        const errorText = await resp.text();
-                        throw new Error(`Error creating patient: ${resp.status} - ${errorText}`);
+                        throw new Error(responseData.msg || "Error creating patient");
                     }
-                    const data = await resp.json();
+            
                     getActions().getPatients(); // Refrescar la lista
-                    return data;
+                    return responseData;
                 } catch (error) {
                     console.log("Error creating patient:", error.message);
                     throw error;
@@ -331,21 +373,22 @@ const getState = ({ getStore, getActions, setStore }) => {
                         setStore({ currentPatient: null, authPatient: false, error: "No hay token" });
                         return;
                     }
-            
+
                     const response = await fetch(`${process.env.BACKEND_URL}/api/patient/profile`, {
                         method: "GET",
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     });
-            
+
                     const data = await response.json();
                     if (!response.ok) {
                         setStore({ currentPatient: null, error: data.msg || "Error al obtener datos del paciente" });
                         return;
                     }
-            
+
                     setStore({ currentPatient: data.patient, error: null });
+                    return data.patient; // Retornamos los datos para depuración
                 } catch (error) {
                     console.error("Error fetching patient data:", error);
                     setStore({ currentPatient: null, error: "Error al obtener datos del paciente" });
@@ -1019,7 +1062,11 @@ const getState = ({ getStore, getActions, setStore }) => {
                     const data = await resp.json();
                     if (!resp.ok) throw new Error(data.msg || "Error al cargar el dashboard");
 
-                    setStore({ dashboardPatientData: data.patient });
+                    // Actualizar tanto dashboardPatientData como currentPatient
+                    setStore({ 
+                        dashboardPatientData: data.patient,
+                        currentPatient: data.patient // Aseguramos que currentPatient también se actualice
+                    });
                     return data;
                 } catch (error) {
                     console.log("Error al cargar el dashboard:", error.message);
@@ -1031,6 +1078,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             // Acción para logout
             logoutPatient: () => {
                 setStore({
+                    tokenpatient: null,
                     authPatient: false,
                     currentPatient: null,
                     dashboardPatientData: null,
@@ -1053,11 +1101,18 @@ const getState = ({ getStore, getActions, setStore }) => {
                 if (token) {
                     setStore({ tokenpatient: token, authPatient: true });
                     try {
-                        await getActions().getDashboardPatient(); // Verifica el token y carga datos
+                        await getActions().getDashboardPatient();
                         console.log("Paciente autenticado correctamente");
                     } catch (error) {
-                        console.error("Token inválido, cerrando sesión:", error);
-                        getActions().logoutPatient(); // Si el token no es válido, cerrar sesión
+                        console.error("Error al validar autenticación, intentando con getPatientData:", error);
+                        // Si getDashboardPatient falla, intentamos con getPatientData
+                        try {
+                            await getActions().getPatientData();
+                            console.log("Datos del paciente cargados con getPatientData");
+                        } catch (error) {
+                            console.error("Token inválido, cerrando sesión:", error);
+                            getActions().logoutPatient();
+                        }
                     }
                 }
             },
@@ -1143,6 +1198,48 @@ const getState = ({ getStore, getActions, setStore }) => {
                     loginDoctorError: null,
                 });
                 localStorage.removeItem("tokendoctor");
+            },
+
+            //Accion para eliminar cuenta dl doctor
+
+            deleteDoctorAccount: async () => {
+                const store = getStore();
+                const token = store.tokendoctor || localStorage.getItem("tokendoctor");
+                const doctorId = store.doctorPanelData?.doctor?.id;
+            
+                if (!token) {
+                    setStore({ loginDoctorError: "No hay token, por favor inicia sesión" });
+                    throw new Error("No hay token disponible");
+                }
+            
+                if (!doctorId) {
+                    setStore({ loginDoctorError: "No se encontró el ID del doctor" });
+                    throw new Error("No se encontró el ID del doctor");
+                }
+            
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/api/doctors/${doctorId}`, {
+                        method: "DELETE",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    });
+            
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.msg || "Error al eliminar la cuenta");
+                    }
+            
+                    // Limpiar el estado de autenticación
+                    getActions().logoutDoctor();
+            
+                    return true; // Indicar éxito
+                } catch (error) {
+                    console.error("Error al eliminar la cuenta:", error.message);
+                    setStore({ loginDoctorError: error.message });
+                    throw error;
+                }
             },
 
             // Acción para cargar el token desde localStorage al iniciar la app
@@ -1425,11 +1522,27 @@ getDoctorPanel: async () => {
         const data = await resp.json();
         if (!resp.ok) throw new Error(data.error || "Error al cargar los datos del panel del doctor");
 
+        // Depurar la respuesta cruda del backend
+        console.log("Respuesta cruda de /api/paneldoctor:", data);
+
+        // Transformar specialties y medical_centers en listas de strings
+        const transformedData = {
+            doctor: data.doctor || {},
+            specialties: data.doctor && data.doctor.specialties
+                ? data.doctor.specialties.map(specialty => specialty.name)
+                : [],
+            offices: data.doctor && data.doctor.medical_centers
+                ? data.doctor.medical_centers.map(center => `${center.name} - Oficina: ${center.office}`)
+                : []
+        };
+
+        console.log("Datos transformados antes de guardar en el store:", transformedData);
+
         setStore({
-            doctorPanelData: data,
+            doctorPanelData: transformedData,
         });
 
-        return data;
+        return transformedData;
     } catch (error) {
         console.log("Error al cargar el Panel del Doctor:", error.message);
         setStore({ loginDoctorError: error.message });
@@ -1660,6 +1773,56 @@ getMedicalCenterLocations: async () => {
         console.error("Error cargando ubicaciones únicas:", error);
     }
 },
+
+////////////////////////////se agregar Editar Data Pacient - 14-04-2025
+
+ // UPDATE A PACIENTE
+ updatePatient: async (patientData) => {  
+    try {
+        const token = localStorage.getItem("tokenpatient");
+        if (!token) throw new Error("No hay token disponible");
+
+        console.log("Datos enviados al backend:");
+        for (let [key, value] of patientData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+
+        const resp = await fetch(`${process.env.BACKEND_URL}/api/patient/profile`, {
+            method: "PUT",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+            body: patientData, // Enviar FormData directamente
+        });
+
+        const data = await resp.json();
+        console.log("Respuesta completa del backend:", data);
+
+        if (!resp.ok) {
+            throw new Error(data.msg || "Error updating Patient");
+        }
+
+        setStore({
+            getUserPatient: {
+                ...getStore().getUserPatient,
+                pacient: data.updated_patient,
+            },
+        });
+
+        await getActions().getUserPatient();
+        return data;
+    } catch (error) {
+        console.log("Error updating pacient:", error);
+        throw error;
+    }
+},
+
+
+
+
+
+
+
           
         }
     };

@@ -346,7 +346,7 @@ def setup_commands(app):
                 "date": datetime(2023, 3, 5).date(),
                 "id_center": 1,
                 "rating": 5,
-                "comments": "The doctor was very attentive"
+                "comments": "El doctor fue muy atento"
             },
             {
                 
@@ -355,7 +355,7 @@ def setup_commands(app):
                 "date": datetime(2023, 2, 10).date(),
                 "id_center": 2,
                 "rating": 2,
-                "comments": "The doctor was late for the appointment"
+                "comments": "El doctor llego tarde a la cita"
             },
             {
                 
@@ -364,7 +364,7 @@ def setup_commands(app):
                 "date": datetime(2023, 2, 11).date(),
                 "id_center": 3,
                 "rating": 5,
-                "comments": "I felt very comfortable and well attended to"
+                "comments": "Ambiente muy agradable y me senti muy bien atendido"
             }
         ]
 

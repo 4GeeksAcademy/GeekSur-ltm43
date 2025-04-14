@@ -1,16 +1,17 @@
 import React, { useEffect, useContext, useState } from "react";
 import { Context } from "../store/appContext";
-import { useNavigate, Navigate, Link, useLocation } from "react-router-dom"; // Añadimos useLocation
-import logo from "../../img/logo.png";
+import { useNavigate, Navigate, Link, useLocation } from "react-router-dom";
+import logo from "../../img/meedgeeknegro.png";
 
 export const PanelDoctor = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
-    const location = useLocation(); // Hook para obtener la ruta actual
+    const location = useLocation();
     const [currentTime, setCurrentTime] = useState(
         new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     );
     const [showDropdown, setShowDropdown] = useState(false);
+    const [isLoading, setIsLoading] = useState(true); // Estado para manejar la carga
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -20,12 +21,30 @@ export const PanelDoctor = () => {
     }, []);
 
     useEffect(() => {
-        if (!store.authDoctor && !localStorage.getItem("tokendoctor")) {
-            navigate("/logindoctor");
-        } else if (!store.doctorPanelData) {
-            actions.getDoctorPanel();
-        }
-    }, [store.authDoctor, store.doctorPanelData, navigate]);
+        const loadData = async () => {
+            console.log("Iniciando carga de datos en PanelDoctor...");
+            setIsLoading(true);
+
+            try {
+                if (!store.authDoctor && !localStorage.getItem("tokendoctor")) {
+                    console.log("No hay autenticación, redirigiendo a login...");
+                    navigate("/logindoctor");
+                    return;
+                }
+
+                console.log("Autenticación confirmada, cargando datos...");
+                await actions.getDoctorPanel();
+                console.log("Datos del panel del doctor cargados:", store.doctorPanelData);
+            } catch (error) {
+                console.error("Error al cargar datos:", error);
+            } finally {
+                console.log("Finalizando carga, actualizando isLoading a false...");
+                setIsLoading(false);
+            }
+        };
+
+        loadData();
+    }, []); // vacio para ejecutar solo al montar
 
     const handleLogout = () => {
         actions.logoutDoctor();
@@ -35,17 +54,23 @@ export const PanelDoctor = () => {
     const handleDeleteAccount = async () => {
         const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.");
         if (!confirmDelete) return;
+    
         try {
             await actions.deleteDoctorAccount();
-            navigate("/logindoctor");
+            navigate("/"); // Redirigir al home tras eliminación exitosa
         } catch (error) {
             console.error("Error al eliminar la cuenta:", error);
+            alert("No se pudo eliminar la cuenta: " + error.message); // Mostrar mensaje de error al usuario
         }
     };
 
     const doctor = store.doctorPanelData?.doctor;
     const doctorName = doctor ? `${doctor.first_name} ${doctor.last_name}` : "Doctor";
-    const doctorLocation = doctor?.city ? `${doctor.city}, ${doctor.country || 'CA'}` : "San Francisco, CA"; // Renombramos a doctorLocation
+    const doctorLocation = doctor?.city ? `${doctor.city}, ${doctor.country || 'CA'}` : "San Francisco, CA";
+
+    // if (isLoading) {
+    //     return <div>Cargando datos...</div>;
+    // }
 
     return (
         <>
@@ -156,9 +181,10 @@ export const PanelDoctor = () => {
                             onClick={handleLogout}
                             className="btn d-flex align-items-center"
                             style={{
-                                backgroundColor: "#ffffff",
+                                backgroundColor: "#97dbe7",
                                 color: "#000",
-                                border: "1px solid #000",
+                                minWidth: "100px",
+                                whiteSpace: "nowrap",
                                 padding: "10px",
                                 borderRadius: "5px",
                                 fontWeight: "500",
@@ -186,7 +212,7 @@ export const PanelDoctor = () => {
                             <div className="d-flex align-items-center position-relative">
                                 <span className="text-dark me-3" style={{ opacity: 0.8 }}>
                                     <i className="bi bi-geo-alt me-1"></i>
-                                    {doctorLocation} - {currentTime} {/* Usamos doctorLocation */}
+                                    {doctorLocation} - {currentTime}
                                 </span>
                                 {doctor?.url && (
                                     <div>
@@ -338,12 +364,12 @@ export const PanelDoctor = () => {
                                         className="btn btn-danger"
                                         style={{ backgroundColor: "rgb(173 29 29)", border: "none" }}
                                     >
-                                        Delete Account
+                                        Elimina la cuenta
                                     </button>
                                 </div>
                             </div>
                         ) : (
-                            <p>Cargando datos...</p>
+                            <p>No se pudieron cargar los datos.</p>
                         )}
                     </div>
                 </div>
@@ -354,11 +380,11 @@ export const PanelDoctor = () => {
     );
 };
 
-// Añadir estilos personalizados para el resaltado
+// estilos personalizados para el resaltado
 const styles = `
     .nav-link.active {
-        background-color: #f0faff !important; /* Color gris claro */
-        color: #000 !important; /* Cambiar el color del texto a negro para que sea legible */
+        background-color: #f0faff !important;
+        color: #000 !important;
     }
 `;
 

@@ -20,7 +20,7 @@ function DoctorProfile() {
                 setDoctor(data);
             })
             .catch(error => console.error('Error:', error));
-    }, [doctorId]);
+    }, []);
 
     const handleBookAppointment = () => {
         navigate('/agendar-turno/' + doctorId+"/"+specialtyId);

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import logo from "../../img/logo.png";
+import logo from "../../img/meedgeeknegro.png";
 
 export const DoctorAppointment = () => {
     const { store, actions } = useContext(Context);
@@ -25,8 +25,12 @@ export const DoctorAppointment = () => {
         } else {
             console.log("Cargando citas para el doctor con token:", localStorage.getItem("tokendoctor"));
             actions.getDoctorAppointments();
+            // Cargar datos de pacientes, centros médicos y especialidades
+            actions.getPatients();
+            actions.getMedicalCenters();
+            actions.getSpecialties();
         }
-    }, [store.authDoctor, actions, navigate]);
+    }, []);
 
     const handleLogout = () => {
         actions.logoutDoctor();
@@ -39,7 +43,23 @@ export const DoctorAppointment = () => {
 
     const doctor = store.doctorPanelData?.doctor;
     const doctorName = doctor ? `${doctor.first_name} ${doctor.last_name}` : "Doctor";
-    const doctorLocation = doctor?.city ? `${doctor.city}, ${doctor.country || 'CA'}` : "San Francisco, CA"; // Renombramos a doctorLocation
+    const doctorLocation = doctor?.city ? `${doctor.city}, ${doctor.country || 'CA'}` : "San Francisco, CA";
+
+    // Funciones para mapear IDs a nombres
+    const getPatientName = (patientId) => {
+        const patient = store.patients.find(p => p.id === patientId);
+        return patient ? `${patient.first_name} ${patient.last_name}` : `Paciente ${patientId}`;
+    };
+
+    const getCenterName = (centerId) => {
+        const center = store.medicalCenters.find(c => c.id === centerId);
+        return center ? center.name : `Centro ${centerId}`;
+    };
+
+    const getSpecialtyName = (specialtyId) => {
+        const specialty = store.specialties.find(s => s.id === specialtyId);
+        return specialty ? specialty.name : `Especialidad ${specialtyId}`;
+    };
 
     return (
         <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f0faff" }}>
@@ -148,9 +168,10 @@ export const DoctorAppointment = () => {
                     onClick={handleLogout}
                     className="btn d-flex align-items-center"
                     style={{
-                        backgroundColor: "#ffffff",
+                        backgroundColor: "#97dbe7",
                         color: "#000",
-                        border: "1px solid #000",
+                        minWidth: "100px",
+                        whiteSpace: "nowrap",
                         padding: "10px",
                         borderRadius: "5px",
                         fontWeight: "500",
@@ -175,13 +196,13 @@ export const DoctorAppointment = () => {
                 <div className="container-fluid">
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h2 className="fw-bold">Hello, {doctorName}</h2>
+                            <h2 className="fw-bold">Hola, {doctorName}</h2>
                             <p className="text-muted">Aquí están tus citas programadas.</p>
                         </div>
                         <div className="d-flex align-items-center position-relative">
                             <span className="text-dark me-3" style={{ opacity: 0.8 }}>
                                 <i className="bi bi-geo-alt me-1"></i>
-                                {doctorLocation} - {currentTime} {/* Usamos doctorLocation */}
+                                {doctorLocation} - {currentTime}
                             </span>
                             {doctor?.url && (
                                 <div>
@@ -244,9 +265,9 @@ export const DoctorAppointment = () => {
                                             <p className="card-text" style={{ color: "#000" }}>
                                                 <strong>Fecha:</strong> {appointment.date}<br />
                                                 <strong>Hora:</strong> {appointment.hour}<br />
-                                                <strong>Paciente ID:</strong> {appointment.id_patient}<br />
-                                                <strong>Centro ID:</strong> {appointment.id_center}<br />
-                                                <strong>Especialidad ID:</strong> {appointment.id_specialty}<br />
+                                                <strong>Paciente:</strong> {getPatientName(appointment.id_patient)}<br />
+                                                <strong>Centro Médico:</strong> {getCenterName(appointment.id_center)}<br />
+                                                <strong>Especialidad:</strong> {getSpecialtyName(appointment.id_specialty)}<br />
                                                 <strong>Estado:</strong> {appointment.confirmation}
                                             </p>
                                             <div className="d-flex gap-2">

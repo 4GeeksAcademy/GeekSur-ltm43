@@ -1,77 +1,7 @@
-// import React, { useEffect, useContext } from "react";
-// import { Context } from "../store/appContext";
-// import { useNavigate, Navigate, Link } from "react-router-dom";
-
-// export const PatientAppointments = () => {
-//     const { store, actions } = useContext(Context);
-//     const navigate = useNavigate();
-
-//     useEffect(() => {
-//         if (!store.authPatient && !localStorage.getItem("tokenpatient")) {
-//             navigate("/loginpatient");
-//         } else {
-//             actions.getPatientAppointments();
-//         }
-//     }, [store.authPatient]);
-
-//     const handleRate = (appointmentId) => {
-//         navigate(`/rate-appointment/${appointmentId}`);
-//     };
-
-//     const handleLogout = () => {
-//         actions.logoutPatient();
-//         navigate("/loginpatient");
-//     };
-
-//     return (
-//         <>
-//             {store.authPatient || localStorage.getItem("tokenpatient") ? (
-//                 <div className="container">
-//                     <h1>Mis Citas</h1>
-//                     <button onClick={handleLogout}>Cerrar Sesión</button>
-
-//                     {store.patientAppointmentError && (
-//                         <p style={{ color: "red" }}>{store.patientAppointmentError}</p>
-//                     )}
-//                     {store.patientAppointments.length > 0 ? (
-//                         <ul>
-//                             {store.patientAppointments.map((appointment) => (
-//                                 <li key={appointment.id}>
-//                                     Fecha: {appointment.date} | Hora: {appointment.hour} | 
-//                                     Doctor ID: {appointment.id_doctor} | 
-//                                     Centro ID: {appointment.id_center} | 
-//                                     Especialidad ID: {appointment.id_specialty} | 
-//                                     Estado: {appointment.confirmation}
-//                                     <button
-//                                         className="btn btn-primary ms-2"
-//                                         onClick={() => handleRate(appointment.id)}
-//                                     >
-//                                         Calificar
-//                                     </button>
-//                                 </li>
-//                             ))}
-//                         </ul>
-//                     ) : (
-//                         <p>No tienes citas registradas.</p>
-//                     )}
-//                     <br />
-//                     <Link to="/dashboardpatient">
-//                         <button className="btn btn-primary">Volver al Dashboard</button>
-//                     </Link>
-//                     <Link to="/">
-//                         <button className="btn btn-primary ms-2">Back Home</button>
-//                     </Link>
-//                 </div>
-//             ) : (
-//                 <Navigate to="/loginpatient" />
-//             )}
-//         </>
-//     );
-// };
 import React, { useEffect, useContext, useState } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate, Navigate, Link, useLocation } from "react-router-dom";
-import logo from "../../img/logo.png";
+import logo from "../../img/meedgeeknegro.png";
 
 export const PatientAppointments = () => {
     const { store, actions } = useContext(Context);
@@ -95,6 +25,10 @@ export const PatientAppointments = () => {
             navigate("/loginpatient");
         } else {
             actions.getPatientAppointments();
+            // Cargar datos de doctores, centros médicos y especialidades
+            actions.getDoctors();
+            actions.getMedicalCenters();
+            actions.getSpecialties();
         }
     }, [store.authPatient]);
 
@@ -110,6 +44,22 @@ export const PatientAppointments = () => {
     const patient = store.currentPatient;
     const patientName = patient ? `${patient.first_name} ${patient.last_name}` : "Paciente";
     const patientLocation = patient?.city ? `${patient.city}, ${patient.country || 'CA'}` : "San Francisco, CA";
+
+    // Funciones para mapear IDs a nombres
+    const getDoctorName = (doctorId) => {
+        const doctor = store.doctors.find(d => d.id === doctorId);
+        return doctor ? `${doctor.first_name} ${doctor.last_name}` : `Doctor ${doctorId}`;
+    };
+
+    const getCenterName = (centerId) => {
+        const center = store.medicalCenters.find(c => c.id === centerId);
+        return center ? center.name : `Centro ${centerId}`;
+    };
+
+    const getSpecialtyName = (specialtyId) => {
+        const specialty = store.specialties.find(s => s.id === specialtyId);
+        return specialty ? specialty.name : `Especialidad ${specialtyId}`;
+    };
 
     return (
         <>
@@ -198,7 +148,8 @@ export const PatientAppointments = () => {
                                     Buscar Profesional
                                 </Link>
                             </li>
-                            <Link
+                            <li>
+                                <Link
                                     to="/ai-consultation"
                                     className={`nav-link text-white d-flex align-items-center ${
                                         location.pathname === "/ai-consultation" ? "active" : ""
@@ -212,7 +163,7 @@ export const PatientAppointments = () => {
                                     <i className="bi bi-person me-2 fs-5" style={{ marginLeft: "15px" }}></i>
                                     Habla Con Boti IA
                                 </Link>
-
+                            </li>
                         </ul>
                         <hr />
                         <button
@@ -226,10 +177,10 @@ export const PatientAppointments = () => {
                                 padding: "10px",
                                 borderRadius: "5px",
                                 fontWeight: "500",
-                                 whiteSpace: "nowrap",
-                                 width: "fit-content",
-                                 maxWidth: "100%",
-                                 margin: "0 auto",
+                                whiteSpace: "nowrap",
+                                width: "fit-content",
+                                maxWidth: "100%",
+                                margin: "0 auto",
                             }}
                         >
                             <i className="bi bi-box-arrow-right me-2 fs-5"></i>
@@ -257,7 +208,7 @@ export const PatientAppointments = () => {
                                     <i className="bi bi-geo-alt me-1"></i>
                                     {patientLocation} - {currentTime}
                                 </span>
-                                {patient?.url && (
+                                {patient?.url ? (
                                     <div>
                                         <img
                                             src={patient.url}
@@ -288,17 +239,60 @@ export const PatientAppointments = () => {
                                                     onClick={handleLogout}
                                                     className="btn d-flex align-items-center"
                                                     style={{
-                                                        backgroundColor: "#97dbe7",
+                                                        padding: "10px 20px",
                                                         color: "#000",
-                                                        minWidth: "100px",
-                                                        whiteSpace: "nowrap",
-                                                        padding: "10px",
-                                                        borderRadius: "5px",
-                                                        fontWeight: "500",
-                                                         whiteSpace: "nowrap",
-                                                         width: "fit-content",
-                                                         maxWidth: "100%",
-                                                         margin: "0 auto",
+                                                        border: "none",
+                                                        background: "none",
+                                                        width: "100%",
+                                                        textAlign: "left",
+                                                    }}
+                                                >
+                                                    <i className="bi bi-box-arrow-right me-2"></i>
+                                                    Cerrar Sesión
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div
+                                        style={{
+                                            width: "40px",
+                                            height: "40px",
+                                            borderRadius: "50%",
+                                            backgroundColor: "#97dbe7",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            color: "#fff",
+                                            fontWeight: "bold",
+                                            cursor: "pointer",
+                                        }}
+                                        onClick={() => setShowDropdown(!showDropdown)}
+                                    >
+                                        {patientName.charAt(0).toUpperCase()}
+                                        {showDropdown && (
+                                            <div
+                                                style={{
+                                                    position: "absolute",
+                                                    top: "50px",
+                                                    right: "0",
+                                                    backgroundColor: "#fff",
+                                                    border: "1px solid #dee2e6",
+                                                    borderRadius: "5px",
+                                                    boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+                                                    zIndex: 1000,
+                                                }}
+                                            >
+                                                <button
+                                                    onClick={handleLogout}
+                                                    className="btn d-flex align-items-center"
+                                                    style={{
+                                                        padding: "10px 20px",
+                                                        color: "#000",
+                                                        border: "none",
+                                                        background: "none",
+                                                        width: "100%",
+                                                        textAlign: "left",
                                                     }}
                                                 >
                                                     <i className="bi bi-box-arrow-right me-2"></i>
@@ -340,18 +334,16 @@ export const PatientAppointments = () => {
                                                 <tr key={appointment.id}>
                                                     <td>{appointment.date}</td>
                                                     <td>{appointment.hour}</td>
-                                                    <td>Dr. {appointment.doctor_name || `ID: ${appointment.id_doctor}`}</td>
-                                                    <td>{appointment.center_name || `ID: ${appointment.id_center}`}</td>
-                                                    <td>{appointment.specialty_name || `ID: ${appointment.id_specialty}`}</td>
+                                                    <td>Dr. {getDoctorName(appointment.id_doctor)}</td>
+                                                    <td>{getCenterName(appointment.id_center)}</td>
+                                                    <td>{getSpecialtyName(appointment.id_specialty)}</td>
                                                     <td>
                                                         <span className={`badge ${
                                                             appointment.confirmation === "confirmed" ? "bg-success" :
                                                             appointment.confirmation === "pending" ? "bg-warning" :
-                                                            // appointment.confirmation === "cancelled" ? "bg-danger" : "bg-secondary"
                                                             appointment.confirmation === "false" ? "bg-danger" : "bg-secondary"
-                                                                                                                       
                                                         }`}>
-                                                             {appointment.confirmation === "false" ? "Pendiente" : appointment.confirmation}
+                                                            {appointment.confirmation === "false" ? "Pendiente" : appointment.confirmation}
                                                         </span>
                                                     </td>
                                                     <td>
@@ -385,9 +377,7 @@ export const PatientAppointments = () => {
                             </div>
                         )}
 
-                        <div className="mt-4">
-
-                        </div>
+                        <div className="mt-4"></div>
                     </div>
                 </div>
             ) : (
@@ -397,7 +387,7 @@ export const PatientAppointments = () => {
             {/* Añadir estilos personalizados para el resaltado */}
             <style>{`
                 .nav-link.active {
-                    background-color: #f0faff !important;
+                    backgroundColor: #f0faff !important;
                     color: #000 !important;
                 }
             `}</style>

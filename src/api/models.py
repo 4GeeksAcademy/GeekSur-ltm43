@@ -18,7 +18,8 @@ class Patient(db.Model):
     birth_date = db.Column(db.Date, nullable=False)
     phone_number = db.Column(db.String(20), nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    historial_clinico = db.Column(db.Text, nullable=True)  # Nuevo campo
+    historial_clinico = db.Column(db.Text, nullable=True)
+    url = db.Column(db.String(255), nullable=True)
     appointments = db.relationship('Appointment', backref='patient', lazy=True) #Relacion con Appointment
 
     def serialize(self):
@@ -30,7 +31,8 @@ class Patient(db.Model):
             "gender": self.gender,
             "birth_date": self.birth_date.strftime('%Y-%m-%d'),
             "phone_number": self.phone_number,
-            "historial_clinico": self.historial_clinico
+            "historial_clinico": self.historial_clinico,
+            "url": self.url
             # Password excluido por seguridad
         }
 

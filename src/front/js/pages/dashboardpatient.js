@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate, Navigate, Link, useLocation } from "react-router-dom";
-import logo from "../../img/logo.png";
+import logo from "../../img/meedgeeknegro.png";
 import robot3D from "../../img/robot3D.png";
 
 export const DashboardPatient = () => {
@@ -15,6 +15,16 @@ export const DashboardPatient = () => {
 
     const [showDropdown, setShowDropdown] = useState(false);
     const [isLoading, setIsLoading] = useState(true); // Estado para manejar la carga
+
+    useEffect(() => {
+        console.log("Store completo:", store); // Verifica toda la estructura del store
+        console.log("Current Patient:", store.currentPatient);
+        console.log("First Name:", store.currentPatient?.first_name);
+        console.log("Token:", localStorage.getItem("tokenpatient")); 
+    }, [store, store.currentPatient]);
+
+
+
 
     // Actualizar la hora cada minuto
     useEffect(() => {
@@ -36,6 +46,13 @@ export const DashboardPatient = () => {
                     navigate("/loginpatient");
                     return;
                 }
+
+                // Ejecutar todas las acciones
+                const promises = [
+                    actions.getPatientData().then(() => console.log("GetPatientData completado")),
+
+                ];
+
 
                 console.log("Autenticación confirmada, cargando datos...");
 
@@ -65,8 +82,14 @@ export const DashboardPatient = () => {
         navigate("/loginpatient");
     };
 
-    const patient = store.currentPatient;
+    // const patient = store.currentPatient;
+    const patient = store.getPatients;
     const patientName = patient ? `${patient.first_name} ${patient.last_name}` : "Paciente";
+
+    const doctor = store.doctorPanelData?.doctor;
+    const doctorName = doctor ? `${doctor.first_name} ${doctor.last_name}` : "Doctor";
+
+
     const patientLocation = patient ? `${patient.city || "San Francisco"}, ${patient.country || "CA"}` : "San Francisco, CA";
 
     // Filtrar citas pendientes
@@ -226,7 +249,7 @@ export const DashboardPatient = () => {
                             <i className="bi bi-geo-alt me-1"></i>
                             {patientLocation} - {currentTime}
                         </span>
-                        {patient?.url && (
+                        {patient?.url ? (
                             <div>
                                 <img
                                     src={patient.url}
@@ -257,17 +280,60 @@ export const DashboardPatient = () => {
                                             onClick={handleLogout}
                                             className="btn d-flex align-items-center"
                                             style={{
-                                                backgroundColor: "#97dbe7",
+                                                padding: "10px 20px",
                                                 color: "#000",
-                                                minWidth: "100px",
-                                                whiteSpace: "nowrap",
-                                                padding: "10px",
-                                                borderRadius: "5px",
-                                                fontWeight: "500",
-                                                whiteSpace: "nowrap",
-                                                width: "fit-content",
-                                                maxWidth: "100%",
-                                                margin: "0 auto",
+                                                border: "none",
+                                                background: "none",
+                                                width: "100%",
+                                                textAlign: "left",
+                                            }}
+                                        >
+                                            <i className="bi bi-box-arrow-right me-2"></i>
+                                            Cerrar Sesión
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div
+                                style={{
+                                    width: "40px",
+                                    height: "40px",
+                                    borderRadius: "50%",
+                                    backgroundColor: "#97dbe7",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    color: "#fff",
+                                    fontWeight: "bold",
+                                    cursor: "pointer",
+                                }}
+                                onClick={() => setShowDropdown(!showDropdown)}
+                            >
+                                {patientName.charAt(0).toUpperCase()}
+                                {showDropdown && (
+                                    <div
+                                        style={{
+                                            position: "absolute",
+                                            top: "50px",
+                                            right: "0",
+                                            backgroundColor: "#fff",
+                                            border: "1px solid #dee2e6",
+                                            borderRadius: "5px",
+                                            boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+                                            zIndex: 1000,
+                                        }}
+                                    >
+                                        <button
+                                            onClick={handleLogout}
+                                            className="btn d-flex align-items-center"
+                                            style={{
+                                                padding: "10px 20px",
+                                                color: "#000",
+                                                border: "none",
+                                                background: "none",
+                                                width: "100%",
+                                                textAlign: "left",
                                             }}
                                         >
                                             <i className="bi bi-box-arrow-right me-2"></i>

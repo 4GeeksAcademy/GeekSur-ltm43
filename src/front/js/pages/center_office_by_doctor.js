@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate, Link, useLocation } from "react-router-dom"; // Añadimos useLocation
-import logo from "../../img/logo.png";
+import logo from "../../img/meedgeeknegro.png";
 
 export const CenterOfficeByDoctor = () => {
     const { store, actions } = useContext(Context);
@@ -31,7 +31,7 @@ export const CenterOfficeByDoctor = () => {
             actions.getMedicalCenters();
             actions.getDoctorPanel();
         }
-    }, [store.authDoctor, actions, navigate]);
+    }, []);
 
     const handleAddCenter = async (e) => {
         e.preventDefault();
@@ -180,24 +180,25 @@ export const CenterOfficeByDoctor = () => {
                 </ul>
                 <hr />
                 <button
-                    onClick={handleLogout}
-                    className="btn d-flex align-items-center"
-                    style={{
-                        backgroundColor: "#ffffff",
-                        color: "#000",
-                        border: "1px solid #000",
-                        padding: "10px",
-                        borderRadius: "5px",
-                        fontWeight: "500",
-                        whiteSpace: "nowrap",
-                        width: "fit-content",
-                        maxWidth: "100%",
-                        margin: "0 auto",
-                    }}
-                >
-                    <i className="bi bi-box-arrow-right me-2 fs-5"></i>
-                    Cerrar Sesión
-                </button>
+                            onClick={handleLogout}
+                            className="btn d-flex align-items-center"
+                            style={{
+                                backgroundColor: "#97dbe7",
+                                color: "#000",
+                                minWidth: "100px",
+                                whiteSpace: "nowrap",
+                                padding: "10px",
+                                borderRadius: "5px",
+                                fontWeight: "500",
+                                whiteSpace: "nowrap",
+                                width: "fit-content",
+                                maxWidth: "100%",
+                                margin: "0 auto",
+                            }}
+                        >
+                            <i className="bi bi-box-arrow-right me-2 fs-5"></i>
+                            Cerrar Sesión
+                        </button>
             </div>
 
             {/* Contenido principal */}
@@ -207,7 +208,7 @@ export const CenterOfficeByDoctor = () => {
             >
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <div>
-                        <h2>Hello, {doctorName}</h2>
+                        <h2>Hola, {doctorName}</h2>
                         <p className="text-muted">Gestiona tus centros médicos y oficinas aquí.</p>
                     </div>
                     <div className="d-flex align-items-center position-relative">

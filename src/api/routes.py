@@ -116,11 +116,26 @@ def post_doctor():
 #-------------------------------------DELETE-----Doctor------------------------------------------------#
 
 @api.route('/doctors/<int:doctor_id>', methods=['DELETE'])
+@jwt_required()
 def delete_doctor(doctor_id):
-    doctor_one = Doctors.query.get(doctor_id)
+    current_doctor_id = get_jwt_identity()
 
+    if int(current_doctor_id) != doctor_id:
+        return jsonify({"msg": "No autorizado para eliminar esta cuenta"}), 403
+
+    doctor_one = Doctors.query.get(doctor_id)
     if not doctor_one:
         return jsonify({"msg": "Doctor no encontrado"}), 404
+
+    # Eliminar registros relacionados
+    Specialties_doctor.query.filter_by(id_doctor=doctor_id).delete()
+    MedicalCenterDoctor.query.filter_by(id_doctor=doctor_id).delete()
+    Appointment.query.filter_by(id_doctor=doctor_id).delete()
+    Review.query.filter_by(id_doctor=doctor_id).delete()
+
+    # Eliminar la imagen de Cloudinary si existe
+    if doctor_one.url:
+        delete_image(doctor_one.url)
 
     db.session.delete(doctor_one)
     db.session.commit()
@@ -367,96 +382,98 @@ def get_patients():
     
 @api.route('/patients', methods=['POST'])
 def create_patient():
-    data = request.get_json()
-    
-    required_fields = ['email', 'first_name', 'last_name', 'gender', 'birth_date', 'phone_number', 'password']
-    for field in required_fields:
-        if field not in data:
-            raise APIException(f"Missing required field: {field}", status_code=400)
-    
-    if '@' not in data['email']:
-        raise APIException("Invalid email format", status_code=400)
-    
-    if data['gender'] not in ['male', 'female']:
-        raise APIException("Gender must be 'male' or 'female'", status_code=400)
-    
     try:
-        birth_date = datetime.strptime(data['birth_date'], '%Y-%m-%d').date()
-    except ValueError:
-        raise APIException("Invalid birth_date format, use YYYY-MM-DD", status_code=400)
-    
-    if Patient.query.filter_by(email=data['email']).first():
-        raise APIException("Email already exists", status_code=400)
-    
-    new_patient = Patient(
-        email=data['email'],
-        first_name=data['first_name'],
-        last_name=data['last_name'],
-        gender=data['gender'],
-        birth_date=birth_date,
-        phone_number=data['phone_number'],
-        password=data['password'],
-        historial_clinico=data.get('historial_clinico', '')  # Valor por defecto si no se envía
-    )
-    
-    db.session.add(new_patient)
+        # Obtener datos del formulario (multipart/form-data)
+        email = request.form.get("email")
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
+        gender = request.form.get("gender")
+        birth_date = request.form.get("birth_date")
+        phone_number = request.form.get("phone_number")
+        password = request.form.get("password")
+        historial_clinico = request.form.get("historial_clinico", "")
+        file = request.files.get("photo")
+
+        # Validar campos requeridos
+        required_fields = ['email', 'first_name', 'last_name', 'gender', 'birth_date', 'phone_number', 'password']
+        for field in required_fields:
+            if not request.form.get(field):
+                raise APIException(f"Missing required field: {field}", status_code=400)
+
+        # Validar formato de email
+        if '@' not in email:
+            raise APIException("Invalid email format", status_code=400)
+
+        # Validar género
+        if gender not in ['male', 'female']:
+            raise APIException("Gender must be 'male' or 'female'", status_code=400)
+
+        # Validar formato de fecha
+        try:
+            birth_date = datetime.strptime(birth_date, '%Y-%m-%d').date()
+        except ValueError:
+            raise APIException("Invalid birth_date format, use YYYY-MM-DD", status_code=400)
+
+        # Verificar si el email ya existe
+        if Patient.query.filter_by(email=email).first():
+            raise APIException("Email already exists", status_code=400)
+
+        # Subir la imagen a Cloudinary si se proporcionó
+        image_url = None
+        if file:
+            try:
+                image_url = upload_image(file)
+            except Exception as e:
+                raise APIException(f"Error uploading image to Cloudinary: {str(e)}", status_code=500)
+
+        # Crear nuevo paciente
+        new_patient = Patient(
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            gender=gender,
+            birth_date=birth_date,
+            phone_number=phone_number,
+            password=password,
+            historial_clinico=historial_clinico,
+            url=image_url
+        )
+
+        db.session.add(new_patient)
+        db.session.commit()
+
+        return jsonify(new_patient.serialize()), 201
+
+    except APIException as e:
+        return jsonify({"msg": e.message}), e.status_code
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": f"Error creating patient: {str(e)}"}), 500
+
+@api.route('/patients/<int:patient_id>', methods=['DELETE'])
+@jwt_required()
+def delete_patient(patient_id):
+    current_patient_id = get_jwt_identity()
+
+    if int(current_patient_id) != patient_id:
+        return jsonify({"msg": "No autorizado para eliminar esta cuenta"}), 403
+
+    patient_one = Patient.query.get(patient_id)
+    if not patient_one:
+        return jsonify({"msg": "Paciente no encontrado"}), 404
+
+    # Eliminar registros relacionados
+    Appointment.query.filter_by(id_patient=patient_id).delete()
+    Review.query.filter_by(id_patient=patient_id).delete()
+
+    # Eliminar la imagen de Cloudinary si existe
+    if patient_one.url:
+        delete_image(patient_one.url)
+
+    db.session.delete(patient_one)
     db.session.commit()
-    
-    return jsonify(new_patient.serialize()), 201
 
-@api.route('/patients/<int:id>', methods=['PUT'])
-def update_patient(id):
-    patient = Patient.query.get_or_404(id)
-    
-    data = request.get_json()
-    
-    required_fields = ['email', 'first_name', 'last_name', 'gender', 'birth_date', 'phone_number']
-    for field in required_fields:
-        if field not in data:
-            raise APIException(f"Missing required field: {field}", status_code=400)
-    
-    if '@' not in data['email']:
-        raise APIException("Invalid email format", status_code=400)
-    
-    if data['gender'] not in ['male', 'female']:
-        raise APIException("Gender must be 'male' or 'female'", status_code=400)
-    
-    try:
-        birth_date = datetime.strptime(data['birth_date'], '%Y-%m-%d').date()
-    except ValueError:
-        raise APIException("Invalid birth_date format, use YYYY-MM-DD", status_code=400)
-    
-    existing_patient = Patient.query.filter_by(email=data['email']).first()
-    if existing_patient and existing_patient.id != id:
-        raise APIException("Email already exists", status_code=400)
-    
-    patient.email = data['email']
-    patient.first_name = data['first_name']
-    patient.last_name = data['last_name']
-    patient.gender = data['gender']
-    patient.birth_date = birth_date
-    patient.phone_number = data['phone_number']
-
-    if 'password' in data:
-        patient.password = data['password']
-    if 'historial_clinico' in data:
-        patient.historial_clinico = data['historial_clinico']
-
-    db.session.commit()
-    
-    return jsonify(patient.serialize()), 200
-
-@api.route('/patients/<int:id>', methods=['DELETE'])
-def delete_patient(id):
-    # Busca el paciente por ID
-    patient = Patient.query.get_or_404(id)
-    
-    # Elimina el paciente de la base de datos
-    db.session.delete(patient)
-    db.session.commit()
-    
-    # Retorna una respuesta vacía con código 200
-    return jsonify({"message": f"Patient with id {id} has been deleted"}), 200
+    return jsonify({"msg": f"Paciente con ID {patient_id} eliminado correctamente"}), 200
 ################## End patients services#########
 
  ################## Beguin login patients services##############
@@ -1386,6 +1403,10 @@ def get_patient_panel():
                 "first_name": patient.first_name,
                 "last_name": patient.last_name,
                 "phone_number": patient.phone_number,
+                "gender": patient.gender,
+                "birth_date": patient.birth_date,
+                "historial_clinico": patient.historial_clinico,
+                "url": patient.url,
                 "appointments": [appointment.serialize() for appointment in patient.appointments] if hasattr(patient, 'appointments') else []
             }
         }
@@ -1829,6 +1850,43 @@ def update_doctor_profile():
     except Exception as e:
         db.session.rollback()
         return jsonify({"msg": "Error al actualizar el perfil: " + str(e)}), 500
+
+
+####paciente
+@api.route('/patient/profile', methods=['PUT'])
+@jwt_required()
+def update_patient_profile():
+    patient_id = get_jwt_identity()  
+    patient = Patient.query.get(patient_id) 
+
+    if not patient:
+        return jsonify({"msg": "Paciente no encontrado"}), 404
+
+    data = request.form 
+
+    # Actualizar los campos si están presentes en el formulario
+    patient.first_name = data.get('first_name', patient.first_name)
+    patient.last_name = data.get('last_name', patient.last_name)
+    patient.email = data.get('email', patient.email)
+    patient.phone_number = data.get('phone_number', patient.phone_number)
+    patient.gender = data.get('gender', patient.gender)
+    patient.birth_date = data.get('birth_date', patient.birth_date)
+    patient.historial_clinico = data.get('historial_clinico', patient.historial_clinico)
+    patient.url = data.get('url', patient.url)
+    
+    # Actualizar contraseña si se proporciona
+    if 'password' in data and data['password']:
+        patient.password = data['password'] 
+
+    try:
+        db.session.commit()
+        return jsonify({"updated_Pacient": patient.serialize()}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": "Error al actualizar el perfil: " + str(e)}), 500
+
+
+
     
 
 

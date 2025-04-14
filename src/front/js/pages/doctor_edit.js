@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate, Navigate, Link, useLocation } from "react-router-dom";
-import logo from "../../img/logo.png";
+import logo from "../../img/meedgeeknegro.png";
 
 export const DoctorEdit = () => {
     const { store, actions } = useContext(Context);
@@ -37,6 +37,7 @@ export const DoctorEdit = () => {
         } else if (!store.doctorPanelData) {
             actions.getDoctorPanel();
         } else if (!formData.first_name) {
+            console.log("Datos de store.doctorPanelData:", store.doctorPanelData); // Agregar depuración
             setFormData({
                 first_name: store.doctorPanelData.doctor.first_name,
                 last_name: store.doctorPanelData.doctor.last_name,
@@ -211,9 +212,10 @@ export const DoctorEdit = () => {
                             onClick={handleLogout}
                             className="btn d-flex align-items-center"
                             style={{
-                                backgroundColor: "#ffffff",
+                                backgroundColor: "#97dbe7",
                                 color: "#000",
-                                border: "1px solid #000",
+                                minWidth: "100px",
+                                whiteSpace: "nowrap",
                                 padding: "10px",
                                 borderRadius: "5px",
                                 fontWeight: "500",
@@ -532,6 +534,7 @@ export const DoctorEdit = () => {
                                             </div>
                                         </div>
                                     </div>
+                                    
                                 </div>
                             ) : (
                                 <p>Cargando datos...</p>
@@ -561,7 +564,7 @@ export const DoctorEdit = () => {
     );
 };
 
-// Añadir estilos personalizados para el resaltado
+// estilos personalizados para el resaltado
 const styles = `
     .nav-link.active {
         background-color: #f0faff !important; /* Color gris claro */

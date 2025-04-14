@@ -1,137 +1,7 @@
-// import React, { useState, useContext, useEffect } from "react";
-// import { Context } from "../store/appContext";
-// import { useNavigate, useParams, Link } from "react-router-dom";
-
-// export const RateAppointment = () => {
-//     const { store, actions } = useContext(Context);
-//     const { appointmentId } = useParams();
-//     const navigate = useNavigate();
-
-//     const [reviewData, setReviewData] = useState({
-//         id_doctor: "",
-//         id_center: "",
-//         rating: 0,
-//         comments: "",
-//         date: "",
-//     });
-//     const [ratingStars, setRatingStars] = useState([false, false, false, false, false]);
-
-//     useEffect(() => {
-//         if (!store.authPatient && !localStorage.getItem("tokenpatient")) {
-//             navigate("/loginpatient");
-//         } else {
-//             // Prellenar algunos campos basados en la cita
-//             const appointment = store.patientAppointments.find(app => app.id === parseInt(appointmentId));
-//             if (appointment) {
-//                 setReviewData({
-//                     ...reviewData,
-//                     id_doctor: appointment.id_doctor,
-//                     id_center: appointment.id_center,
-//                     date: appointment.date,
-//                 });
-//             }
-//         }
-//     }, [store.authPatient, appointmentId, store.patientAppointments]);
-
-//     const handleInputChange = (e) => {
-//         setReviewData({ ...reviewData, [e.target.name]: e.target.value });
-//     };
-
-//     const handleRatingClick = (index) => {
-//         const newRatingStars = ratingStars.map((_, i) => i < index + 1);
-//         setRatingStars(newRatingStars);
-//         setReviewData({ ...reviewData, rating: index + 1 });
-//     };
-
-//     const handleSubmit = async (e) => {
-//         e.preventDefault();
-//         try {
-//             await actions.createPatientReview(reviewData);
-//             navigate("/patient-appointments");
-//         } catch (error) {
-//             console.error("Error al enviar la reseña:", error);
-//         }
-//     };
-
-//     const renderStars = () => {
-//         return ratingStars.map((filled, index) => (
-//             <span
-//                 key={index}
-//                 style={{ cursor: "pointer", fontSize: "1.5em", color: "#ffc107", marginRight: "5px" }}
-//                 onClick={() => handleRatingClick(index)}
-//             >
-//                 {filled ? "★" : "☆"}
-//             </span>
-//         ));
-//     };
-
-//     return (
-//         <div className="container">
-//             <h1>Calificar Cita</h1>
-//             {store.reviewError && <p style={{ color: "red" }}>{store.reviewError}</p>}
-//             {store.reviewSuccessMessage && <p style={{ color: "green" }}>{store.reviewSuccessMessage}</p>}
-//             <form onSubmit={handleSubmit}>
-//                 <div className="mb-3">
-//                     <label className="form-label">Doctor ID:</label>
-//                     <input
-//                         type="number"
-//                         className="form-control"
-//                         name="id_doctor"
-//                         value={reviewData.id_doctor}
-//                         onChange={handleInputChange}
-//                         disabled
-//                     />
-//                 </div>
-//                 <div className="mb-3">
-//                     <label className="form-label">Centro ID:</label>
-//                     <input
-//                         type="number"
-//                         className="form-control"
-//                         name="id_center"
-//                         value={reviewData.id_center}
-//                         onChange={handleInputChange}
-//                         disabled
-//                     />
-//                 </div>
-//                 <div className="mb-3">
-//                     <label className="form-label">Fecha:</label>
-//                     <input
-//                         type="date"
-//                         className="form-control"
-//                         name="date"
-//                         value={reviewData.date}
-//                         onChange={handleInputChange}
-//                         disabled
-//                     />
-//                 </div>
-//                 <div className="mb-3">
-//                     <label className="form-label">Calificación:</label>
-//                     <div>{renderStars()}</div>
-//                 </div>
-//                 <div className="mb-3">
-//                     <label className="form-label">Comentarios:</label>
-//                     <textarea
-//                         className="form-control"
-//                         name="comments"
-//                         value={reviewData.comments}
-//                         onChange={handleInputChange}
-//                         rows="3"
-//                         required
-//                     />
-//                 </div>
-//                 <button type="submit" className="btn btn-primary">Enviar Reseña</button>
-//             </form>
-//             <br />
-//             <Link to="/patient-appointments">
-//                 <button className="btn btn-primary">Volver a Mis Citas</button>
-//             </Link>
-//         </div>
-//     );
-// };
 import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
-import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
-import logo from "../../img/logo.png";
+import { useNavigate, useParams, Link, useLocation, Navigate } from "react-router-dom";
+import logo from "../../img/meedgeeknegro.png";
 
 export const RateAppointment = () => {
     const { store, actions } = useContext(Context);
@@ -172,8 +42,11 @@ export const RateAppointment = () => {
                     date: appointment.date,
                 });
             }
+            // Cargar datos de doctores y centros médicos
+            actions.getDoctors();
+            actions.getMedicalCenters();
         }
-    }, [store.authPatient, appointmentId, store.patientAppointments]);
+    }, []);
 
     const handleInputChange = (e) => {
         setReviewData({ ...reviewData, [e.target.name]: e.target.value });
@@ -214,6 +87,17 @@ export const RateAppointment = () => {
 
     const patient = store.currentPatient;
     const patientLocation = patient?.city ? `${patient.city}, ${patient.country || 'CA'}` : "San Francisco, CA";
+
+    // Funciones para mapear IDs a nombres
+    const getDoctorName = (doctorId) => {
+        const doctor = store.doctors.find(d => d.id === doctorId);
+        return doctor ? `${doctor.first_name} ${doctor.last_name}` : `Doctor ${doctorId}`;
+    };
+
+    const getCenterName = (centerId) => {
+        const center = store.medicalCenters.find(c => c.id === centerId);
+        return center ? center.name : `Centro ${centerId}`;
+    };
 
     return (
         <>
@@ -414,27 +298,35 @@ export const RateAppointment = () => {
                             <form onSubmit={handleSubmit}>
                                 <div className="row mb-3">
                                     <div className="col-md-4">
-                                        <label className="form-label">Doctor ID:</label>
+                                        <label className="form-label">Doctor:</label>
                                         <input
-                                            type="number"
+                                            type="text"
                                             className="form-control"
-                                            name="id_doctor"
-                                            value={reviewData.id_doctor}
-                                            onChange={handleInputChange}
+                                            value={getDoctorName(reviewData.id_doctor)}
                                             disabled
                                             style={{ border: "1px solid #000" }}
                                         />
+                                        {/* Campo oculto para enviar el id_doctor */}
+                                        <input
+                                            type="hidden"
+                                            name="id_doctor"
+                                            value={reviewData.id_doctor}
+                                        />
                                     </div>
                                     <div className="col-md-4">
-                                        <label className="form-label">Centro ID:</label>
+                                        <label className="form-label">Centro Médico:</label>
                                         <input
-                                            type="number"
+                                            type="text"
                                             className="form-control"
-                                            name="id_center"
-                                            value={reviewData.id_center}
-                                            onChange={handleInputChange}
+                                            value={getCenterName(reviewData.id_center)}
                                             disabled
                                             style={{ border: "1px solid #000" }}
+                                        />
+                                        {/* Campo oculto para enviar el id_center */}
+                                        <input
+                                            type="hidden"
+                                            name="id_center"
+                                            value={reviewData.id_center}
                                         />
                                     </div>
                                     <div className="col-md-4">
@@ -497,7 +389,7 @@ export const RateAppointment = () => {
             {/* Estilos CSS */}
             <style>{`
                 .nav-link.active {
-                    background-color: #f0faff !important;
+                    backgroundColor: #f0faff !important;
                     color: #000 !important;
                 }
             `}</style>
