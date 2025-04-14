@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Context } from "../store/appContext";
 import { FaSearch } from "react-icons/fa";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import logo from "../../img/logo.png";
+import logo from "../../img/meedgeeknegro.png";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function SearchProfessionals() {

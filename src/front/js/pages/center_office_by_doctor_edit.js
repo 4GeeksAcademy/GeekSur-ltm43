@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import logo from "../../img/logo.png";
+import logo from "../../img/meedgeeknegro.png";
 
 export const CenterOfficeByDoctorEdit = () => {
     const { store, actions } = useContext(Context);

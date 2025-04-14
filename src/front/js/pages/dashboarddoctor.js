@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate, Navigate, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
-import logo from "../../img/logo.png";
+import logo from "../../img/meedgeeknegro.png";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 

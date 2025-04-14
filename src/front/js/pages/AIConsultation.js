@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
 import { useNavigate, Link } from "react-router-dom";
 import robot3D from "../../img/robot3D.png";
-import logo from "../../img/logo.png";
+import logo from "../../img/meedgeeknegro.png";
 import { FaSearch } from "react-icons/fa";
 import { IoArrowBack } from "react-icons/io5";
 
@@ -237,23 +237,6 @@ export const AIConsultation = () => {
 
                     {error && <p className="text-danger mt-3">{error}</p>}
 
-                    <div className="text-center mt-4">
-                        <button
-                            onClick={() => navigate("/dashboardpatient")}
-                            className="btn d-flex align-items-center justify-content-center gap-2"
-                            style={{
-                                backgroundColor: "#97dbe7",
-                                color: "#000",
-                                width: "60%",
-                                border: "2px solid #97dbe7",
-                                borderRadius: "8px",
-                                padding: "8px 0",
-                                fontWeight: "bold"
-                            }}
-                        >
-                            <IoArrowBack /> Volver al Dashboard
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
