@@ -54,11 +54,13 @@ export const PanelDoctor = () => {
     const handleDeleteAccount = async () => {
         const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.");
         if (!confirmDelete) return;
+    
         try {
             await actions.deleteDoctorAccount();
-            navigate("/logindoctor");
+            navigate("/"); // Redirigir al home tras eliminación exitosa
         } catch (error) {
             console.error("Error al eliminar la cuenta:", error);
+            alert("No se pudo eliminar la cuenta: " + error.message); // Mostrar mensaje de error al usuario
         }
     };
 
