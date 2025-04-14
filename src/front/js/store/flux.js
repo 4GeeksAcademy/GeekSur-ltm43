@@ -126,6 +126,50 @@ const getState = ({ getStore, getActions, setStore }) => {
                 });
                 localStorage.removeItem("tokenpatient");
             },
+
+            //Accion para eliminar cuenta del paciente
+
+            deletePatientAccount: async () => {
+                const store = getStore();
+                const token = store.tokenpatient || localStorage.getItem("tokenpatient");
+                const patientId = store.currentPatient?.id;
+            
+                if (!token) {
+                    setStore({ loginPatientError: "No hay token, por favor inicia sesión" });
+                    throw new Error("No hay token disponible");
+                }
+            
+                if (!patientId) {
+                    setStore({ loginPatientError: "No se encontró el ID del paciente" });
+                    throw new Error("No se encontró el ID del paciente");
+                }
+            
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/api/patients/${patientId}`, {
+                        method: "DELETE",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    });
+            
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.msg || "Error al eliminar la cuenta");
+                    }
+            
+                    // Limpiar el estado de autenticación
+                    getActions().logoutPatient();
+            
+                    return true; // Indicar éxito
+                } catch (error) {
+                    console.error("Error al eliminar la cuenta:", error.message);
+                    setStore({ loginPatientError: error.message });
+                    throw error;
+                }
+            },
+
+
             ///////////////////START/////////////////////////////////DOCTORS////////////////////////////////////
 
             // SE CREA ACTION PARA VER LISTA DE DOCTOR EN COMPONENTE DOCTORS
@@ -1156,6 +1200,48 @@ const getState = ({ getStore, getActions, setStore }) => {
                 localStorage.removeItem("tokendoctor");
             },
 
+            //Accion para eliminar cuenta dl doctor
+
+            deleteDoctorAccount: async () => {
+                const store = getStore();
+                const token = store.tokendoctor || localStorage.getItem("tokendoctor");
+                const doctorId = store.doctorPanelData?.doctor?.id;
+            
+                if (!token) {
+                    setStore({ loginDoctorError: "No hay token, por favor inicia sesión" });
+                    throw new Error("No hay token disponible");
+                }
+            
+                if (!doctorId) {
+                    setStore({ loginDoctorError: "No se encontró el ID del doctor" });
+                    throw new Error("No se encontró el ID del doctor");
+                }
+            
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/api/doctors/${doctorId}`, {
+                        method: "DELETE",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    });
+            
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.msg || "Error al eliminar la cuenta");
+                    }
+            
+                    // Limpiar el estado de autenticación
+                    getActions().logoutDoctor();
+            
+                    return true; // Indicar éxito
+                } catch (error) {
+                    console.error("Error al eliminar la cuenta:", error.message);
+                    setStore({ loginDoctorError: error.message });
+                    throw error;
+                }
+            },
+
             // Acción para cargar el token desde localStorage al iniciar la app
             validateAuthDoctor: async () => {
                 const token = localStorage.getItem("tokendoctor");
@@ -1436,11 +1522,27 @@ getDoctorPanel: async () => {
         const data = await resp.json();
         if (!resp.ok) throw new Error(data.error || "Error al cargar los datos del panel del doctor");
 
+        // Depurar la respuesta cruda del backend
+        console.log("Respuesta cruda de /api/paneldoctor:", data);
+
+        // Transformar specialties y medical_centers en listas de strings
+        const transformedData = {
+            doctor: data.doctor || {},
+            specialties: data.doctor && data.doctor.specialties
+                ? data.doctor.specialties.map(specialty => specialty.name)
+                : [],
+            offices: data.doctor && data.doctor.medical_centers
+                ? data.doctor.medical_centers.map(center => `${center.name} - Oficina: ${center.office}`)
+                : []
+        };
+
+        console.log("Datos transformados antes de guardar en el store:", transformedData);
+
         setStore({
-            doctorPanelData: data,
+            doctorPanelData: transformedData,
         });
 
-        return data;
+        return transformedData;
     } catch (error) {
         console.log("Error al cargar el Panel del Doctor:", error.message);
         setStore({ loginDoctorError: error.message });

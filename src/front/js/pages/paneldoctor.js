@@ -44,7 +44,7 @@ export const PanelDoctor = () => {
         };
 
         loadData();
-    }, []); // Dependencias vacías para ejecutar solo al montar
+    }, []); // vacio para ejecutar solo al montar
 
     const handleLogout = () => {
         actions.logoutDoctor();
@@ -54,11 +54,13 @@ export const PanelDoctor = () => {
     const handleDeleteAccount = async () => {
         const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.");
         if (!confirmDelete) return;
+    
         try {
             await actions.deleteDoctorAccount();
-            navigate("/logindoctor");
+            navigate("/"); // Redirigir al home tras eliminación exitosa
         } catch (error) {
             console.error("Error al eliminar la cuenta:", error);
+            alert("No se pudo eliminar la cuenta: " + error.message); // Mostrar mensaje de error al usuario
         }
     };
 
@@ -378,7 +380,7 @@ export const PanelDoctor = () => {
     );
 };
 
-// Añadir estilos personalizados para el resaltado
+// estilos personalizados para el resaltado
 const styles = `
     .nav-link.active {
         background-color: #f0faff !important;

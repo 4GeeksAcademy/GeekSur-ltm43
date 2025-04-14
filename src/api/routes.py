@@ -116,11 +116,26 @@ def post_doctor():
 #-------------------------------------DELETE-----Doctor------------------------------------------------#
 
 @api.route('/doctors/<int:doctor_id>', methods=['DELETE'])
+@jwt_required()
 def delete_doctor(doctor_id):
-    doctor_one = Doctors.query.get(doctor_id)
+    current_doctor_id = get_jwt_identity()
 
+    if int(current_doctor_id) != doctor_id:
+        return jsonify({"msg": "No autorizado para eliminar esta cuenta"}), 403
+
+    doctor_one = Doctors.query.get(doctor_id)
     if not doctor_one:
         return jsonify({"msg": "Doctor no encontrado"}), 404
+
+    # Eliminar registros relacionados
+    Specialties_doctor.query.filter_by(id_doctor=doctor_id).delete()
+    MedicalCenterDoctor.query.filter_by(id_doctor=doctor_id).delete()
+    Appointment.query.filter_by(id_doctor=doctor_id).delete()
+    Review.query.filter_by(id_doctor=doctor_id).delete()
+
+    # Eliminar la imagen de Cloudinary si existe
+    if doctor_one.url:
+        delete_image(doctor_one.url)
 
     db.session.delete(doctor_one)
     db.session.commit()
@@ -435,17 +450,30 @@ def create_patient():
         db.session.rollback()
         return jsonify({"msg": f"Error creating patient: {str(e)}"}), 500
 
-@api.route('/patients/<int:id>', methods=['DELETE'])
-def delete_patient(id):
-    
-    patient = Patient.query.get_or_404(id)
-    
-    # Elimina el paciente de la base de datos
-    db.session.delete(patient)
+@api.route('/patients/<int:patient_id>', methods=['DELETE'])
+@jwt_required()
+def delete_patient(patient_id):
+    current_patient_id = get_jwt_identity()
+
+    if int(current_patient_id) != patient_id:
+        return jsonify({"msg": "No autorizado para eliminar esta cuenta"}), 403
+
+    patient_one = Patient.query.get(patient_id)
+    if not patient_one:
+        return jsonify({"msg": "Paciente no encontrado"}), 404
+
+    # Eliminar registros relacionados
+    Appointment.query.filter_by(id_patient=patient_id).delete()
+    Review.query.filter_by(id_patient=patient_id).delete()
+
+    # Eliminar la imagen de Cloudinary si existe
+    if patient_one.url:
+        delete_image(patient_one.url)
+
+    db.session.delete(patient_one)
     db.session.commit()
-    
-    # Retorna una respuesta vacía con código 200
-    return jsonify({"message": f"Patient with id {id} has been deleted"}), 200
+
+    return jsonify({"msg": f"Paciente con ID {patient_id} eliminado correctamente"}), 200
 ################## End patients services#########
 
  ################## Beguin login patients services##############
