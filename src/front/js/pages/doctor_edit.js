@@ -37,6 +37,7 @@ export const DoctorEdit = () => {
         } else if (!store.doctorPanelData) {
             actions.getDoctorPanel();
         } else if (!formData.first_name) {
+            console.log("Datos de store.doctorPanelData:", store.doctorPanelData); // Agregar depuración
             setFormData({
                 first_name: store.doctorPanelData.doctor.first_name,
                 last_name: store.doctorPanelData.doctor.last_name,
@@ -533,6 +534,7 @@ export const DoctorEdit = () => {
                                             </div>
                                         </div>
                                     </div>
+                                    
                                 </div>
                             ) : (
                                 <p>Cargando datos...</p>
@@ -562,7 +564,7 @@ export const DoctorEdit = () => {
     );
 };
 
-// Añadir estilos personalizados para el resaltado
+// estilos personalizados para el resaltado
 const styles = `
     .nav-link.active {
         background-color: #f0faff !important; /* Color gris claro */
