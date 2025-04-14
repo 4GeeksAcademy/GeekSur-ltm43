@@ -28,7 +28,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 20px;
-    width: 100%;
+    width: 63%;
 }
 
 .text-content {
@@ -358,4 +358,31 @@ button {
     .category-list a {
         margin: 5px; 
     }
+}
+
+.doctor-card {
+    background-color: white;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.doctor-details h3 {
+    font-size: 1.2rem;
+    color: #00bcd4;
+}
+
+.doctor-details p {
+    margin: 0;
+    color: #555;
+    font-weight: 500;
+}
+
+.doctor-rating {
+    background-color: #e0f7fa;
+    color: #00796b;
+    font-weight: bold;
 }

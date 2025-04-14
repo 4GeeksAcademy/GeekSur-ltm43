@@ -2,6 +2,9 @@ import React from "react";
 import { Navbar } from "../component/navbar.js";
 import { Footer } from "../component/footer.js";
 import "../../styles/SobreNosotros.css";
+import oscar from '../../img/oscar.png';
+import alejandro from '../../img/alejandro.png';
+import saray from '../../img/saray.png';
 
 const SobreNosotros = () => {
   return (
@@ -60,7 +63,7 @@ const SobreNosotros = () => {
             {
               name: "Alejandro Arraga",
               role: "Desarrollador",
-              image: "https://randomuser.me/api/portraits/women/44.jpg"
+              image: "alejandro.png"
             },
             {
               name: "Saray Rodríguez",
@@ -70,7 +73,7 @@ const SobreNosotros = () => {
             {
               name: "Oscar Villalobos",
               role: "Desarrollador",
-              image: "https://randomuser.me/api/portraits/women/68.jpg"
+              image: "oscar.png"
             },
             
           ].map((member, idx) => (

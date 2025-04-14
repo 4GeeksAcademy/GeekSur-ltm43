@@ -278,7 +278,9 @@ function SearchProfessionals() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
-  
+
+  const searchParams = location.state;
+
   const [currentTime, setCurrentTime] = useState(
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   );
@@ -294,99 +296,28 @@ function SearchProfessionals() {
   useEffect(() => {
     actions.getMedicalCenterLocations();
     actions.getSpecialties();
-    
+
     if (!store.authPatient && !localStorage.getItem("tokenpatient")) {
       navigate("/loginpatient");
     }
   }, []);
 
-  const handleLogout = () => {
-    actions.logoutPatient();
-    navigate("/loginpatient");
-  };
-
-  const patient = store.currentPatient;
-  const patientName = patient ? `${patient.first_name} ${patient.last_name}` : "Paciente";
-  const patientLocation = patient?.city ? `${patient.city}, ${patient.country || 'CA'}` : "San Francisco, CA";
-
-  const handleSearch = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      let url = `${process.env.BACKEND_URL}/api/professionals/search?country=${selectedLocation}`;
-
-      if (selectedSpecialty) {
-        url += `&specialty=${selectedSpecialty}`;
-      }
-
-      if (selectedCity) {
-        url += `&city=${selectedCity}`;
-      }
-
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error de red");
-      }
-
-      const data = await response.json();
-      if (response.status === 200) {
-        setSearchResults(data.doctors);
-      }
-    } catch (err) {
-      setError("Hubo un error al buscar los resultados.");
-      console.error(err);
-    } finally {
-      setLoading(false);
+  // Ejecutar búsqueda automáticamente si hay datos del Home
+  useEffect(() => {
+    if (searchParams) {
+      const { country, specialty, city } = searchParams;
+      if (country) setSelectedLocation(country);
+      if (specialty) setSelectedSpecialty(specialty);
+      if (city) setSelectedCity(city);
     }
-  };
+  }, [searchParams]);
 
-  const handleLocationChange = (e) => {
-    setSelectedLocation(e.target.value);
-  };
-
-  const handleSpecialtyChange = (e) => {
-    setSelectedSpecialty(e.target.value);
-  };
-
-  const handleCityChange = (e) => {
-    setSelectedCity(e.target.value);
-  };
-
-  const uniqueCountries = medicalCenterLocations ? [...new Set(medicalCenterLocations.map(location => location.country))] : [];
-
-  const uniqueCities = selectedLocation
-    ? [...new Set(
-        medicalCenterLocations
-          .filter((location) => location.country === selectedLocation)
-          .map((location) => location.city)
-      )]
-    : [];
-
-  const handleScheduleClick = (doctorId) => {
-    const token = localStorage.getItem('tokenpatient');
-    const selectedSpecialtyObj = specialties.find(
-      (spec) => spec.name === selectedSpecialty
-    );
-    const specialtyId = selectedSpecialtyObj ? selectedSpecialtyObj.id : null;
-  
-    if (!specialtyId) {
-      alert("Error: No se encontró el ID de la especialidad.");
-      return;
+  // Cuando ya estén cargados los datos y se hayan seteado los filtros, lanza búsqueda automática
+  useEffect(() => {
+    if (selectedLocation && selectedSpecialty) {
+      handleSearch();
     }
-  
-    if (token && token !== "") {
-      navigate(`/agendar-turno/${doctorId}/${specialtyId}`);
-    } else {
-      navigate('/loginpatient');
-    }
-  };
+  }, [selectedLocation, selectedSpecialty]);
 
   return (
     <>
