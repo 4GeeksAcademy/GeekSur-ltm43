@@ -347,15 +347,14 @@ export const PanelPatient = () => {
                                                 'No especificado'
                                                 }<br />
                                                 <p>
-                                                <strong>Fecha Nacimiento:</strong>{" "}
-                                                {patient.birth_date
-                                                ? new Date(patient.birth_date).toLocaleDateString("es-ES", {
-                                                    day: "2-digit",
-                                                    month: "2-digit",
-                                                    year: "numeric",
-                                                    })
-                                                : ""}
-                                                </p>
+                                                    <strong>Fecha Nacimiento:</strong>{" "}
+                                                    {patient.birth_date
+                                                        ? (() => {
+                                                            const date = new Date(patient.birth_date);
+                                                            return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
+                                                        })()
+                                                        : ""}
+                                            </p>
                                             </p>
                                         </div>
                                     </div>

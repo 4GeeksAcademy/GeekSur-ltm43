@@ -11,13 +11,16 @@ export const Navbar = () => {
                     <Link to="/" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>Home</Link>
                 </li>
                 <li style={{ margin: '0 15px' }}>
-                    <Link to="/search-professionals" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>¿Necesitas un Medico?</Link>
-                </li>
-                <li style={{ margin: '0 15px' }}>
                     <Link to="/loginpatient" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>¿Eres un Paciente?</Link>
                 </li>
                 <li style={{ margin: '0 15px' }}>
                     <Link to="/logindoctor" href="#" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>¿Eres un doctor?</Link>
+                </li>
+                <li style={{ margin: '0 15px' }}>
+                    <Link to="/sobre-nosotros" href="#" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>Sobre Nosotros</Link>
+                </li>
+                <li style={{ margin: '0 15px' }}>
+                    <Link to="/contactanos" href="#" style={{ textDecoration: 'none', color: 'white', fontWeight: 'bold' }}>Contáctanos</Link>
                 </li>
             </ul>
         </nav>

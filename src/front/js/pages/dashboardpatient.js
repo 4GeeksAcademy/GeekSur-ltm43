@@ -14,17 +14,14 @@ export const DashboardPatient = () => {
     );
 
     const [showDropdown, setShowDropdown] = useState(false);
-    const [isLoading, setIsLoading] = useState(true); // Estado para manejar la carga
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        console.log("Store completo:", store); // Verifica toda la estructura del store
+        console.log("Store completo:", store);
         console.log("Current Patient:", store.currentPatient);
         console.log("First Name:", store.currentPatient?.first_name);
-        console.log("Token:", localStorage.getItem("tokenpatient")); 
+        console.log("Token:", localStorage.getItem("tokenpatient"));
     }, [store, store.currentPatient]);
-
-
-
 
     // Actualizar la hora cada minuto
     useEffect(() => {
@@ -34,31 +31,26 @@ export const DashboardPatient = () => {
         return () => clearInterval(interval);
     }, []);
 
-    // Cargar datos del paciente y citas
+    // Validar autenticación y cargar datos al montar
     useEffect(() => {
-        const loadData = async () => {
-            console.log("Iniciando carga de datos...");
+        const initialize = async () => {
+            console.log("Iniciando validación de autenticación...");
             setIsLoading(true);
 
             try {
-                if (!store.authPatient && !localStorage.getItem("tokenpatient")) {
+                // Validar token y autenticación
+                await actions.validateAuthPatient();
+
+                // Si no hay token ni autenticación, redirigir al login
+                if (!localStorage.getItem("tokenpatient") && !store.authPatient) {
                     console.log("No hay autenticación, redirigiendo a login...");
                     navigate("/loginpatient");
                     return;
                 }
 
-                // Ejecutar todas las acciones
-                const promises = [
-                    actions.getPatientData().then(() => console.log("GetPatientData completado")),
-
-                ];
-
-
-                console.log("Autenticación confirmada, cargando datos...");
-
                 // Cargar datos del paciente y citas
                 await Promise.all([
-                    actions.getPatientData().then(() => console.log("getPatientData completado")),
+                    actions.getUserPatient().then(() => console.log("getUserPatient completado")),
                     actions.getPatientAppointments().then(() => console.log("getPatientAppointments completado")),
                 ]);
 
@@ -67,29 +59,24 @@ export const DashboardPatient = () => {
                     patientAppointments: store.patientAppointments,
                 });
             } catch (error) {
-                console.error("Error durante la carga de datos:", error);
+                console.error("Error durante la carga inicial:", error);
+                navigate("/loginpatient");
             } finally {
                 console.log("Finalizando carga, actualizando isLoading a false...");
                 setIsLoading(false);
             }
         };
 
-        loadData();
-    }, []); // Dependencias vacías para ejecutar solo al montar
+        initialize();
+    }, [navigate, store.authPatient]);
 
     const handleLogout = () => {
         actions.logoutPatient();
         navigate("/loginpatient");
     };
 
-    // const patient = store.currentPatient;
-    const patient = store.getPatients;
+    const patient = store.currentPatient;
     const patientName = patient ? `${patient.first_name} ${patient.last_name}` : "Paciente";
-
-    const doctor = store.doctorPanelData?.doctor;
-    const doctorName = doctor ? `${doctor.first_name} ${doctor.last_name}` : "Doctor";
-
-
     const patientLocation = patient ? `${patient.city || "San Francisco"}, ${patient.country || "CA"}` : "San Francisco, CA";
 
     // Filtrar citas pendientes
@@ -103,6 +90,10 @@ export const DashboardPatient = () => {
             appointment.confirmation !== "completed"
         );
     }) || [];
+
+    if (!store.authPatient && !localStorage.getItem("tokenpatient")) {
+        return <Navigate to="/loginpatient" />;
+    }
 
     return (
         <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f0faff" }}>

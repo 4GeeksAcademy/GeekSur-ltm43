@@ -338,7 +338,7 @@ export const PatientAppointments = () => {
                                                     <td>{getCenterName(appointment.id_center)}</td>
                                                     <td>{getSpecialtyName(appointment.id_specialty)}</td>
                                                     <td>
-                                                        <span className={`badge ${
+                                                        <span className={`badge text-white ${
                                                             appointment.confirmation === "confirmed" ? "bg-success" :
                                                             appointment.confirmation === "pending" ? "bg-warning" :
                                                             appointment.confirmation === "false" ? "bg-danger" : "bg-secondary"
