@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Context } from "../store/appContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import robot3D from "../../img/robot3D.png";
 import logo from "../../img/meedgeeknegro.png";
 import { FaSearch } from "react-icons/fa";
@@ -9,6 +9,7 @@ import { IoArrowBack } from "react-icons/io5";
 export const AIConsultation = () => {
     const { store, actions } = useContext(Context);
     const navigate = useNavigate();
+    const location = useLocation();
     const [symptoms, setSymptoms] = useState("");
     const [response, setResponse] = useState({ recommendation: "", link: { text: "", url: "" }, specialty: "", doctors: [] });
     const [error, setError] = useState("");
@@ -52,7 +53,9 @@ export const AIConsultation = () => {
     };
 
     return (
-        <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f0faff" }}>
+        <>
+            {store.authPatient || localStorage.getItem("tokenpatient") ? (
+                <div className="d-flex" style={{ minHeight: "100vh", backgroundColor: "#f0faff" }}>
                     {/* Sidebar fijo */}
                     <div
                         className="d-flex flex-column flex-shrink-0 py-3 text-white"
@@ -82,176 +85,206 @@ export const AIConsultation = () => {
                                         padding: "10px 0",
                                         margin: "0 -15px",
                                         borderRadius: "0",
+                                        whiteSpace: "normal",
+                                        wordWrap: "break-word",
+                                        paddingLeft: "15px",
                                     }}
                                 >
-                                            <i className="bi bi-house-door me-2 fs-5" style={{ marginLeft: "15px" }}></i>
-                                            Dashboard
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            to="/panelpatient"
-                                            className={`nav-link text-white d-flex align-items-center ${
-                                                location.pathname === "/panelpatient" ? "active" : ""
-                                            }`}
-                                            style={{
-                                                padding: "10px 0",
-                                                margin: "0 -15px",
-                                                borderRadius: "0",
-                                            }}
-                                        >
-                                            <i className="bi bi-person me-2 fs-5" style={{ marginLeft: "15px" }}></i>
-                                            Mi Perfil
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            to="/patient-appointments"
-                                            className={`nav-link text-white d-flex align-items-center ${
-                                                location.pathname === "/patient-appointments" ? "active" : ""
-                                            }`}
-                                            style={{
-                                                padding: "10px 0",
-                                                margin: "0 -15px",
-                                                borderRadius: "0",
-                                            }}
-                                        >
-                                            <i className="bi bi-calendar-check me-2 fs-5" style={{ marginLeft: "15px" }}></i>
-                                            Mis Citas
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            to="/search-professionals"
-                                            className={`nav-link text-white d-flex align-items-center ${
-                                                location.pathname === "/search-professionals" ? "active" : ""
-                                            }`}
-                                            style={{
-                                                padding: "10px 0",
-                                                margin: "0 -15px",
-                                                borderRadius: "0",
-                                            }}
-                                        >
-                                            <i className="bi bi-search me-2 fs-5" style={{ marginLeft: "15px" }}></i>
-                                            Buscar Profesional
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            to="/ai-consultation"
-                                            className={`nav-link text-white d-flex align-items-center ${
-                                              location.pathname === "/ai-consultation" ? "active" : ""
-                                            }`}
-                                            style={{
-                                                padding: "10px 0",
-                                                margin: "0 -15px",
-                                                borderRadius: "0",
-                                            }}
-                                        >
-                                            <i className="bi bi-person me-2 fs-5" style={{ marginLeft: "15px" }}></i>
-                                            Habla Con Boti IA
-                                        </Link>
-                                    </li>
-                                </ul>
-                                <hr />
-                                <button
-                                    onClick={handleLogout}
-                                    className="btn d-flex align-items-center"
+                                    <i className="bi bi-house-door me-2 fs-5"></i>
+                                    Dashboard
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/panelpatient"
+                                    className={`nav-link text-white d-flex align-items-center ${
+                                        location.pathname === "/panelpatient" ? "active" : ""
+                                    }`}
                                     style={{
-                                        backgroundColor: "#97dbe7",
-                                        color: "#000",
-                                        minWidth: "100px",
-                                        whiteSpace: "nowrap",
-                                        padding: "10px",
-                                        borderRadius: "5px",
-                                        fontWeight: "500",
-                                        whiteSpace: "nowrap",
-                                        width: "fit-content",
-                                        maxWidth: "100%",
-                                        margin: "0 auto",
+                                        padding: "10px 0",
+                                        margin: "0 -15px",
+                                        borderRadius: "0",
+                                        whiteSpace: "normal",
+                                        wordWrap: "break-word",
+                                        paddingLeft: "15px",
                                     }}
                                 >
-                                    <i className="bi bi-box-arrow-right me-2 fs-5"></i>
-                                    Cerrar Sesión
-                                </button>
-                            </div>
+                                    <i className="bi bi-person me-2 fs-5"></i>
+                                    Mi Perfil
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/patient-appointments"
+                                    className={`nav-link text-white d-flex align-items-center ${
+                                        location.pathname === "/patient-appointments" ? "active" : ""
+                                    }`}
+                                    style={{
+                                        padding: "10px 0",
+                                        margin: "0 -15px",
+                                        borderRadius: "0",
+                                        whiteSpace: "normal",
+                                        wordWrap: "break-word",
+                                        paddingLeft: "15px",
+                                    }}
+                                >
+                                    <i className="bi bi-calendar-check me-2 fs-5"></i>
+                                    Mis Citas
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/search-professionals"
+                                    className={`nav-link text-white d-flex align-items-center ${
+                                        location.pathname === "/search-professionals" ? "active" : ""
+                                    }`}
+                                    style={{
+                                        padding: "10px 0",
+                                        margin: "0 -15px",
+                                        borderRadius: "0",
+                                        whiteSpace: "normal",
+                                        wordWrap: "break-word",
+                                        paddingLeft: "15px",
+                                    }}
+                                >
+                                    <i className="bi bi-search me-2 fs-5"></i>
+                                    Buscar Profesional
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/ai-consultation"
+                                    className={`nav-link text-white d-flex align-items-center ${
+                                        location.pathname === "/ai-consultation" ? "active" : ""
+                                    }`}
+                                    style={{
+                                        padding: "10px 0",
+                                        margin: "0 -15px",
+                                        borderRadius: "0",
+                                        whiteSpace: "normal",
+                                        wordWrap: "break-word",
+                                        paddingLeft: "15px",
+                                    }}
+                                >
+                                    <i className="bi bi-robot me-2 fs-5"></i>
+                                    Habla Con Boti IA
+                                </Link>
+                            </li>
+                        </ul>
+                        <hr />
+                        <button
+                            onClick={handleLogout}
+                            className="btn d-flex align-items-center"
+                            style={{
+                                backgroundColor: "#97dbe7",
+                                color: "#000",
+                                minWidth: "100px",
+                                whiteSpace: "nowrap",
+                                padding: "10px",
+                                borderRadius: "5px",
+                                fontWeight: "500",
+                                width: "fit-content",
+                                maxWidth: "100%",
+                                margin: "0 auto",
+                            }}
+                        >
+                            <i className="bi bi-box-arrow-right me-2 fs-5"></i>
+                            Cerrar Sesión
+                        </button>
+                    </div>
 
-            {/* Contenido principal */}
-            <div className="container d-flex justify-content-center align-items-center" style={{ flex: 1, position: "relative" }}>
-                <div className="card shadow p-4" style={{ width: "100%", maxWidth: "600px", borderRadius: "15px", position: "relative" }}>
-                    <img
-                        src={robot3D}
-                        alt="Robot 3D"
-                        style={{
-                            position: "absolute",
-                            top: "-40px",
-                            right: "-40px",
-                            width: "140px",
-                            height: "auto",
-                            animation: "float 3s ease-in-out infinite",
-                            zIndex: 1
-                        }}
-                    />
-                    <style>{`
-                        @keyframes float {
-                            0% { transform: translateY(0px); }
-                            50% { transform: translateY(-10px); }
-                            100% { transform: translateY(0px); }
-                        }
-                    `}</style>
-
-                    <h1 className="text-center mb-4" style={{ color: "#64bfd0", fontWeight: "bold" }}>Consultale a Boti</h1>
-
-                    <form onSubmit={handleSubmit}>
-                        <textarea
-                            name="symptoms"
-                            value={symptoms}
-                            onChange={(e) => setSymptoms(e.target.value)}
-                            placeholder="Describe tus síntomas (ejemplo: dolor de cabeza, fiebre)..."
-                            required
-                            className="form-control mb-3"
-                            style={{ height: "100px", resize: "none" }}
-                        />
-
-                        <div className="text-center">
-                            <button
-                                type="submit"
-                                className="btn d-flex align-items-center justify-content-center gap-2"
+                    {/* Contenido principal */}
+                    <div className="container d-flex justify-content-center align-items-center" style={{ flex: 1, position: "relative", marginLeft: "280px" }}>
+                        <div className="card shadow p-4" style={{ width: "100%", maxWidth: "600px", borderRadius: "15px", position: "relative" }}>
+                            <img
+                                src={robot3D}
+                                alt="Robot 3D"
                                 style={{
-                                    backgroundColor: "#97dbe7",
-                                    color: "#000",
-                                    width: "80%",
-                                    border: "none",
-                                    borderRadius: "8px",
-                                    padding: "10px 0",
-                                    fontWeight: "bold"
+                                    position: "absolute",
+                                    top: "-40px",
+                                    right: "-40px",
+                                    width: "140px",
+                                    height: "auto",
+                                    animation: "float 3s ease-in-out infinite",
+                                    zIndex: 1
                                 }}
-                            >
-                                <FaSearch /> Obtener Recomendación
-                            </button>
-                        </div>
-                    </form>
+                            />
+                            <style>{`
+                                @keyframes float {
+                                    0% { transform: translateY(0px); }
+                                    50% { transform: translateY(-10px); }
+                                    100% { transform: translateY(0px); }
+                                }
+                            `}</style>
 
-                    {response.recommendation && (
-                        <div className="mt-4" style={{ textAlign: "left", color: "#333" }}>
-                            <p>{response.recommendation}</p>
-                            {response.link && (
-                                <p>
-                                    {response.link.text.split("haciendo clic aquí")[0]}
-                                    <Link to={response.link.url} style={{ color: "#64bfd0", textDecoration: "underline" }}>
-                                        haciendo clic aquí
-                                    </Link>
-                                    .
-                                </p>
+                            <h1 className="text-center mb-4" style={{ color: "#64bfd0", fontWeight: "bold" }}>Consultale a Boti</h1>
+
+                            <form onSubmit={handleSubmit}>
+                                <textarea
+                                    name="symptoms"
+                                    value={symptoms}
+                                    onChange={(e) => setSymptoms(e.target.value)}
+                                    placeholder="Describe tus síntomas (ejemplo: dolor de cabeza, fiebre)..."
+                                    required
+                                    className="form-control mb-3"
+                                    style={{ height: "100px", resize: "none" }}
+                                />
+
+                                <div className="text-center">
+                                    <button
+                                        type="submit"
+                                        className="btn d-flex align-items-center justify-content-center gap-2"
+                                        style={{
+                                            backgroundColor: "#97dbe7",
+                                            color: "#000",
+                                            width: "80%",
+                                            border: "none",
+                                            borderRadius: "8px",
+                                            padding: "10px 0",
+                                            fontWeight: "bold"
+                                        }}
+                                    >
+                                        <FaSearch /> Obtener Recomendación
+                                    </button>
+                                </div>
+                            </form>
+
+                            {response.recommendation && (
+                                <div className="mt-4" style={{ textAlign: "left", color: "#333" }}>
+                                    <p>{response.recommendation}</p>
+                                    {response.link && (
+                                        <p>
+                                            {response.link.text.split("haciendo clic aquí")[0]}
+                                            <Link to={response.link.url} style={{ color: "#64bfd0", textDecoration: "underline" }}>
+                                                haciendo clic aquí
+                                            </Link>
+                                            .
+                                        </p>
+                                    )}
+                                </div>
                             )}
+
+                            {error && <p className="text-danger mt-3">{error}</p>}
                         </div>
-                    )}
-
-                    {error && <p className="text-danger mt-3">{error}</p>}
-
+                    </div>
                 </div>
-            </div>
-        </div>
+            ) : (
+                <Navigate to="/loginpatient" />
+            )}
+
+            {/* Estilos CSS */}
+            <style>{`
+                .nav-link.active {
+                    background-color: #f0faff !important;
+                    color: #000 !important;
+                }
+                .nav-link {
+                    padding-left: 15px !important;
+                    white-space: normal !important;
+                    overflow-wrap: break-word !important;
+                }
+            `}</style>
+        </>
     );
 };
 

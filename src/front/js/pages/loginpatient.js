@@ -58,12 +58,12 @@ export const LoginPatient = () => {
                     required
                   />
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                {/* <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                   <label>
                     <input type="checkbox" /> Recuérdame
                   </label>
                   <Link to="/forgotpassword" style={{ fontSize: '0.9rem' }}>Olvidaste tu contraseña?</Link>
-                </div>
+                </div> */}
     
                 <button type="submit" className="sent">Login</button>
               </form>
@@ -72,10 +72,10 @@ export const LoginPatient = () => {
                 <p className="error">{store.loginPatientError}</p>
               )}
     
-              <div className="login-buttons">
+              {/* <div className="login-buttons">
                 <div className="social-button google">Iniciar con Google</div>
                 <div className="social-button facebook">Iniciar con Facebook</div>
-              </div>
+              </div> */}
     
               <p className="copyright">©2025 MedGeek.</p>
             </div>

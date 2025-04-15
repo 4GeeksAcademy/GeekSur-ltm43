@@ -70,8 +70,8 @@ const getState = ({ getStore, getActions, setStore }) => {
             patientAppointments: [],
             patientAppointmentError: null,
             doctorAppointmentsChartData: null,
-            getUserPatient:null,
-            getPatients:null
+            getUserPatient: null,
+            getPatients: null
         },
         actions: {
             updatePatientProfile: async (patientData) => {
@@ -117,16 +117,6 @@ const getState = ({ getStore, getActions, setStore }) => {
                     console.error("Error al obtener datos del paciente:", error);
                     throw error;
                 }
-            },
-            logoutPatient: () => {
-                setStore({
-                    tokenpatient: null,
-                    authPatient: false,          // Asegúrate de limpiar authPatient
-                    currentPatient: null,
-                    dashboardPatientData: null,  // Limpia explícitamente los datos del dashboard
-                    loginPatientError: null,
-                });
-                localStorage.removeItem("tokenpatient");
             },
 
             //Accion para eliminar cuenta del paciente
@@ -1014,6 +1004,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 
             // Acción para login de pacientes
+
             loginPatient: async (email, password) => {
                 try {
                     const resp = await fetch(process.env.BACKEND_URL + "/api/loginpatient", {
@@ -1024,17 +1015,20 @@ const getState = ({ getStore, getActions, setStore }) => {
                         body: JSON.stringify({ email, password }),
                     });
                     const data = await resp.json();
-
-                    
                     if (!resp.ok) throw new Error(data.msg || "Error en el login");
-
+            
                     setStore({
                         tokenpatient: data.tokenpatient,
                         authPatient: true,
                         currentPatient: data.patient,
+                        getUserPatient: data.patient,
                         loginPatientError: null,
                     });
                     localStorage.setItem("tokenpatient", data.tokenpatient);
+                    
+                    // Cargar datos completos del paciente
+                    await getActions().getDashboardPatient();
+            
                     return data;
                 } catch (error) {
                     console.log("Error en el login:", error.message);
@@ -1075,19 +1069,6 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-            // Acción para logout
-            logoutPatient: () => {
-                setStore({
-                    tokenpatient: null,
-                    authPatient: false,
-                    currentPatient: null,
-                    dashboardPatientData: null,
-                    loginPatientError: null,
-                });
-                localStorage.removeItem("tokenpatient");
-            },
-
-
             loadTokenPatient: () => {
                 const token = localStorage.getItem("tokenpatient");
                 if (token) {
@@ -1096,6 +1077,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
             // Acción para cargar el token desde localStorage al iniciar la app
+        
             validateAuthPatient: async () => {
                 const token = localStorage.getItem("tokenpatient");
                 if (token) {
@@ -1104,15 +1086,8 @@ const getState = ({ getStore, getActions, setStore }) => {
                         await getActions().getDashboardPatient();
                         console.log("Paciente autenticado correctamente");
                     } catch (error) {
-                        console.error("Error al validar autenticación, intentando con getPatientData:", error);
-                        // Si getDashboardPatient falla, intentamos con getPatientData
-                        try {
-                            await getActions().getPatientData();
-                            console.log("Datos del paciente cargados con getPatientData");
-                        } catch (error) {
-                            console.error("Token inválido, cerrando sesión:", error);
-                            getActions().logoutPatient();
-                        }
+                        console.error("Error al validar autenticación:", error);
+                        getActions().logoutPatient();
                     }
                 }
             },
@@ -1733,33 +1708,50 @@ addMedicalCenterDoctor: async (medicalCenterId, office, specialtyId) => {
         return { success: false, msg: "Error al conectar con el servidor" };
     }
 },
-// --------- getuserpatient ------------
+
 getUserPatient: async () => {
     const token = localStorage.getItem("tokenpatient");
     if (token) {
-        try {
-            const resp = await fetch(process.env.BACKEND_URL + "/api/panelpatient", {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            if (resp.ok) {
-                const data = await resp.json();
-                setStore({ ...getStore(), currentPatient: data.patient, authPatient: true });
-            } else {
-                console.error("Error fetching patient data:", resp.status);
-            }
-        } catch (error) {
-            console.error("Error decoding or fetching:", error);
+      try {
+        const resp = await fetch(process.env.BACKEND_URL + "/api/panelpatient", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (resp.ok) {
+          const data = await resp.json();
+          console.log("Respuesta del backend (getUserPatient):", data);
+          setStore({
+            currentPatient: data.patient,
+            getUserPatient: data.patient,
+            authPatient: true,
+          });
+          console.log("store.currentPatient actualizado:", data.patient);
+        } else {
+          console.error("Error fetching patient data:", resp.status);
+          setStore({ currentPatient: null, getUserPatient: null, authPatient: false });
         }
+      } catch (error) {
+        console.error("Error decoding or fetching:", error);
+        setStore({ currentPatient: null, getUserPatient: null, authPatient: false });
+      }
+    } else {
+      console.log("No hay token, limpiando datos del paciente");
+      setStore({ currentPatient: null, getUserPatient: null, authPatient: false });
     }
-},
+  },
 
 logoutPatient: () => {
+    setStore({
+        tokenpatient: null,
+        authPatient: false,
+        currentPatient: null,
+        dashboardPatientData: null,
+        getUserPatient: null,
+        loginPatientError: null,
+    });
     localStorage.removeItem("tokenpatient");
-    setStore({ ...getStore(), authPatient: false, currentPatient: null });
 },
-
 
 ////////////////////////////se agregar buscar Location Medical Center - 07-04-2025
 
@@ -1776,54 +1768,47 @@ getMedicalCenterLocations: async () => {
 
 ////////////////////////////se agregar Editar Data Pacient - 14-04-2025
 
- // UPDATE A PACIENTE
- updatePatient: async (patientData) => {  
-    try {
-        const token = localStorage.getItem("tokenpatient");
-        if (!token) throw new Error("No hay token disponible");
+updatePatient: async (formData) => {
+    const store = getStore();
+    const token = localStorage.getItem("tokenpatient");
+    if (!token) {
+        throw new Error("No hay token de autenticación");
+    }
 
+    try {
         console.log("Datos enviados al backend:");
-        for (let [key, value] of patientData.entries()) {
+        for (let [key, value] of formData.entries()) {
             console.log(`${key}: ${value}`);
         }
 
-        const resp = await fetch(`${process.env.BACKEND_URL}/api/patient/profile`, {
+        const resp = await fetch(process.env.BACKEND_URL + "/api/patient/profile", {
             method: "PUT",
             headers: {
-                "Authorization": `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
             },
-            body: patientData, // Enviar FormData directamente
+            body: formData,
         });
 
         const data = await resp.json();
-        console.log("Respuesta completa del backend:", data);
-
         if (!resp.ok) {
-            throw new Error(data.msg || "Error updating Patient");
+            throw new Error(data.msg || "Error al actualizar el perfil");
         }
 
+        console.log("Respuesta del backend (updatePatient):", data);
+
+        // Actualizar store.currentPatient con los datos recibidos
         setStore({
-            getUserPatient: {
-                ...getStore().getUserPatient,
-                pacient: data.updated_patient,
-            },
+            currentPatient: data.updated_Pacient,
+            getUserPatient: data.updated_Pacient,
         });
 
-        await getActions().getUserPatient();
         return data;
     } catch (error) {
-        console.log("Error updating pacient:", error);
+        console.error("Error en updatePatient:", error);
         throw error;
     }
 },
-
-
-
-
-
-
-
-          
+       
         }
     };
 };

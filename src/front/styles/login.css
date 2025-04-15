@@ -13,7 +13,6 @@
   width: 100%;
   background-color: #fff;
   border-radius: 1rem;
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.07);
   overflow: hidden;
 }
 
@@ -77,14 +76,6 @@
   margin-bottom: 0.7rem;
   font-weight: bold;
   cursor: pointer;
-}
-
-.google {
-  color: #000;
-}
-
-.facebook {
-  color: #64bfd0;
 }
 
 .sent {

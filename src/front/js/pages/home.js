@@ -58,27 +58,6 @@ export const Home = () => {
             console.log(data.results);
             setResults(data.results)
 
-            //   setResults()
-            // navigate("/search-professionals", {
-            //     state: {
-            //         specialty: specialtyQuery,
-            //         results: data // opcional si quieres pasar los resultados directamente
-            //     }
-            // });
-
-            //   setError(null);
-            // const queryParams = new URLSearchParams();
-            // if (nameQuery) queryParams.append("name", nameQuery);
-            // if (specialtyQuery && specialtyQuery !== "Especialidades") queryParams.append("specialty", specialtyQuery);
-
-            // const response = await fetch(`${process.env.BACKEND_URL}/search-doctor?${queryParams.toString()}`);
-            // const data = await response.json();
-
-            // if (response.ok) {
-            //     navigate("/search-professionals", { state: { results: data } });
-            // } else {
-            //     console.error("Error en la búsqueda:", data.message);
-            // }
         } catch (error) {
             console.error("Error al buscar profesionales:", error);
         }
@@ -340,6 +319,16 @@ export const Home = () => {
                 </Link>
 
             </section>
+
+            <a
+                href="https://wa.me/51929421375" 
+                className="whatsapp-float"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <i className="fab fa-whatsapp whatsapp-icon"></i>
+            </a>
+
         </div>
     );
 };

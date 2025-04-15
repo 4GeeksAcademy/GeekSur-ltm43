@@ -1853,16 +1853,50 @@ def update_doctor_profile():
 
 
 ####paciente
+# @api.route('/patient/profile', methods=['PUT'])
+# @jwt_required()
+# def update_patient_profile():
+#     patient_id = get_jwt_identity()  
+#     patient = Patient.query.get(patient_id) 
+
+#     if not patient:
+#         return jsonify({"msg": "Paciente no encontrado"}), 404
+
+#     data = request.form 
+
+#     # Actualizar los campos si están presentes en el formulario
+#     patient.first_name = data.get('first_name', patient.first_name)
+#     patient.last_name = data.get('last_name', patient.last_name)
+#     patient.email = data.get('email', patient.email)
+#     patient.phone_number = data.get('phone_number', patient.phone_number)
+#     patient.gender = data.get('gender', patient.gender)
+#     patient.birth_date = data.get('birth_date', patient.birth_date)
+#     patient.historial_clinico = data.get('historial_clinico', patient.historial_clinico)
+#     patient.url = data.get('url', patient.url)
+    
+#     # Actualizar contraseña si se proporciona
+#     if 'password' in data and data['password']:
+#         patient.password = data['password'] 
+
+#     try:
+#         db.session.commit()
+#         return jsonify({"updated_Pacient": patient.serialize()}), 200
+#     except Exception as e:
+#         db.session.rollback()
+#         return jsonify({"msg": "Error al actualizar el perfil: " + str(e)}), 500
+
+
 @api.route('/patient/profile', methods=['PUT'])
 @jwt_required()
 def update_patient_profile():
-    patient_id = get_jwt_identity()  
-    patient = Patient.query.get(patient_id) 
+    patient_id = get_jwt_identity()
+    patient = Patient.query.get(patient_id)
 
     if not patient:
         return jsonify({"msg": "Paciente no encontrado"}), 404
 
-    data = request.form 
+    data = request.form  # Usar request.form para manejar FormData
+    remove_photo = data.get('remove_photo') == 'true'
 
     # Actualizar los campos si están presentes en el formulario
     patient.first_name = data.get('first_name', patient.first_name)
@@ -1872,21 +1906,37 @@ def update_patient_profile():
     patient.gender = data.get('gender', patient.gender)
     patient.birth_date = data.get('birth_date', patient.birth_date)
     patient.historial_clinico = data.get('historial_clinico', patient.historial_clinico)
-    patient.url = data.get('url', patient.url)
-    
+
     # Actualizar contraseña si se proporciona
     if 'password' in data and data['password']:
-        patient.password = data['password'] 
+        patient.password = data['password']  # Almacenar directamente, sin hasheo
+
+    # Manejar la foto de perfil
+    if remove_photo and patient.url:
+        try:
+            delete_image(patient.url)
+            patient.url = None
+        except Exception as e:
+            return jsonify({"msg": f"Error al eliminar la foto: {str(e)}"}), 500
+    elif 'photo' in request.files:
+        photo = request.files['photo']
+        if photo:
+            try:
+                # Eliminar la foto anterior si existe
+                if patient.url:
+                    delete_image(patient.url)
+                # Subir la nueva foto
+                upload_result = cloudinary.uploader.upload(photo)
+                patient.url = upload_result['secure_url']
+            except Exception as e:
+                return jsonify({"msg": f"Error al subir la foto: {str(e)}"}), 500
 
     try:
         db.session.commit()
         return jsonify({"updated_Pacient": patient.serialize()}), 200
     except Exception as e:
         db.session.rollback()
-        return jsonify({"msg": "Error al actualizar el perfil: " + str(e)}), 500
-
-
-
+        return jsonify({"msg": f"Error al actualizar el perfil: {str(e)}"}), 500
     
 
 
