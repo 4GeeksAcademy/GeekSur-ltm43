@@ -3,7 +3,7 @@ import { Context } from "../store/appContext";
 import "../../styles/login.css";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../../img/meedgeeknegro.png";
-import login_doctor from "../../img/Login_Doctor.jpg";
+import login_doctor from "../../img/loginDoctor.png";
 
 export const LoginDoctor = () => {
   const { store, actions } = useContext(Context);
@@ -60,12 +60,12 @@ export const LoginDoctor = () => {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              {/* <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <label>
                   <input type="checkbox" /> Recordarme
                 </label>
                 <Link to="/forgotpassword" style={{ fontSize: '0.9rem' }}>¿Olvidaste tu clave?</Link>
-              </div>
+              </div> */}
 
               <button type="submit" className="sent">Login</button>
             </form>
@@ -74,10 +74,10 @@ export const LoginDoctor = () => {
               <p className="error">{store.loginDoctorError}</p>
             )}
 
-            <div className="login-buttons">
+            {/* <div className="login-buttons">
               <div className="social-button google">Iniciar sesión con Google</div>
               <div className="social-button facebook">Iniciar sesión con Facebook</div>
-            </div>
+            </div> */}
 
             <p className="register-message">
               ¿No tiene cuenta? Favor haga clic en{" "}
